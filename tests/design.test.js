@@ -152,3 +152,38 @@ describe("undo/redo", () => {
     expect(h.past.length).toBe(depth + 1);
   });
 });
+
+describe("brand-library logos", () => {
+  const add = (source) => {
+    let s = initialDesignState("standard");
+    return designReducer(s, {
+      type: "ADD_LOGO", id: "l1", fileName: "mark.svg", mimeType: "image/svg+xml",
+      naturalWidth: 400, naturalHeight: 200, ...(source ? { source } : {}),
+    });
+  };
+
+  it("records which saved asset a logo came from", () => {
+    // account.reel48.com's designer places logos from a company's brand library.
+    // Recording the asset id — not the URL — is what lets production be told
+    // "this is the approved mark on file", and what survives a storage change.
+    const src = { kind: "brand", assetId: "b7f1c2a0-0000-4000-8000-000000000001" };
+    const s = add(src);
+    expect(s.elements[0].source).toEqual(src);
+    expect(toDesignDescription(s).elements[0].source).toEqual(src);
+  });
+
+  it("omits the key entirely when there is no source", () => {
+    // The storefront passes nothing, and its stored documents must stay
+    // byte-identical — which is what makes this additive at schemaVersion 3.
+    // `source: undefined` would serialize away but compare unequal in a golden
+    // test, so absence has to mean absent.
+    const s = add(null);
+    expect("source" in s.elements[0]).toBe(false);
+    expect("source" in toDesignDescription(s).elements[0]).toBe(false);
+  });
+
+  it("did not bump the schema version", () => {
+    // An added optional field is readable by everything that read version 3.
+    expect(DESIGN_SCHEMA_VERSION).toBe(3);
+  });
+});

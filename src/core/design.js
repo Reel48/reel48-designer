@@ -14,8 +14,10 @@
 // duplicate, reorder and the centre-alignment guides all work uniformly:
 //
 //   common: { id, type, x, y, rotation, opacity }   // x/y = normalized centre 0..1
-//   logo:   + { fileName, mimeType, naturalWidth, naturalHeight, scale }
-//             scale = logo width as a fraction of stage width
+//   logo:   + { fileName, mimeType, naturalWidth, naturalHeight, scale, source? }
+//             scale  = logo width as a fraction of stage width
+//             source = where the artwork came from, when that is worth recording
+//                      — see ADD_LOGO
 //   text:   + { text, fontFamily, fontStyle, fill, align, fontScale }
 //             fontScale = font size as a fraction of stage width
 //
@@ -117,6 +119,20 @@ export function designReducer(state, action) {
         scale: 0.4,
         rotation: 0,
         opacity: 1,
+        // Optional, and omitted entirely when absent rather than set to
+        // undefined — `source: undefined` would serialize as a missing key in
+        // JSON but compare unequal in a golden test, which is a confusing way to
+        // discover an additive change.
+        //
+        // `{kind: "brand", assetId}` means the buyer picked this from their
+        // saved brand library on account.reel48.com. That is worth recording
+        // because it changes what production is told: an approved mark on file,
+        // not a file someone attached to an order. It also survives a change of
+        // storage, where a URL would not.
+        //
+        // The storefront passes nothing, so its documents are byte-identical to
+        // before — which is what lets this be additive at schemaVersion 3.
+        ...(action.source ? { source: action.source } : {}),
       };
       return { ...state, elements: [...state.elements, el], selectedId: el.id };
     }
@@ -276,6 +292,7 @@ export function toDesignDescription(state) {
           naturalWidth: el.naturalWidth,
           naturalHeight: el.naturalHeight,
           scale: el.scale,
+          ...(el.source ? { source: el.source } : {}),
         };
       }
       return {

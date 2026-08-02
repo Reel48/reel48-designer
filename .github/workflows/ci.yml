@@ -1,0 +1,45 @@
+# The golden files are only protective if something runs them.
+#
+# tests/die-geometry.golden.json and tests/design.golden.json were captured from
+# Reel48-Storefront before the code moved here. They pin every derived number,
+# the full traced outline, and the serialized design document — by exact
+# equality, because a rounding difference is a real relocation of artwork on an
+# order, not noise.
+#
+# A push here cannot reach either production on its own: both consumers pin a
+# tarball by tag, so a change only ships when someone opens a PR over there. This
+# workflow is what makes that PR meaningful rather than a rubber stamp.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm test
+
+      # `core` must stay importable with no dependencies at all. A stray import
+      # of konva or react from a core module would not fail the tests above —
+      # devDependencies are installed there — but it WOULD break the consumers
+      # that import core on a server with no canvas: a server action pricing a
+      # design, a script building a supplier zip.
+      - name: core imports with zero dependencies
+        run: |
+          rm -rf node_modules
+          node --input-type=module -e "
+            import('./src/core/index.js').then((m) => {
+              const missing = ['dieGeometry','traceDie','designReducer','toDesignDescription','snapTargets']
+                .filter((k) => typeof m[k] !== 'function');
+              if (missing.length) { console.error('missing exports:', missing); process.exit(1); }
+              console.log('core loaded with no node_modules present');
+            }).catch((e) => { console.error(e); process.exit(1); });
+          "

@@ -19,10 +19,14 @@ coming. Building each designer twice would mean building each *die* twice.
 > **If a file computes a number that ends up in `designJson`, it belongs in
 > `core/`. If it computes a class name, it belongs to the host app.**
 
-So the die geometry, the design reducer, the serializer and the production spec
-live here. The panels, pickers and toolbars do not — the storefront's are
-Tailwind, the portal's are Carbon, and that duplication is correct because none
-of it can produce a wrong order.
+So the die geometry, the design reducer, the serializer and the canvas live
+here — the canvas because it does nothing *but* convert between normalized
+fractions and pixels in both directions, and getting either direction wrong
+relocates artwork.
+
+The panels, pickers and toolbars do not. The storefront's are Tailwind, the
+portal's are `r48-*`, and that duplication is correct because none of it can
+produce a wrong order.
 
 ## Stage frames are pinned
 
@@ -86,13 +90,41 @@ Pinned git dependency, so a push here cannot reach either production until
 someone opens a PR in the consumer:
 
 ```jsonc
-"@reel48/designer": "github:Reel48/reel48-designer#v1.0.0"
+"@reel48/designer": "https://github.com/Reel48/reel48-designer/archive/refs/tags/v1.2.0.tar.gz"
 ```
+
+Two entry points, split so they can be imported independently:
+
+```js
+import { dieGeometry, designReducer } from "@reel48/designer/core";   // zero deps
+import { DesignStage } from "@reel48/designer/stage";                 // needs a DOM
+```
+
+**`core` must never drag Konva in behind it.** It gets imported by a server
+action pricing a design, by a script building a supplier zip, and by tests —
+none of which have a canvas.
+
+`stage` ships `.jsx` and no build step, so a consumer transpiles it:
+`transpilePackages: ["@reel48/designer"]` in `next.config`, or esbuild's `.jsx`
+loader. `konva` and `react-konva` are optional peers, so a `core`-only consumer
+installs neither.
+
+### Styling the stage
+
+`DesignStage` owns the styles it must **compute** — positions, sizes, the
+typography a text element declares — and applies them through React's `style`
+prop. It owns no class names: pass `classNames` (`root`, `textEditor`,
+`rotationBadge`, `rotationBadgeAligned`) and `accent`.
+
+That split is load-bearing for account.reel48.com, whose CSP is
+`style-src 'self'` with no `unsafe-inline`. React sets the `style` prop via
+`style.setProperty` (CSSOM), which `style-src` does not govern; a literal
+`style="…"` attribute would be blocked.
 
 ## Layout
 
 ```
-src/core/   zero dependencies — dies, design document, spec, sanitize, upload
-src/stage/  (next) peers: react, react-dom, konva, react-konva
+src/core/   zero dependencies — dies.js, design.js
+src/stage/  optional peers: react, react-dom, konva, react-konva — DesignStage.jsx, useImage.js
 tests/      golden files and unit tests
 ```

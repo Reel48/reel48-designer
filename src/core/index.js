@@ -7,6 +7,7 @@ export {
   dieGeometry,
   diesOfKind,
   resolveDie,
+  snapTargets,
   traceDie,
   tracePath,
   zoneAt,

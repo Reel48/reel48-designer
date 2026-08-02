@@ -259,6 +259,31 @@ export function traceDie(ctx, geom, scale = 1) {
 }
 
 /**
+ * The centre lines a dragged element snaps to, in NATIVE stage px.
+ *
+ * Gathered from the zones and deduped, replacing three hardcoded expressions in
+ * the storefront's stage. For a koozie the answer is identical — one vertical
+ * through the panel centre, one horizontal through each panel — which
+ * `tests/dies.test.js` asserts against the values captured before the move.
+ *
+ * The generalisation is what earns it: a hat has one zone, a polo has a bounded
+ * imprint area, a cooler wraps. None of those can be written as "the midpoints
+ * of the two panels", and every one of them is a registry entry away.
+ *
+ * The stage centre is deliberately NOT a target. On a koozie that is the middle
+ * of the base disc, which is not somewhere artwork ever goes.
+ */
+export function snapTargets(geom) {
+  const xs = new Set();
+  const ys = new Set();
+  for (const z of geom.zones ?? []) {
+    for (const x of z.snapLines?.x ?? []) xs.add(x);
+    for (const y of z.snapLines?.y ?? []) ys.add(y);
+  }
+  return { x: [...xs], y: [...ys] };
+}
+
+/**
  * Which zone a normalized point sits in, or null if it is off the die.
  *
  * The upside-down warning becomes "in a zone whose `flipped` is true", rather

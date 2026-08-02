@@ -5,6 +5,7 @@ import {
   DIES,
   dieGeometry,
   resolveDie,
+  snapTargets,
   traceDie,
   zoneAt,
 } from "../src/core/dies.js";
@@ -129,5 +130,34 @@ describe("zones replace bottomPanelStartY", () => {
     const geom = dieGeometry(die.id);
     // The gap between the panels, where the disc is — not a printable zone.
     expect(zoneAt(geom, 0.02, 0.5, die.stage)).toBeNull();
+  });
+});
+
+describe("snap targets", () => {
+  it("derives exactly the three lines the storefront hardcoded", () => {
+    // The storefront's CoozieStage computed these inline:
+    //   xTarget  = geom.cx
+    //   yTargets = [(geom.y0 + geom.y1) / 2, (geom.y2 + geom.y3) / 2]
+    // Deriving them from the zones instead is what lets a hat (one zone) or a
+    // polo (a bounded imprint) work without a second renderer — so the numbers
+    // have to come out identical for the die that already exists.
+    for (const id of ["koozie-standard", "koozie-slim"]) {
+      const geom = dieGeometry(id);
+      expect(snapTargets(geom)).toEqual({
+        x: [geom.cx],
+        y: [(geom.y0 + geom.y1) / 2, (geom.y2 + geom.y3) / 2],
+      });
+    }
+  });
+
+  it("dedupes the shared vertical rather than snapping to it twice", () => {
+    // Both panels declare the same centre x. Two identical targets would make
+    // the guide flicker and the second iteration unreachable.
+    const { x } = snapTargets(dieGeometry("koozie-standard"));
+    expect(x).toHaveLength(1);
+  });
+
+  it("returns empty axes for a die with no zones rather than throwing", () => {
+    expect(snapTargets({})).toEqual({ x: [], y: [] });
   });
 });

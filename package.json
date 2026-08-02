@@ -5,13 +5,37 @@
   "type": "module",
   "license": "UNLICENSED",
   "exports": {
-    "./core": "./src/core/index.js"
+    "./core": "./src/core/index.js",
+    "./stage": "./src/stage/index.js"
   },
-  "files": ["src", "README.md"],
+  "files": [
+    "src",
+    "README.md"
+  ],
   "scripts": {
     "test": "vitest run"
   },
   "devDependencies": {
     "vitest": "^4.1.9"
+  },
+  "peerDependencies": {
+    "konva": ">=9",
+    "react": ">=18",
+    "react-dom": ">=18",
+    "react-konva": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "konva": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "react-konva": {
+      "optional": true
+    }
   }
 }

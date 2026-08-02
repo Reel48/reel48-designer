@@ -1,0 +1,91 @@
+{
+ "schemaVersion": 3,
+ "initial": {
+  "schemaVersion": 3,
+  "size": "standard",
+  "color": "#1C2E4A",
+  "patternId": null,
+  "elements": [],
+  "selectedId": null
+ },
+ "after": {
+  "schemaVersion": 3,
+  "size": "standard",
+  "color": "#C13232",
+  "patternId": null,
+  "elements": [
+   {
+    "id": "<id>",
+    "type": "text",
+    "text": "Your text",
+    "fontFamily": "Arial, sans-serif",
+    "fontStyle": "normal",
+    "fill": "#FFFFFF",
+    "align": "center",
+    "fontScale": 0.07,
+    "x": 0.5,
+    "y": 0.5,
+    "rotation": 0,
+    "opacity": 1
+   },
+   {
+    "id": "<id>",
+    "type": "logo",
+    "fileName": "logo.png",
+    "mimeType": "image/png",
+    "naturalWidth": 400,
+    "naturalHeight": 200,
+    "x": 0.5,
+    "y": 0.5,
+    "scale": 0.4,
+    "rotation": 0,
+    "opacity": 1
+   }
+  ]
+ },
+ "description": {
+  "schemaVersion": 3,
+  "size": "standard",
+  "color": "#C13232",
+  "patternId": null,
+  "elements": [
+   {
+    "id": "<id>",
+    "type": "text",
+    "x": 0.5,
+    "y": 0.5,
+    "rotation": 0,
+    "opacity": 1,
+    "text": "Your text",
+    "fontFamily": "Arial, sans-serif",
+    "fontStyle": "normal",
+    "fill": "#FFFFFF",
+    "align": "center",
+    "fontScale": 0.07
+   },
+   {
+    "id": "<id>",
+    "type": "logo",
+    "x": 0.5,
+    "y": 0.5,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "logo.png",
+    "mimeType": "image/png",
+    "naturalWidth": 400,
+    "naturalHeight": 200,
+    "scale": 0.4
+   }
+  ]
+ },
+ "historyAfterTwo": {
+  "past": 2,
+  "future": 0,
+  "color": "#222222"
+ },
+ "afterUndo": {
+  "past": 1,
+  "future": 1,
+  "color": "#111111"
+ }
+}

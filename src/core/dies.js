@@ -22,9 +22,11 @@
 // becomes the bottom — which is why anything on the bottom panel prints upside
 // down (see the `flipped` zone below).
 //
-// The standard numbers are measured off Reel48's own production art,
-// "HB Neild Koozies.pdf" — a 336.75 x 768 pt vector page whose die is 304 pt
-// wide, panels 290 pt tall, base disc 207 pt across, 161 pt between the panels.
+// The standard numbers are measured off Reel48's own production art: a
+// 336.75 x 768 pt vector page whose die is 304 pt wide, panels 290 pt tall,
+// base disc 207 pt across, 161 pt between the panels. (The source file is named
+// for the customer it was cut for, so it is referenced by shape rather than by
+// name — this repo is public.)
 //
 // The slim die is the 12 oz SLEEK can — 2.24" x 6.13", what White Claw, Truly,
 // High Noon, Michelob Ultra and Red Bull 12 oz all use. (A true slim can is

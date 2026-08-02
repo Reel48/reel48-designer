@@ -1,0 +1,17 @@
+{
+  "name": "@reel48/designer",
+  "version": "1.0.0",
+  "description": "Reel48's product designer: die geometry, design document, and production spec. Shared by www.reel48.com and account.reel48.com.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "exports": {
+    "./core": "./src/core/index.js"
+  },
+  "files": ["src", "README.md"],
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.9"
+  }
+}

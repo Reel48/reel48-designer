@@ -158,6 +158,25 @@ export function designReducer(state, action) {
       };
     }
 
+    case "NUDGE_ELEMENT": {
+      // Keyboard nudge. `dx` and `dy` are both FRACTIONS OF STAGE WIDTH, so one
+      // step moves the same visual distance on either axis; the aspect
+      // conversion for y happens here, against the die's pinned stage frame,
+      // rather than in each host. Clamped like DUPLICATE_ELEMENT. Hosts pass a
+      // `coalesceKey` per key-hold so a held arrow is one undo step.
+      const { id, dx = 0, dy = 0 } = action;
+      const el = state.elements.find((e) => e.id === id);
+      if (!el || (dx === 0 && dy === 0)) return state;
+      const { stage } = resolveDie(state.size);
+      const x = clamp01(el.x + dx);
+      const y = clamp01(el.y + dy * (stage.width / stage.height));
+      if (x === el.x && y === el.y) return state;
+      return {
+        ...state,
+        elements: state.elements.map((e) => (e.id === id ? { ...e, x, y } : e)),
+      };
+    }
+
     case "DUPLICATE_ELEMENT": {
       // The source clone (logo file / objectURL) is the caller's problem; here
       // we clone the element data under a new id, nudged so it is visible.

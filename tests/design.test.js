@@ -187,3 +187,76 @@ describe("brand-library logos", () => {
     expect(DESIGN_SCHEMA_VERSION).toBe(3);
   });
 });
+
+describe("NUDGE_ELEMENT", () => {
+  // The standard die's stage is 1000x2000, so a `dy` in fractions of stage
+  // WIDTH becomes half that in fractions of stage height. That conversion is
+  // the reason the action exists here instead of in each host: two hosts edit
+  // the same documents, and a second copy of the arithmetic relocates artwork.
+  const ASPECT = 1000 / 2000;
+
+  const withText = () => {
+    const s = initialDesignState("standard");
+    return designReducer(s, { type: "ADD_TEXT", id: "t1" });
+  };
+
+  it("moves x by dx and leaves y alone", () => {
+    const s = designReducer(withText(), { type: "NUDGE_ELEMENT", id: "t1", dx: 0.01 });
+    expect(s.elements[0].x).toBe(0.51);
+    expect(s.elements[0].y).toBe(0.5);
+  });
+
+  it("converts dy by the die's aspect so a step looks the same on either axis", () => {
+    const s = designReducer(withText(), { type: "NUDGE_ELEMENT", id: "t1", dy: 0.01 });
+    expect(s.elements[0].y).toBeCloseTo(0.5 + 0.01 * ASPECT, 10); // 0.505
+    expect(s.elements[0].x).toBe(0.5);
+  });
+
+  it("clamps to the stage frame instead of walking artwork off the die", () => {
+    let s = designReducer(withText(), {
+      type: "UPDATE_ELEMENT", id: "t1", patch: { x: 0.995, y: 0.001 },
+    });
+    s = designReducer(s, { type: "NUDGE_ELEMENT", id: "t1", dx: 0.01 });
+    expect(s.elements[0].x).toBe(1);
+    s = designReducer(s, { type: "NUDGE_ELEMENT", id: "t1", dy: -0.01 });
+    expect(s.elements[0].y).toBe(0);
+  });
+
+  it("returns the same state object for an unknown id", () => {
+    // Identity, not equality: historyReducer decides "did anything change?" by
+    // comparing objects, so a no-op has to be the SAME object or it costs an
+    // undo step that undoes to an identical state.
+    const before = withText();
+    expect(designReducer(before, { type: "NUDGE_ELEMENT", id: "nope", dx: 0.01 })).toBe(before);
+  });
+
+  it("returns the same state object for a zero nudge", () => {
+    const before = withText();
+    expect(designReducer(before, { type: "NUDGE_ELEMENT", id: "t1", dx: 0, dy: 0 })).toBe(before);
+  });
+
+  it("collapses one key-hold into ONE undo step", () => {
+    // A held arrow key auto-repeats. The host passes one coalesceKey per hold,
+    // so the whole hold is a single undo step and separate taps stay separately
+    // undoable.
+    let h = initialHistoryState("standard");
+    h = historyReducer(h, { type: "ADD_TEXT", id: "t1" });
+    const before = h.past.length;
+    for (let i = 0; i < 3; i++) {
+      h = historyReducer(h, {
+        type: "NUDGE_ELEMENT", id: "t1", dx: 0.01, coalesceKey: "nudge:1",
+      });
+    }
+    expect(h.past.length).toBe(before + 1);
+    expect(h.present.elements[0].x).toBeCloseTo(0.53, 10);
+
+    h = historyReducer(h, {
+      type: "NUDGE_ELEMENT", id: "t1", dx: 0.01, coalesceKey: "nudge:2",
+    });
+    expect(h.past.length).toBe(before + 2);
+
+    // One undo drops the second hold, not one of its three repeats.
+    h = historyReducer(h, { type: "UNDO" });
+    expect(h.present.elements[0].x).toBeCloseTo(0.53, 10);
+  });
+});

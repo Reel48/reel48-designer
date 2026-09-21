@@ -68,6 +68,7 @@ import {
   traceDie,
 } from "../core/index.js";
 import { useImage } from "./useImage.js";
+import { createImageReadiness } from "./imageReadiness.js";
 
 /** Snap distance to a guide, in NATIVE stage px. */
 const DEFAULT_SNAP_THRESHOLD = 8;
@@ -88,14 +89,20 @@ function LogoNode({
   onTransform,
   onTransformEnd,
   registerNode,
+  reportImage,
 }) {
-  const [img] = useImage(src, null); // same-origin blob URL → no crossOrigin needed
+  const [img, imageStatus] = useImage(src, null); // same-origin blob URL → no crossOrigin needed
   const ref = useRef(null);
 
   useEffect(() => {
     registerNode(el.id, ref.current);
     return () => registerNode(el.id, null);
   }, [el.id, registerNode, img]);
+
+  // Layout effects run after the Konva node has received this exact image.
+  useLayoutEffect(() => {
+    reportImage(`logo:${el.id}`, src, img && ref.current ? "loaded" : imageStatus === "failed" ? "failed" : "loading");
+  }, [el.id, src, img, imageStatus, reportImage]);
 
   if (!img) return null;
 
@@ -268,6 +275,7 @@ function InlineTextEditor({ el, displayW, displayH, className, onCommit, onCance
  * @param {function} props.dispatch      the history reducer's dispatch
  * @param {object}   props.logoSources   elementId → object URL / https URL
  * @param {string}   [props.patternSrc]  tiled background image
+ * @param {function} [props.onReadyChange] (ready, error|null), current committed artwork
  * @param {number}   [props.fontVersion] bump to re-measure after a font loads
  * @param {string}   [props.dieId]       die id, or a legacy `size`
  * @param {string}   [props.accent]      guides + transformer colour
@@ -283,6 +291,7 @@ const DesignStage = forwardRef(function DesignStage(
     dispatch,
     logoSources,
     patternSrc,
+    onReadyChange,
     fontVersion = 0,
     dieId,
     accent = DEFAULT_ACCENT,
@@ -294,6 +303,11 @@ const DesignStage = forwardRef(function DesignStage(
   const containerRef = useRef(null);
   const stageRef = useRef(null);
   const trRef = useRef(null);
+  const uiLayerRef = useRef(null);
+  const patternRef = useRef(null);
+  const exportingRef = useRef(false);
+  const readiness = useMemo(() => createImageReadiness(), []);
+  const reportImage = useMemo(() => (id, src, status) => readiness.report(id, src, status), [readiness]);
   const nodesRef = useRef(new Map());
   const [displayW, setDisplayW] = useState(0);
   // Snap guides, in display px — null when that axis isn't snapped.
@@ -320,7 +334,43 @@ const DesignStage = forwardRef(function DesignStage(
     if (editingId && !editingEl) setEditingId(null);
   }, [editingId, editingEl]);
 
-  const [patternImg] = useImage(patternSrc || null);
+  const [patternImg, patternStatus] = useImage(patternSrc || null);
+
+  useLayoutEffect(() => {
+    readiness.mount();
+    return () => readiness.unmount();
+  }, [readiness]);
+
+  useLayoutEffect(() => {
+    const entries = state.elements.filter((el) => el.type === "logo")
+      .map((el) => [`logo:${el.id}`, logoSources[el.id]]);
+    if (patternSrc) entries.push(["pattern", patternSrc]);
+    readiness.commit(entries, displayW > 0 && !!stageRef.current,
+      JSON.stringify([state, displayW, native.width, native.height, fontVersion]));
+  }, [readiness, state, logoSources, patternSrc, displayW, native.width, native.height, fontVersion]);
+
+  useLayoutEffect(() => {
+    if (patternSrc) reportImage("pattern", patternSrc,
+      patternImg && patternRef.current?.fillPatternImage() === patternImg ? "loaded" : patternStatus === "failed" ? "failed" : "loading");
+  }, [reportImage, patternSrc, patternImg, patternStatus, displayW]);
+
+  useLayoutEffect(() => {
+    let previous;
+    let previousError;
+    const report = () => {
+      const status = readiness.status();
+      const ready = status === "ready";
+      const error = status === "failed" ? "Artwork could not be loaded. Please upload it again." : null;
+      if (ready !== previous || error !== previousError) {
+        previous = ready;
+        previousError = error;
+        onReadyChange?.(ready, error);
+      }
+    };
+    const unsubscribe = readiness.subscribe(report);
+    report();
+    return unsubscribe;
+  }, [readiness, onReadyChange]);
 
   // Measured, not computed: the container is fluid, and the die's aspect decides
   // the height. Re-measured when the die changes too — that resizes the
@@ -444,29 +494,44 @@ const DesignStage = forwardRef(function DesignStage(
       setEditingId(id);
     },
     async exportProof() {
-      // If an inline edit is open, close it and wait a frame so the Konva text
-      // node is visible again before the snapshot. (Blur has already committed
-      // the textarea value by the time any submit button's click handler runs.)
-      if (editingId) {
-        setEditingId(null);
-        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      if (exportingRef.current) throw new Error("A proof is already being generated.");
+      exportingRef.current = true;
+      const requestedRevision = readiness.revision;
+      let uiLayer;
+      let wasVisible;
+      try {
+        // Closing the editor restores the existing committed text node. The
+        // host still owns committing its value before requesting a proof.
+        if (editingId) {
+          setEditingId(null);
+          await new Promise((resolve, reject) => {
+            const timer = setTimeout(() => reject(new Error("The designer is not ready. Please try again.")), 15000);
+            requestAnimationFrame(() => requestAnimationFrame(() => { clearTimeout(timer); resolve(); }));
+          });
+        }
+        await readiness.wait();
+        if (readiness.revision !== requestedRevision) {
+          throw new Error("The design changed while preparing the proof. Please try again.");
+        }
+        const stage = stageRef.current;
+        if (!stage) throw new Error("The designer is not ready. Please try again.");
+        // Hide the entire UI layer synchronously, including snap guides. This
+        // avoids relying on a React state update before the canvas snapshot.
+        uiLayer = uiLayerRef.current;
+        wasVisible = uiLayer?.visible();
+        uiLayer?.hide();
+        stage.draw();
+        const pixelRatio = native.width / (displayW || native.width);
+        const blob = await readiness.capture(() => stage.toBlob({ pixelRatio, mimeType: "image/png" }));
+        if (!blob) throw new Error("The proof could not be created. Please try again.");
+        return blob;
+      } finally {
+        if (uiLayer && stageRef.current && uiLayer.getStage() === stageRef.current) {
+          uiLayer.visible(wasVisible);
+          uiLayer.draw();
+        }
+        exportingRef.current = false;
       }
-      const stage = stageRef.current;
-      if (!stage) return null;
-      // Detach the transformer and clear the guides: this image is what the
-      // buyer approves and the factory prints from, so no editing chrome may
-      // survive into it.
-      const restore = state.selectedId ? nodesRef.current.get(state.selectedId) : null;
-      trRef.current?.nodes([]);
-      setGuides({ x: null, y: null });
-      trRef.current?.getLayer()?.batchDraw();
-      // Export at NATIVE resolution whatever size the canvas happens to be, so
-      // the proof does not depend on the buyer's window width.
-      const pixelRatio = native.width / (displayW || native.width);
-      const blob = await stage.toBlob({ pixelRatio, mimeType: "image/png" });
-      trRef.current?.nodes(restore ? [restore] : []);
-      trRef.current?.getLayer()?.batchDraw();
-      return blob;
     },
   }));
 
@@ -502,6 +567,7 @@ const DesignStage = forwardRef(function DesignStage(
     onTransform: handleTransform,
     onTransformEnd: handleTransformEnd,
     registerNode,
+    reportImage,
   };
 
   return (
@@ -529,6 +595,10 @@ const DesignStage = forwardRef(function DesignStage(
               y={0}
               width={displayW}
               height={displayH}
+              ref={(node) => {
+                patternRef.current = node;
+                if (node) reportImage("pattern", patternSrc, "loaded");
+              }}
               fillPatternImage={patternImg}
               fillPatternRepeat="repeat"
               fillPatternScale={{ x: scale, y: scale }}
@@ -570,7 +640,7 @@ const DesignStage = forwardRef(function DesignStage(
         </Layer>
 
         {/* UI layer — alignment guides + transform handles (not exported) */}
-        <Layer>
+        <Layer ref={uiLayerRef}>
           {guides.x !== null && (
             <Line
               points={[guides.x, 0, guides.x, displayH]}

@@ -128,3 +128,28 @@ src/core/   zero dependencies — dies.js, design.js
 src/stage/  optional peers: react, react-dom, konva, react-konva — DesignStage.jsx, useImage.js
 tests/      golden files and unit tests
 ```
+
+### Image readiness (v1.4.1)
+
+`DesignStage` accepts an optional `onReadyChange(ready: boolean, error: string | null)` callback. It
+reports `false` until the measured canvas and every current logo and pattern
+image have committed, and `true` when artwork can be exported. A missing or
+failed source is not ready. The callback runs after commits and reports changes;
+its initial report is always delivered. Missing/failed images provide a customer-facing
+error string; loading and ready states provide `null`, clearing errors on source
+replacement. Image loads fail after 15 seconds so the host can surface stalled
+requests without requiring an export attempt. Existing single-argument callbacks
+remain compatible. Hosts should disable proof actions while
+not ready and while their own artwork editor is open.
+
+`await stageRef.current.exportProof()` waits up to 15 seconds for images, then
+exports the committed artwork at native resolution. It rejects for image load
+failure, timeout, unmount, concurrent export, or a design change during export.
+PNG encoding also has a 15-second bound. A host should display the error and let
+the customer retry. This protects the proof from being paired with a different
+artwork revision when a logo is replaced, restored, or undone. Image replacement
+never displays the previous source while the new source loads. The full UI layer
+is excluded from proofs, and restored even when export fails.
+
+The core document format, existing props, and successful `Promise<Blob>` export
+contract are unchanged.

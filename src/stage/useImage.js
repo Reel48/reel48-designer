@@ -13,39 +13,50 @@ import { useEffect, useState } from "react";
  *
  * Ported from Reel48-Storefront/src/hooks/useImage.ts. It lost its TypeScript
  * types in the move because this package ships plain ESM with no build step —
- * the runtime behaviour is identical, and the two call sites are both in this
- * directory.
+ * image state is now keyed to its source, so replacements cannot flash stale
+ * artwork. A stalled load becomes a failure after 15 seconds.
  *
  * Returns `[image, status]`, status one of "loading" | "loaded" | "failed".
  */
 export function useImage(src, crossOrigin = "anonymous") {
-  const [image, setImage] = useState(null);
-  const [status, setStatus] = useState("loading");
+  const [result, setResult] = useState(null);
 
   useEffect(() => {
     if (!src) {
-      setImage(null);
-      setStatus("loading");
+      setResult(null);
       return undefined;
     }
     let cancelled = false;
     const img = new window.Image();
     if (crossOrigin) img.crossOrigin = crossOrigin;
+    const timer = setTimeout(() => {
+      if (cancelled) return;
+      cancelled = true;
+      setResult({ src, crossOrigin, image: null, status: "failed" });
+    }, 15000);
     img.onload = () => {
       if (cancelled) return;
-      setImage(img);
-      setStatus("loaded");
+      clearTimeout(timer);
+      cancelled = true;
+      setResult({ src, crossOrigin, image: img, status: "loaded" });
     };
     img.onerror = () => {
       if (cancelled) return;
-      setImage(null);
-      setStatus("failed");
+      clearTimeout(timer);
+      cancelled = true;
+      setResult({ src, crossOrigin, image: null, status: "failed" });
     };
     img.src = src;
     return () => {
       cancelled = true;
+      clearTimeout(timer);
+      img.onload = null;
+      img.onerror = null;
     };
   }, [src, crossOrigin]);
 
-  return [image, status];
+  // Never expose the previous source for even one render after a replacement.
+  return result && result.src === src && result.crossOrigin === crossOrigin
+    ? [result.image, result.status]
+    : [null, "loading"];
 }

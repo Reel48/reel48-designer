@@ -14,6 +14,14 @@ export {
 } from "./dies.js";
 
 export {
+  IDENTITY_CAMERA,
+  cameraFor,
+  cameraPoint,
+  containDisplayWidth,
+  focusRects,
+} from "./camera.js";
+
+export {
   DEFAULT_COLOR,
   DEFAULT_TEXT,
   DESIGN_SCHEMA_VERSION,

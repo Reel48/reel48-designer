@@ -128,3 +128,95 @@ src/core/   zero dependencies — dies.js, design.js
 src/stage/  optional peers: react, react-dom, konva, react-konva — DesignStage.jsx, useImage.js
 tests/      golden files and unit tests
 ```
+
+### Image readiness (v1.4.1)
+
+`DesignStage` accepts an optional `onReadyChange(ready: boolean, error: string | null)` callback. It
+reports `false` until the measured canvas and every current logo and pattern
+image have committed, and `true` when artwork can be exported. A missing or
+failed source is not ready. The callback runs after commits and reports changes;
+its initial report is always delivered. Missing/failed images provide a customer-facing
+error string; loading and ready states provide `null`, clearing errors on source
+replacement. Image loads fail after 15 seconds so the host can surface stalled
+requests without requiring an export attempt. Existing single-argument callbacks
+remain compatible. Hosts should disable proof actions while
+not ready and while their own artwork editor is open.
+
+`await stageRef.current.exportProof()` waits up to 15 seconds for images, then
+exports the committed artwork at native resolution. It rejects for image load
+failure, timeout, unmount, concurrent export, or a design change during export.
+PNG encoding also has a 15-second bound. A host should display the error and let
+the customer retry. This protects the proof from being paired with a different
+artwork revision when a logo is replaced, restored, or undone. Image replacement
+never displays the previous source while the new source loads. The full UI layer
+is excluded from proofs, and restored even when export fails.
+
+The core document format, existing props, and successful `Promise<Blob>` export
+contract are unchanged.
+
+## v1.5.0: camera, gestures, phone hooks
+
+Built for the storefront's full-screen phone designer: the canvas sits in a
+fixed-height box on the top half of the screen, zooms into one face of the die
+on the "logo" and "text" steps, and takes one-finger drags and two-finger
+pinches. **Everything here is opt-in.** With none of the new props passed,
+`DesignStage` renders, behaves and exports exactly as v1.4.1 (the layers are
+never transformed, the proof is the same `toBlob` call), and every existing
+golden file is unchanged.
+
+### `core`
+
+- `focusRects(geom)` → `{ front, back, base }` in native stage px: each zone's
+  bounds under its id, plus `base`, the base disc's bounding box. A die with
+  other zones and no disc gets just its zones.
+- `cameraFor({ rect, native, displayW, viewport, rotate = 0, margin = 0.06, inset })` →
+  Konva layer attrs `{ x, y, offsetX, offsetY, scaleX, scaleY, rotation }`.
+  `rect: null` is the whole die fitted to the viewport; a rect (from
+  `focusRects`) is centred and scaled to fit inside `margin` per side, turned by
+  `rotate`. `inset` (`{ top, right, bottom, left }`, CSS px) is the part of the
+  viewport the host covers with its own controls: the camera frames inside the
+  rest and centres there. Pinned by `tests/camera.golden.json` (no inset) and
+  `tests/camera.test.js` (inset).
+- `containDisplayWidth(viewport, native)`, `cameraPoint(camera, point)`,
+  `IDENTITY_CAMERA`: the fit, the forward transform, and the no-camera attrs.
+- `ADD_LOGO` / `ADD_TEXT` take optional `x`, `y` (fractions, clamped to 0..1)
+  and `rotation` (degrees). Non-numbers are ignored. Without them the element is
+  byte-identical to before.
+
+### `DesignStage` props
+
+| Prop | Default | |
+| --- | --- | --- |
+| `fit` | `"width"` | `"contain"` fits the die inside the container. The host gives the container a definite height (e.g. a flex child at `height: 100%`). The Konva stage fills the box; the placeholder fills it too. |
+| `view` | `{ focus: null }` | `{ focus: "front" \| "back" \| "base" \| null, rotate180?: boolean, inset?: { top, right, bottom, left } }`. Contain mode only. `rotate180` shows a focused face turned over, so artwork on the back panel (which prints upside down) reads upright. `inset` keeps the die clear of host overlays without resizing the stage (a resize re-fits instantly; a view or inset change glides). |
+| `animate` | `true` | Tween view changes (0.3s, StrongEaseOut). Pass `false` for `prefers-reduced-motion`. First layout and resizes are always instant. |
+| `interactive` | `true` | `false`: elements can't be selected, dragged or transformed, the transformer is hidden, and stage taps don't change selection. Selection itself is left alone. |
+| `gestures` | `false` | Two-finger pinch (scale), twist (rotation, soft-snaps to 0/90/180/270 within 4°) and pan of the **selected** element, wherever the fingers land. One gesture is one undo step (`coalesceKey: "pinch-<ts>"`), including a drag or anchor transform it took over from. While on, a touch on bare stage clears selection on tap instead of touchdown, so the first finger of a pinch can land anywhere. |
+| `touchAction` | `"pan-y"` | The container's `touch-action`. A full-screen host passes `"none"`. |
+| `anchorSize` | `18` | Transformer anchor size. Passing it also makes anchors round. |
+| `anchorPadding` | `0` | Transformer `padding`. |
+| `anchorHitSize` | none | A finger-sized hit area for each anchor, larger than the anchor drawn (via the anchor's `hitStrokeWidth`), so a host can draw quiet small handles. |
+| `inlineTextEdit` | `true` | `false`: double-tap doesn't open the canvas text editor (the host edits text in its own input). `beginTextEdit` still works. |
+| `onManipulate(kind)` | none | Once at the start of each `"drag"`, `"transform"` or `"pinch"`. |
+| `onSnap()` | none | When a drag snaps to a guide, or a twist snaps to a right angle. Fires on the transition into a snap, not when a manipulation starts already snapped. Meant for a small haptic. |
+
+The rotation badge reads relative to the view, so an element turned 180° on
+the back panel reads 0° in the back view. A selected logo whose bitmap loads
+after it was selected (always, for a freshly added one) gets its handles the
+moment its node registers; before v1.5.0 they appeared only on the next
+unrelated re-render. The die-line and snap guides stay
+hairlines under any zoom, and the snap distance stays constant on screen.
+
+### Ref methods
+
+- `hint(id, { reducedMotion = false } = {}) → Promise<void>`: sways the element
+  6 screen px each way and back to exactly where it was. Never dispatches, so
+  nothing reaches the document, undo or a proof. Resolves at once for
+  `reducedMotion`, a missing node, or an element a finger is already moving.
+  Any touch or click on the stage ends it first. One at a time; call it after
+  the element has rendered.
+- `exportProof()`: unchanged contract, and **camera-independent**. In contain
+  mode it lands any camera tween, resets the layers to identity, exports the
+  die's own rectangle at native resolution, and puts the camera back, all
+  without a React render. The result is pixel-identical to a width-mode proof
+  at the same display width, whatever the view.

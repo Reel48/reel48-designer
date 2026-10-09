@@ -37,7 +37,7 @@ jobs:
           rm -rf node_modules
           node --input-type=module -e "
             import('./src/core/index.js').then((m) => {
-              const missing = ['dieGeometry','traceDie','designReducer','toDesignDescription','snapTargets']
+              const missing = ['dieGeometry','traceDie','designReducer','toDesignDescription','snapTargets','focusRects','cameraFor']
                 .filter((k) => typeof m[k] !== 'function');
               if (missing.length) { console.error('missing exports:', missing); process.exit(1); }
               console.log('core loaded with no node_modules present');

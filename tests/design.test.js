@@ -260,3 +260,69 @@ describe("NUDGE_ELEMENT", () => {
     expect(h.present.elements[0].x).toBeCloseTo(0.53, 10);
   });
 });
+
+describe("placed adds (v1.5.0)", () => {
+  // The storefront's phone designer adds artwork while the stage is zoomed into
+  // one face of the die, so it places the element on that face — and turns it
+  // 180 on the back panel, which prints upside down unless rotated.
+  const LOGO = {
+    type: "ADD_LOGO", id: "l1", fileName: "mark.png", mimeType: "image/png",
+    naturalWidth: 400, naturalHeight: 200,
+  };
+
+  it("builds byte-for-byte the element v1.4.1 built when nothing is passed", () => {
+    // Key order included: a host that serializes state itself would otherwise
+    // see a diff on every document. These literals are what v1.4.1 produced.
+    const logo = designReducer(initialDesignState("standard"), LOGO).elements[0];
+    expect(JSON.stringify(logo)).toBe(
+      '{"id":"l1","type":"logo","fileName":"mark.png","mimeType":"image/png",' +
+        '"naturalWidth":400,"naturalHeight":200,"x":0.5,"y":0.5,"scale":0.4,"rotation":0,"opacity":1}',
+    );
+    const text = designReducer(initialDesignState("standard"), { type: "ADD_TEXT", id: "t1" }).elements[0];
+    expect(JSON.stringify(text)).toBe(
+      '{"id":"t1","type":"text","text":"Your text","fontFamily":"Arial, sans-serif","fontStyle":"normal",' +
+        '"fill":"#FFFFFF","align":"center","fontScale":0.07,"x":0.5,"y":0.5,"rotation":0,"opacity":1}',
+    );
+  });
+
+  it("places a logo where the host says, turned as it says", () => {
+    const s = designReducer(initialDesignState("standard"), { ...LOGO, x: 0.5, y: 0.8, rotation: 180 });
+    expect(s.elements[0]).toMatchObject({ x: 0.5, y: 0.8, rotation: 180, scale: 0.4 });
+    expect(s.selectedId).toBe("l1");
+    expect(toDesignDescription(s).elements[0]).toMatchObject({ x: 0.5, y: 0.8, rotation: 180 });
+  });
+
+  it("places text the same way", () => {
+    const s = designReducer(initialDesignState("standard"), {
+      type: "ADD_TEXT", id: "t1", x: 0.25, y: 0.2, rotation: -15,
+    });
+    expect(s.elements[0]).toMatchObject({ x: 0.25, y: 0.2, rotation: -15, text: "Your text" });
+  });
+
+  it("takes each key independently", () => {
+    const s = designReducer(initialDesignState("standard"), { type: "ADD_TEXT", id: "t1", y: 0.8 });
+    expect(s.elements[0]).toMatchObject({ x: 0.5, y: 0.8, rotation: 0 });
+  });
+
+  it("ignores anything that is not a finite number", () => {
+    for (const bad of ["0.3", null, NaN, Infinity, {}]) {
+      const s = designReducer(initialDesignState("standard"), {
+        ...LOGO, x: bad, y: bad, rotation: bad,
+      });
+      expect(s.elements[0]).toMatchObject({ x: 0.5, y: 0.5, rotation: 0 });
+    }
+  });
+
+  it("clamps a position to the stage frame, like NUDGE and DUPLICATE", () => {
+    const s = designReducer(initialDesignState("standard"), { ...LOGO, x: -0.2, y: 1.4 });
+    expect(s.elements[0]).toMatchObject({ x: 0, y: 1 });
+  });
+
+  it("is one undo step, like any add", () => {
+    let h = initialHistoryState("standard");
+    h = historyReducer(h, { ...LOGO, x: 0.5, y: 0.8, rotation: 180 });
+    expect(h.past.length).toBe(1);
+    h = historyReducer(h, { type: "UNDO" });
+    expect(h.present.elements).toEqual([]);
+  });
+});

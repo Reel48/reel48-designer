@@ -86,6 +86,25 @@ function clamp01(n) {
   return Math.max(0, Math.min(1, n));
 }
 
+// Optional placement on ADD_LOGO / ADD_TEXT (v1.5.0). The storefront's phone
+// designer adds artwork while the stage is zoomed into one face of the die, so
+// "the centre of the stage frame" (0.5, 0.5) is the middle of the base disc —
+// off-screen, and somewhere artwork never goes. The host passes the centre of
+// the face it is showing instead, and 180 for the back panel, which prints
+// upside down unless rotated (see the `flipped` zone in dies.js).
+//
+// Only a finite number counts; anything else is the default, so an action
+// without these keys builds exactly the element it always built. Positions are
+// clamped like NUDGE_ELEMENT and DUPLICATE_ELEMENT, because they are fractions
+// of the stage frame and nothing outside 0..1 is on it.
+function placedPosition(value) {
+  return Number.isFinite(value) ? clamp01(value) : 0.5;
+}
+
+function placedRotation(value) {
+  return Number.isFinite(value) ? value : 0;
+}
+
 export function designReducer(state, action) {
   switch (action.type) {
     case "SET_COLOR":
@@ -114,10 +133,10 @@ export function designReducer(state, action) {
         mimeType: action.mimeType,
         naturalWidth: action.naturalWidth,
         naturalHeight: action.naturalHeight,
-        x: 0.5,
-        y: 0.5,
+        x: placedPosition(action.x),
+        y: placedPosition(action.y),
         scale: 0.4,
-        rotation: 0,
+        rotation: placedRotation(action.rotation),
         opacity: 1,
         // Optional, and omitted entirely when absent rather than set to
         // undefined — `source: undefined` would serialize as a missing key in
@@ -142,9 +161,9 @@ export function designReducer(state, action) {
         id: action.id,
         type: "text",
         ...DEFAULT_TEXT,
-        x: 0.5,
-        y: 0.5,
-        rotation: 0,
+        x: placedPosition(action.x),
+        y: placedPosition(action.y),
+        rotation: placedRotation(action.rotation),
         opacity: 1,
       };
       return { ...state, elements: [...state.elements, el], selectedId: el.id };

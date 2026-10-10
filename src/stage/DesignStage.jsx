@@ -89,7 +89,9 @@
 // 14. `exportArtCanvas()` returns the artwork layer alone at the die's native
 //     size (core/camera.js `artExportRect`), synchronously, with no export
 //     lock: a texture a host can take on every design change without ever
-//     getting in the way of `exportProof`.
+//     getting in the way of `exportProof`. v1.9.0: `{ color: false }` leaves
+//     the ground colour out, so a host can lay its own colour under the art
+//     and follow a colour drag without exporting again.
 // 15. `isTextEditing()` says whether the inline text editor is open, since
 //     the text being edited is hidden from that texture.
 // 16. `isolate` draws only the focused side (core/confine.js
@@ -635,6 +637,9 @@ const DesignStage = forwardRef(function DesignStage(
   const stageRef = useRef(null);
   const trRef = useRef(null);
   const artLayerRef = useRef(null);
+  // The ground colour under everything on the art layer, which
+  // exportArtCanvas({ color: false }) leaves out.
+  const colorRectRef = useRef(null);
   const overlayLayerRef = useRef(null);
   const dieLineRef = useRef(null);
   const magnetRef = useRef(null);
@@ -1877,7 +1882,12 @@ const DesignStage = forwardRef(function DesignStage(
     // hidden on the stage, so it is missing here too; a host skips painting
     // while `isTextEditing()`. A logo whose bitmap is still loading is not
     // drawn yet; a host paints again when `onReadyChange` reports true.
-    exportArtCanvas() {
+    //
+    // `{ color: false }` (v1.9.0) draws everything but the ground colour: the
+    // pattern, logos and text, still clipped to the die, transparent where
+    // the colour was. A host that fills its own colour under it has the same
+    // picture, and on a colour change needs only to fill again, not to export.
+    exportArtCanvas({ color = true } = {}) {
       const art = artLayerRef.current;
       // The layout as it is now, as exportProof reads it.
       const rect = artExportRect({
@@ -1908,6 +1918,7 @@ const DesignStage = forwardRef(function DesignStage(
         if (sway) hold(sway.node, { x: sway.x0 });
         const settle = settleTweenRef.current;
         if (settle) hold(settle.node, settle.to);
+        if (!color) hold(colorRectRef.current, { visible: false });
         art.setAttrs(IDENTITY_CAMERA);
         return art.toCanvas(rect);
       } finally {
@@ -2050,7 +2061,7 @@ const DesignStage = forwardRef(function DesignStage(
       >
         {/* Artwork layer — clipped to the silhouette */}
         <Layer ref={artLayerRef}>
-          <Rect x={0} y={0} width={displayW} height={displayH} fill={state.color} />
+          <Rect ref={colorRectRef} x={0} y={0} width={displayW} height={displayH} fill={state.color} />
           {patternImg && (
             <Rect
               x={0}

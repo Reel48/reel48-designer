@@ -247,3 +247,29 @@ unchanged.
 | --- | --- | --- |
 | `magnet` | `null` | `"solid"` draws the magnet strip on the back panel; `"ghost"` draws it at 35% so artwork under it stays visible while it is being placed. Drawn in the die-line overlay layer: it follows the camera and never takes a tap. **Never in a proof**: `exportProof` hides it for its one synchronous draw, in both fits, so the screen never shows a frame without it. |
 | `animateResize` | `false` | Contain only. When the container changes size under an unchanged view and die (a host panel growing or shrinking below the canvas), the camera tweens to the new fit instead of jumping. It starts from the camera that shows the re-laid-out die exactly where it was, so the die glides rather than jumping and then gliding. Still instant when `animate` is `false`, and on a die swap. |
+
+## v1.7.0: sides that keep their artwork
+
+One more opt-in prop pair for the storefront's phone designer, which shows one
+side of the koozie at a time. With neither passed, `DesignStage` is v1.6.0 to
+the attr.
+
+### `core`
+
+- `faceRegions(geom)` → `{ front, back, base }`: the panels as their zone rects
+  (`{ kind: "rect", x0, y0, x1, y1 }`), the base as its disc
+  (`{ kind: "circle", cx, cy, r }`), native px.
+- `faceAt(geom, stage, { x, y })`: which side a point (stage fractions) is on,
+  the disc first, then the side of `bottomPanelStartY`.
+- `confineCenter(region, center, { hx, hy })` → `{ x, y, moved }`: the nearest
+  centre at which a box of those half extents lies wholly inside (centred when
+  it cannot fit). `fitScale(region, half)`: the shrink (≤ 1) that makes it fit.
+- `rubberBand(over, limit)`: resistance past an edge that never reaches `limit`.
+- `scaleRegion(region, k)`. All pinned by `tests/confine.test.js`.
+
+### `DesignStage` props
+
+| Prop | Default | |
+| --- | --- | --- |
+| `confine` | `false` | Each element stays wholly on the side its centre was on when a drag, anchor transform or pinch began, measured by its rotated bounding box. Dragged past the edge it gives way less and less (at most 24 screen px) and the side's dashed outline shows. Released outside, or made bigger than the side, ONE `UPDATE_ELEMENT` commits the nearest place it fits (shrunk if need be) and the node glides there from where it was let go: 250ms, `StrongEaseOut`, instant when `animate` is `false`. A proof always shows the committed position. |
+| `onConfine({ id, face, toward })` | none | After a release had to be brought back. `toward` is the side the artwork's leading edge was being taken onto, or `null` past the can's outer edge, so a host can say "switch to the base to put it there". |

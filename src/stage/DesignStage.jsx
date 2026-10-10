@@ -69,6 +69,18 @@
 //     an unchanged view (a host panel growing or shrinking), where v1.5.0
 //     jumps.
 // ---------------------------------------------------------------------------
+// v1.7.0: sides that keep their artwork, for the same phone host. Unpassed,
+// the stage is v1.6.0 to the attr.
+//
+// 12. `confine` keeps each element wholly on the side of the die it was on
+//     when a drag, anchor transform or pinch began (core/confine.js). A drag
+//     past the edge meets rubber-band resistance and shows that side's
+//     outline; a release outside commits ONE update to the nearest place it
+//     fits (smaller, if it was made too big) and the node glides there.
+// 13. `onConfine({ id, face, toward })` reports each release that had to be
+//     brought back, and which side it was being dragged towards, so the host
+//     can say how to put artwork there.
+// ---------------------------------------------------------------------------
 
 import {
   forwardRef,
@@ -84,6 +96,7 @@ import {
   Stage,
   Layer,
   Group,
+  Circle,
   Rect,
   Line,
   Shape,
@@ -99,10 +112,16 @@ import {
   cameraFor,
   cameraForResize,
   cameraPoint,
+  confineCenter,
   containDisplayWidth,
   dieGeometry,
+  faceAt,
+  faceRegions,
+  fitScale,
   focusRects,
   magnetRect,
+  rubberBand,
+  scaleRegion,
   resolveDie,
   snapTargets,
   traceDie,
@@ -151,6 +170,17 @@ const HINT_SCREEN_PX = 6;
 // the die, where a single finger can no longer find it.
 const MIN_DISPLAYED_PX = 16;
 const MAX_LOGO_WIDTH_OF_STAGE = 1.5;
+
+// Confinement (v1.7.0). How far past its side artwork can be dragged, on
+// screen, before the rubber band stops giving; and the glide back after a
+// release outside, on the house strong ease-out (Konva's StrongEaseOut, as the
+// camera uses), short like the camera's move so it never stands between a
+// release and the next touch.
+const CONFINE_OVERSHOOT_PX = 24;
+const SETTLE_SECONDS = 0.25;
+// Under reduced motion the settle is instant, so the side's outline stays up a
+// moment longer than a frame to show where the artwork was put back.
+const BOUNDARY_HOLD_MS = 600;
 
 /** Twist rotation sticks to 0/90/180/270 within this many degrees. */
 const PINCH_ROTATION_SNAP = 4;
@@ -511,6 +541,12 @@ function InlineTextEditor({ el, displayW, displayH, camera, viewportWidth, class
  *                                        an unchanged view tweens the camera
  *                                        too (still instant without `animate`)
  *
+ * v1.7.0, both opt-in (the defaults are v1.6.0's behaviour):
+ * @param {boolean}  [props.confine=false] keep each element wholly on the
+ *                                        side it began a manipulation on
+ * @param {function} [props.onConfine]   ({id, face, toward}) after a release
+ *                                        outside its side was brought back
+ *
  * Imperative handle: `beginTextEdit(id)`, `exportProof() → Promise<Blob>`,
  * `hint(id, {reducedMotion}) → Promise<void>`.
  */
@@ -542,6 +578,9 @@ const DesignStage = forwardRef(function DesignStage(
     // v1.6.0. Every default is what v1.5.0 did.
     magnet = null,
     animateResize = false,
+    // v1.7.0. Every default is what v1.6.0 did.
+    confine = false,
+    onConfine,
   },
   ref,
 ) {
@@ -576,6 +615,15 @@ const DesignStage = forwardRef(function DesignStage(
   const multiTouchRef = useRef(false); // a second finger has been down since the last all-up
   const snapRef = useRef(NO_SNAP); // what the current drag is snapped to, for onSnap
   const latestRef = useRef(null); // this render's values, for native listeners
+  // v1.7.0 confinement, refs for the same reason.
+  const confineRef = useRef(null); // the drag or transform in progress: {id, node, face, region, raw}
+  const settleRef = useRef(null); // a settle to start after the next commit: {id, from, to}
+  const settleTweenRef = useRef(null); // the running settle: {tween, node, to}
+  const boundaryShownRef = useRef(false);
+  const boundaryTimerRef = useRef(0);
+  // The side's outline while artwork is pressed past it, NATIVE px (scaled at
+  // draw time, so a resize mid-glide can't leave it stale), or null.
+  const [boundary, setBoundary] = useState(null);
 
   // `dieId ?? state.size` — the prop wins so a picker can preview another die,
   // and the document is the fallback so a stage rendered with no prop still
@@ -713,6 +761,12 @@ const DesignStage = forwardRef(function DesignStage(
       viewRotation,
       onManipulate,
       onSnap,
+      animate,
+      confine,
+      confineFor,
+      settleTarget,
+      reportConfine,
+      showBoundary,
     };
   });
 
@@ -743,6 +797,79 @@ const DesignStage = forwardRef(function DesignStage(
   // The magnet strip, native px, or null for a die with no back panel. Memoized
   // on `geom` for the same reason as the targets.
   const magnetBox = useMemo(() => magnetRect(geom), [geom]);
+  // The sides artwork is kept on, native px (v1.7.0 `confine`).
+  const regions = useMemo(() => faceRegions(geom), [geom]);
+
+  // ---- Confinement helpers (v1.7.0) ---------------------------------------
+  // Plain functions of this render. The gesture listener reaches them through
+  // latestRef, so they are defined before the placeholder's early return.
+
+  /** The side `el` is on, and that side in display px (and native); null if none. */
+  function confineFor(el) {
+    const face = faceAt(geom, native, { x: el.x, y: el.y });
+    const region = regions[face];
+    return region ? { id: el.id, face, region: scaleRegion(region, scale), native: region } : null;
+  }
+
+  /** A node's drawn box in its layer's own (display px) frame: centre and half extents. */
+  function boxOf(node) {
+    const r = node.getClientRect({ relativeTo: node.getLayer(), skipShadow: true });
+    return { cx: r.x + r.width / 2, cy: r.y + r.height / 2, hx: r.width / 2, hy: r.height / 2 };
+  }
+
+  /**
+   * Where a released node must go to sit wholly on its side: the node position
+   * (not its box centre) and the factor its size must shrink by (1 unless
+   * `allowFit` and it was made too big). `moved` is whether either changed.
+   */
+  function settleTarget(node, c, allowFit) {
+    // The side at THIS render's scale: the box may have resized mid-gesture.
+    const region = scaleRegion(c.native, scale);
+    const box = boxOf(node);
+    const fit = allowFit ? fitScale(region, box) : 1;
+    const t = confineCenter(region, { x: box.cx, y: box.cy }, { hx: box.hx * fit, hy: box.hy * fit });
+    return {
+      x: node.x() + (t.x - box.cx),
+      y: node.y() + (t.y - box.cy),
+      fit,
+      moved: t.moved || fit < 1,
+      box,
+      target: { x: t.x, y: t.y },
+    };
+  }
+
+  /**
+   * Tell the host a release was brought back, and towards which side it was
+   * going: the side the leading edge of the artwork was over, measured from
+   * where the finger had it (`raw`, unbanded), or null when that is still its
+   * own side (dragged off the can's outer edge).
+   */
+  function reportConfine(c, settled, raw = null) {
+    const from = raw ?? { x: settled.box.cx, y: settled.box.cy };
+    const ox = from.x - settled.target.x;
+    const oy = from.y - settled.target.y;
+    const d = Math.hypot(ox, oy);
+    let toward = null;
+    if (d > 0) {
+      // The box's own extent in that direction: its leading edge.
+      const ux = ox / d;
+      const uy = oy / d;
+      const reach = Math.abs(ux) * settled.box.hx + Math.abs(uy) * settled.box.hy;
+      const probe = { x: (from.x + ux * reach) / displayW, y: (from.y + uy * reach) / displayH };
+      const face = faceAt(geom, native, probe);
+      if (face !== c.face) toward = face;
+    }
+    onConfine?.({ id: c.id, face: c.face, toward });
+  }
+
+  /** Show (region) or hide (null) the side's outline, without a render per move. */
+  function showBoundary(region) {
+    clearTimeout(boundaryTimerRef.current);
+    const shown = !!region;
+    if (shown === boundaryShownRef.current) return;
+    boundaryShownRef.current = shown;
+    setBoundary(region);
+  }
   const showMagnet = (magnet === "solid" || magnet === "ghost") && !!magnetBox;
 
   // Attach the transformer to the selected element node (hidden while a text
@@ -778,6 +905,28 @@ const DesignStage = forwardRef(function DesignStage(
     [],
   );
 
+  // ---- Settle (v1.7.0) ----------------------------------------------------
+  // End a settle glide. `finish` lands the node on where it was going, which
+  // is the document's own position: the glide is only ever visual.
+  const stopSettle = useMemo(
+    () => (finish = true) => {
+      const t = settleTweenRef.current;
+      if (!t) return;
+      settleTweenRef.current = null;
+      t.tween.destroy();
+      if (finish && t.node.getStage()) {
+        t.node.setAttrs(t.to);
+        t.node.getLayer()?.batchDraw();
+        trRef.current?.forceUpdate();
+      }
+      // The outline goes with the glide it was showing, however it ended.
+      clearTimeout(boundaryTimerRef.current);
+      boundaryShownRef.current = false;
+      setBoundary(null);
+    },
+    [],
+  );
+
   // A touch or click anywhere on the stage ends a sway BEFORE Konva sees it.
   // Capture phase on the container runs ahead of Konva's own listeners on its
   // content div, so a drag that starts on a swaying node measures its grab
@@ -786,14 +935,19 @@ const DesignStage = forwardRef(function DesignStage(
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return undefined;
-    const stop = () => stopHint();
+    // A settle glide too (v1.7.0): Konva measures a drag's grab offset at
+    // pointerdown, so the node must already be where it is going.
+    const stop = () => {
+      stopHint();
+      stopSettle(true);
+    };
     const opts = { capture: true, passive: true };
     const types = ["pointerdown", "mousedown", "touchstart"];
     for (const type of types) el.addEventListener(type, stop, opts);
     return () => {
       for (const type of types) el.removeEventListener(type, stop, opts);
     };
-  }, [stopHint]);
+  }, [stopHint, stopSettle]);
 
   // If the document moves the element while it sways (undo, a host nudge),
   // the sway must not put back a position that is no longer true. React has
@@ -804,6 +958,80 @@ const DesignStage = forwardRef(function DesignStage(
     const el = state.elements.find((e) => e.id === h.id);
     stopHint(el ? el.x * displayW : null);
   }, [state.elements, displayW, stopHint]);
+
+  // ---- Settle glide (v1.7.0; stopSettle is defined with the hint, above) ---
+  // Start the settle queued by a release, once React has committed the
+  // settled position: put the node back where it was let go, then glide it to
+  // the committed place. No deps: it checks a ref, and every release that
+  // queues one also dispatches, so a commit always follows.
+  useLayoutEffect(() => {
+    const queued = settleRef.current;
+    if (!queued) return;
+    settleRef.current = null;
+    const node = nodesRef.current.get(queued.id);
+    const tr = trRef.current;
+    if (!node?.getStage()) return;
+    stopSettle(true);
+    const hide = () => {
+      boundaryShownRef.current = false;
+      setBoundary(null);
+    };
+    if (!latestRef.current?.animate) {
+      node.setAttrs(queued.to);
+      node.getLayer()?.batchDraw();
+      tr?.forceUpdate();
+      clearTimeout(boundaryTimerRef.current);
+      boundaryTimerRef.current = window.setTimeout(hide, BOUNDARY_HOLD_MS);
+      return;
+    }
+    node.setAttrs(queued.from);
+    const tween = new Konva.Tween({
+      node,
+      duration: SETTLE_SECONDS,
+      easing: Konva.Easings.StrongEaseOut,
+      ...queued.to,
+      onFinish: () => {
+        if (settleTweenRef.current?.tween !== tween) return;
+        settleTweenRef.current = null;
+        node.setAttrs(queued.to);
+        tween.destroy();
+        tr?.forceUpdate();
+        tr?.getLayer()?.batchDraw();
+        hide();
+      },
+    });
+    // Assigned rather than passed, as for the camera tween: Konva would try to
+    // tween an `onUpdate` config key.
+    tween.onUpdate = () => {
+      tr?.forceUpdate();
+      tr?.getLayer()?.batchDraw();
+    };
+    settleTweenRef.current = { tween, node, to: queued.to, id: queued.id };
+    tween.play();
+  });
+
+  // The document moved the element mid-glide (undo, redo, a resize): the
+  // glide is aiming at a position that is no longer true. React has already
+  // written the new x and y; stop the glide where it is, put back the scale
+  // it was animating (never a React prop), and settle on the document.
+  useLayoutEffect(() => {
+    const t = settleTweenRef.current;
+    if (!t) return;
+    const el = state.elements.find((x) => x.id === t.id);
+    if (!el) {
+      stopSettle(false);
+      return;
+    }
+    const x = el.x * displayW;
+    const y = el.y * displayH;
+    if (Math.abs(x - t.to.x) < 0.5 && Math.abs(y - t.to.y) < 0.5) return;
+    stopSettle(false);
+    if (t.node.getStage()) {
+      t.node.setAttrs({ x, y, ...("scaleX" in t.to ? { scaleX: 1, scaleY: 1 } : {}) });
+      t.node.getLayer()?.batchDraw();
+      trRef.current?.forceUpdate();
+    }
+  }, [state.elements, displayW, displayH, stopSettle]);
 
   // ---- Camera -------------------------------------------------------------
   const stopCameraTween = useMemo(
@@ -913,8 +1141,10 @@ const DesignStage = forwardRef(function DesignStage(
     () => () => {
       stopCameraTween();
       stopHint(null);
+      stopSettle(false);
+      clearTimeout(boundaryTimerRef.current);
     },
-    [stopCameraTween, stopHint],
+    [stopCameraTween, stopHint, stopSettle],
   );
 
   // ---- Gestures -----------------------------------------------------------
@@ -944,6 +1174,7 @@ const DesignStage = forwardRef(function DesignStage(
       const dist0 = Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
       if (!(dist0 > 0)) return;
       stopHint();
+      stopSettle(true);
 
       // Konva's own CSS-scale correction (Stage._getContentPosition), so a
       // finger's travel in client px becomes the same travel in stage px.
@@ -969,6 +1200,11 @@ const DesignStage = forwardRef(function DesignStage(
         snapped: false, // seeded from the start rotation below
         disabled: [],
       };
+      // v1.7.0: the pinch keeps the element on its side, and owns that from
+      // here (a drag or transform it interrupts leaves it to the pinch).
+      g.confine = L.confine ? L.confineFor(element) : null;
+      confineRef.current = null;
+      L.showBoundary(null);
       // Set BEFORE stopping anything, so the dragend / transformend those stops
       // fire synchronously can see that this gesture will commit for them.
       pinchRef.current = g;
@@ -1075,9 +1311,27 @@ const DesignStage = forwardRef(function DesignStage(
       // A two-finger tap changed nothing, and an undo step that undoes
       // nothing is worse than none.
       if (!g.moved && !g.dragged && !g.transformed) return;
-      const patch = { x: node.x() / L.displayW, y: node.y() / L.displayH };
+      // v1.7.0: off its side, or too big for it, the element settles where it
+      // fits, as a release from a drag or an anchor does.
+      let at = { x: node.x(), y: node.y() };
+      let fit = 1;
+      if (g.confine) {
+        const settled = L.settleTarget(node, g.confine, g.moved || g.transformed);
+        if (settled.moved) {
+          fit = settled.fit;
+          settleRef.current = {
+            id: g.id,
+            from: { x: at.x, y: at.y, scaleX: 1 / fit, scaleY: 1 / fit },
+            to: { x: settled.x, y: settled.y, scaleX: 1, scaleY: 1 },
+          };
+          at = { x: settled.x, y: settled.y };
+          L.showBoundary(g.confine.native);
+          L.reportConfine(g.confine, settled);
+        }
+      }
+      const patch = { x: at.x / L.displayW, y: at.y / L.displayH };
       if (g.moved || g.transformed) {
-        const scaleX = node.scaleX();
+        const scaleX = node.scaleX() * fit;
         node.scaleX(1);
         node.scaleY(1);
         if (element.type === "logo") patch.scale = (node.width() * scaleX) / L.displayW;
@@ -1119,7 +1373,7 @@ const DesignStage = forwardRef(function DesignStage(
       multiTouchRef.current = false;
       if (g) commit(g);
     };
-  }, [gestures, stopHint]);
+  }, [gestures, stopHint, stopSettle]);
 
   /** A second finger is (or has been, this touch) down — gestures only. */
   const isMultiTouch = (e) =>
@@ -1130,8 +1384,26 @@ const DesignStage = forwardRef(function DesignStage(
   // is v1.4.1's number.
   const snapDistance = () => (snapThreshold * scale) / cameraScale;
 
+  /** The element id a node draws, by the registry. */
+  function idOf(node) {
+    for (const [id, n] of nodesRef.current) if (n === node) return id;
+    return null;
+  }
+
+  /** Arm confinement for a manipulation of `node` starting now (v1.7.0). */
+  function beginConfine(node) {
+    confineRef.current = null;
+    if (!confine) return;
+    stopSettle(true);
+    const id = idOf(node);
+    const el = id && state.elements.find((x) => x.id === id);
+    const c = el ? confineFor(el) : null;
+    confineRef.current = c ? { ...c, node, raw: null } : null;
+  }
+
   function handleDragStart(e) {
     stopHint();
+    beginConfine(e.target);
     // A drag that begins ON a guide is already snapped there. Seeding that
     // means onSnap reports a snap engaging, not the first move of every
     // element that was placed on a centre line (which is where adds land).
@@ -1149,6 +1421,19 @@ const DesignStage = forwardRef(function DesignStage(
   function handleDragMove(e) {
     const node = e.target;
     const snap = snapDistance();
+
+    // v1.7.0: Konva fires dragmove even when the pointer has not moved, and
+    // only re-places the node when it has. If the node is still where the
+    // last move left it, put it back where the finger had it first, so the
+    // rubber band below never compounds on itself.
+    const confining = confineRef.current;
+    if (confining?.node === node && confining.out && confining.konva) {
+      if (node.x() === confining.out.x && node.y() === confining.out.y) {
+        node.x(confining.konva.x);
+        node.y(confining.konva.y);
+      }
+    }
+    if (confining?.node === node) confining.konva = { x: node.x(), y: node.y() };
 
     let x = null;
     for (const target of targets.x) {
@@ -1173,6 +1458,29 @@ const DesignStage = forwardRef(function DesignStage(
     if ((x !== null && was.x === null) || (y !== null && was.y === null)) onSnap?.();
     snapRef.current = x === null && y === null ? NO_SNAP : { x, y };
     if (x !== guides.x || y !== guides.y) setGuides({ x, y });
+
+    // v1.7.0: past its side's edge, the artwork gives way less and less (at
+    // most CONFINE_OVERSHOOT_PX on screen) and the side's outline shows. The
+    // finger's own position is kept for the release, which reads where the
+    // customer was taking it.
+    const c = confineRef.current;
+    if (c && c.node === node) {
+      const region = scaleRegion(c.native, scale);
+      const box = boxOf(node);
+      const t = confineCenter(region, { x: box.cx, y: box.cy }, box);
+      c.raw = { x: box.cx, y: box.cy };
+      if (t.moved) {
+        const limit = CONFINE_OVERSHOOT_PX / cameraScale;
+        const ox = box.cx - t.x;
+        const oy = box.cy - t.y;
+        node.x(node.x() - ox + rubberBand(ox, limit));
+        node.y(node.y() - oy + rubberBand(oy, limit));
+      }
+      // What this move made of Konva's position, so a repeat move with the
+      // pointer where it was starts again from the finger, not from the band.
+      c.out = { x: node.x(), y: node.y() };
+      showBoundary(t.moved ? c.native : null);
+    }
   }
 
   function handleDragEnd(e, el) {
@@ -1187,15 +1495,32 @@ const DesignStage = forwardRef(function DesignStage(
       return;
     }
     const node = e.target;
+    let x = node.x();
+    let y = node.y();
+    const c = confineRef.current;
+    confineRef.current = null;
+    if (c && c.node === node) {
+      const settled = settleTarget(node, c, false);
+      if (settled.moved) {
+        settleRef.current = { id: el.id, from: { x, y }, to: { x: settled.x, y: settled.y } };
+        x = settled.x;
+        y = settled.y;
+        showBoundary(c.native);
+        reportConfine(c, settled, c.raw);
+      } else {
+        showBoundary(null);
+      }
+    }
     dispatch({
       type: "UPDATE_ELEMENT",
       id: el.id,
-      patch: { x: node.x() / displayW, y: node.y() / displayH },
+      patch: { x: x / displayW, y: y / displayH },
     });
   }
 
-  function handleTransformStart() {
+  function handleTransformStart(e) {
     stopHint();
+    beginConfine(e.target);
     onManipulate?.("transform");
   }
 
@@ -1216,7 +1541,27 @@ const DesignStage = forwardRef(function DesignStage(
       g.transformed = true;
       return;
     }
-    const scaleX = node.scaleX();
+    // v1.7.0: released off its side, or too big for it? Commit where it fits,
+    // and glide there from where the anchor left it.
+    const c = confineRef.current;
+    confineRef.current = null;
+    let at = { x: node.x(), y: node.y() };
+    let fit = 1;
+    if (c && c.node === node) {
+      const settled = settleTarget(node, c, true);
+      if (settled.moved) {
+        fit = settled.fit;
+        settleRef.current = {
+          id: el.id,
+          from: { x: at.x, y: at.y, scaleX: 1 / fit, scaleY: 1 / fit },
+          to: { x: settled.x, y: settled.y, scaleX: 1, scaleY: 1 },
+        };
+        at = { x: settled.x, y: settled.y };
+        showBoundary(c.native);
+        reportConfine(c, settled);
+      }
+    }
+    const scaleX = node.scaleX() * fit;
     // Bake the scale into the element's own size and reset the node's, so the
     // document only ever stores one representation of "how big".
     node.scaleX(1);
@@ -1227,8 +1572,8 @@ const DesignStage = forwardRef(function DesignStage(
         type: "UPDATE_ELEMENT",
         id: el.id,
         patch: {
-          x: node.x() / displayW,
-          y: node.y() / displayH,
+          x: at.x / displayW,
+          y: at.y / displayH,
           scale: newWidthPx / displayW,
           rotation: node.rotation(),
         },
@@ -1239,8 +1584,8 @@ const DesignStage = forwardRef(function DesignStage(
         type: "UPDATE_ELEMENT",
         id: el.id,
         patch: {
-          x: node.x() / displayW,
-          y: node.y() / displayH,
+          x: at.x / displayW,
+          y: at.y / displayH,
           fontScale: newFontSize / displayW,
           rotation: node.rotation(),
         },
@@ -1362,8 +1707,10 @@ const DesignStage = forwardRef(function DesignStage(
           }
         };
         const blob = await readiness.capture(() => {
-          // A sway is not an edit; it must never reach a proof.
+          // A sway is not an edit; it must never reach a proof. A settle glide
+          // is only visual; land it on the document's own position.
           stopHint();
+          stopSettle(true);
           // Nor is the magnet: it is sewn on, not printed. Hidden for this
           // synchronous draw only (toBlob renders inside its own call), so the
           // screen never shows a frame without it.
@@ -1464,6 +1811,10 @@ const DesignStage = forwardRef(function DesignStage(
     ...(anchorPadding ? { padding: anchorPadding } : {}),
     ...(anchorStyleFunc ? { anchorStyleFunc } : {}),
   };
+
+  // The side's outline in this render's display px, only while artwork can
+  // be moved at all (an overview never shows one).
+  const drawnBoundary = boundary && interactive ? scaleRegion(boundary, scale) : null;
 
   // Bare stage clears the selection on touchstart, as v1.4.1 does — unless
   // gestures are on. Then the clear waits for the tap: the first finger of a
@@ -1576,6 +1927,33 @@ const DesignStage = forwardRef(function DesignStage(
             transformer ignores its layer's transform by design (it overrides
             getAbsoluteTransform), so anchors keep their screen size. */}
         <Layer ref={uiLayerRef}>
+          {/* v1.7.0: the side artwork is being kept on, while it is pressed
+              past it and as it glides back. A screen hairline, dashed. */}
+          {drawnBoundary &&
+            (drawnBoundary.kind === "circle" ? (
+              <Circle
+                x={drawnBoundary.cx}
+                y={drawnBoundary.cy}
+                radius={drawnBoundary.r}
+                stroke={accent}
+                strokeWidth={1.5}
+                strokeScaleEnabled={false}
+                dash={[6, 4]}
+                listening={false}
+              />
+            ) : (
+              <Rect
+                x={drawnBoundary.x0}
+                y={drawnBoundary.y0}
+                width={drawnBoundary.x1 - drawnBoundary.x0}
+                height={drawnBoundary.y1 - drawnBoundary.y0}
+                stroke={accent}
+                strokeWidth={1.5}
+                strokeScaleEnabled={false}
+                dash={[6, 4]}
+                listening={false}
+              />
+            ))}
           {guides.x !== null && (
             <Line
               points={[guides.x, 0, guides.x, displayH]}

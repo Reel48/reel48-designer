@@ -16,10 +16,13 @@ export {
 export {
   IDENTITY_CAMERA,
   cameraFor,
+  cameraForResize,
   cameraPoint,
   containDisplayWidth,
   focusRects,
 } from "./camera.js";
+
+export { MAGNET_INCHES, magnetRect } from "./magnet.js";
 
 export {
   DEFAULT_COLOR,

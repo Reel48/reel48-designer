@@ -5,6 +5,7 @@ import { DIES, dieGeometry } from "../src/core/dies.js";
 import {
   IDENTITY_CAMERA,
   cameraFor,
+  cameraForResize,
   cameraPoint,
   containDisplayWidth,
   focusRects,
@@ -62,7 +63,7 @@ function konvaMatrix(cam) {
 
 describe("camera is exported from core", () => {
   it("ships the new functions without dragging a dependency in", () => {
-    for (const k of ["focusRects", "cameraFor", "cameraPoint", "containDisplayWidth"]) {
+    for (const k of ["focusRects", "cameraFor", "cameraForResize", "cameraPoint", "containDisplayWidth"]) {
       expect(typeof core[k], k).toBe("function");
     }
     expect(core.IDENTITY_CAMERA).toEqual(IDENTITY_CAMERA);
@@ -314,5 +315,40 @@ describe("cameraFor with an inset (host overlays over the stage)", () => {
     const cam = cameraFor({ rect: null, native, displayW, viewport: tiny, inset: { top: 80, bottom: 80 } });
     expect(cam.scaleX).toBeGreaterThan(0);
     expect(cam.y).toBe(50);
+  });
+});
+
+describe("cameraForResize", () => {
+  // Every node's display position is its fraction times the display width, so
+  // the resized camera must put each fraction where the old camera put it.
+  const native = DIES["koozie-standard"].stage;
+  const geom = dieGeometry(DIES["koozie-standard"]);
+  const cases = [
+    { name: "overview, box taller", rect: null, from: { width: 390, height: 618 }, to: { width: 390, height: 521 } },
+    { name: "back, turned, box shorter", rect: focusRects(geom).back, rotate: 180, from: { width: 390, height: 520 }, to: { width: 390, height: 640 } },
+  ];
+  for (const c of cases) {
+    it(`keeps the die where it was on screen: ${c.name}`, () => {
+      const fromW = containDisplayWidth(c.from, native);
+      const toW = containDisplayWidth(c.to, native);
+      const old = cameraFor({ rect: c.rect, native, displayW: fromW, viewport: c.from, rotate: c.rotate ?? 0 });
+      const start = cameraForResize(old, fromW, toW);
+      for (const [fx, fy] of [[0, 0], [1, 1], [0.25, 0.8], [0.5, 0.5]]) {
+        const aspect = native.height / native.width;
+        const before = cameraPoint(old, { x: fx * fromW, y: fy * fromW * aspect });
+        const after = cameraPoint(start, { x: fx * toW, y: fy * toW * aspect });
+        expect(after.x).toBeCloseTo(before.x, 9);
+        expect(after.y).toBeCloseTo(before.y, 9);
+      }
+      expect(start.rotation).toBe(old.rotation);
+    });
+  }
+
+  it("is the same camera when the width did not change or is unknown", () => {
+    const cam = { x: 1, y: 2, offsetX: 3, offsetY: 4, scaleX: 5, scaleY: 5, rotation: 180 };
+    expect(cameraForResize(cam, 300, 300)).toEqual(cam);
+    expect(cameraForResize(cam, 0, 300)).toEqual(cam);
+    expect(cameraForResize(cam, 300, 0)).toEqual(cam);
+    expect(cameraForResize(cam, 300, 300)).not.toBe(cam);
   });
 });

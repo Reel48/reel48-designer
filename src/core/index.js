@@ -16,6 +16,7 @@ export {
 export {
   IDENTITY_CAMERA,
   cameraFor,
+  cameraForResize,
   cameraPoint,
   containDisplayWidth,
   focusRects,

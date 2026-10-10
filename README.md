@@ -236,6 +236,10 @@ unchanged.
   1.15" × 3.35" with three near-square pads inside a stitched border, converted
   with the die's `pxPerInch`, so it is the same physical part on every die.
   Pinned by `tests/magnet.golden.json`.
+- `cameraForResize(camera, fromDisplayW, toDisplayW)`: the camera that shows a
+  die re-laid out at a new display width exactly where `camera` showed it at the
+  old one (scale times old/new, offsets times new/old). `animateResize` starts
+  its glide from it; `tests/camera.test.js` pins the invariant.
 
 ### `DesignStage` props
 

@@ -97,6 +97,7 @@ import {
   DIE_LINE_WIDTH,
   IDENTITY_CAMERA,
   cameraFor,
+  cameraForResize,
   cameraPoint,
   containDisplayWidth,
   dieGeometry,
@@ -868,19 +869,10 @@ const DesignStage = forwardRef(function DesignStage(
       // React has already laid every node out at the NEW display width, while
       // the layers still hold the old camera, so the first frame would jump by
       // the ratio. Start instead from the camera that puts the new layout
-      // exactly where the old one was on screen: scale times old/new, offsets
-      // times new/old, the same viewport point and turn. (The Konva stage's
-      // origin is the container's top-left either way.) Nothing has painted
-      // yet, since Konva draws on the next animation frame, so it never shows.
-      const r = applied.displayW / displayW;
-      const now = readCamera(art);
-      setCamera(layers, {
-        ...now,
-        scaleX: now.scaleX * r,
-        scaleY: now.scaleY * r,
-        offsetX: now.offsetX / r,
-        offsetY: now.offsetY / r,
-      });
+      // exactly where the old one was on screen (core/camera.js). The Konva
+      // stage's origin is the container's top-left either way, and nothing
+      // has painted yet, since Konva draws on the next animation frame.
+      setCamera(layers, cameraForResize(readCamera(art), applied.displayW, displayW));
     }
     const [, ...followers] = layers;
     // ONE tween, on the artwork layer, mirrored to the other two every frame,

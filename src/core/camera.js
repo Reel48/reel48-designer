@@ -193,3 +193,23 @@ export function cameraPoint(camera, point) {
     y: camera.y + dx * sin + dy * cos,
   };
 }
+
+/**
+ * The camera that shows a die re-laid out at `toDisplayW` exactly where
+ * `camera` showed it at `fromDisplayW` (v1.6.0, for the stage's
+ * `animateResize`). Every node's display position scales with the display
+ * width, so the same viewport point, turn and look-at fraction need scale
+ * times old/new and offsets times new/old. The stage starts its glide here,
+ * so a resize never jumps before it eases.
+ */
+export function cameraForResize(camera, fromDisplayW, toDisplayW) {
+  if (!(fromDisplayW > 0) || !(toDisplayW > 0) || fromDisplayW === toDisplayW) return { ...camera };
+  const r = fromDisplayW / toDisplayW;
+  return {
+    ...camera,
+    scaleX: camera.scaleX * r,
+    scaleY: camera.scaleY * r,
+    offsetX: camera.offsetX / r,
+    offsetY: camera.offsetY / r,
+  };
+}

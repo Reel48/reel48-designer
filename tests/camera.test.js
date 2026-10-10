@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { DIES, dieGeometry } from "../src/core/dies.js";
 import {
   IDENTITY_CAMERA,
+  artExportRect,
   cameraFor,
   cameraForResize,
   cameraPoint,
@@ -63,7 +64,7 @@ function konvaMatrix(cam) {
 
 describe("camera is exported from core", () => {
   it("ships the new functions without dragging a dependency in", () => {
-    for (const k of ["focusRects", "cameraFor", "cameraForResize", "cameraPoint", "containDisplayWidth"]) {
+    for (const k of ["focusRects", "cameraFor", "cameraForResize", "cameraPoint", "containDisplayWidth", "artExportRect"]) {
       expect(typeof core[k], k).toBe("function");
     }
     expect(core.IDENTITY_CAMERA).toEqual(IDENTITY_CAMERA);
@@ -350,5 +351,61 @@ describe("cameraForResize", () => {
     expect(cameraForResize(cam, 0, 300)).toEqual(cam);
     expect(cameraForResize(cam, 300, 0)).toEqual(cam);
     expect(cameraForResize(cam, 300, 300)).not.toBe(cam);
+  });
+});
+
+describe("artExportRect", () => {
+  // The config DesignStage.exportArtCanvas hands Konva: the die's own display
+  // box from the stage origin, scaled up to native. Konva itself is not here
+  // (no canvas in this suite); what is pinned is the arithmetic.
+  const standard = DIES["koozie-standard"].stage;
+  const slim = DIES["koozie-slim"].stage;
+  const displayHOf = (displayW, native) => displayW * (native.height / native.width);
+
+  it("is the die's display box, from the origin, scaled up to native", () => {
+    const rect = artExportRect({ displayW: 400, displayH: displayHOf(400, standard), nativeW: standard.width });
+    expect(rect).toEqual({ x: 0, y: 0, width: 400, height: 800, pixelRatio: 2.5 });
+    expect(rect.width * rect.pixelRatio).toBe(standard.width);
+    expect(rect.height * rect.pixelRatio).toBe(standard.height);
+  });
+
+  it("reaches native size, up to float dust, at non-integer ratios", () => {
+    const cases = [
+      // A contain-mode die in the phone designer's canvas box, both dies.
+      [standard, containDisplayWidth({ width: 390, height: 420 }, standard)],
+      [slim, containDisplayWidth({ width: 375, height: 330 }, slim)],
+      [slim, 301],
+      [standard, 333.5],
+    ];
+    for (const [native, displayW] of cases) {
+      const rect = artExportRect({ displayW, displayH: displayHOf(displayW, native), nativeW: native.width });
+      expect(rect.x).toBe(0);
+      expect(rect.y).toBe(0);
+      expect(rect.width).toBe(displayW);
+      expect(rect.pixelRatio).toBe(native.width / displayW);
+      expect(rect.width * rect.pixelRatio).toBeCloseTo(native.width, 9);
+      expect(rect.height * rect.pixelRatio).toBeCloseTo(native.height, 9);
+    }
+  });
+
+  it("is not rounded, so a canvas can come out a pixel short of native", () => {
+    // Why the caller draws the canvas at the die's own size: a canvas
+    // truncates width * pixelRatio, and at this display width that is
+    // 999.9999999999999.
+    const rect = artExportRect({ displayW: 19, displayH: 38, nativeW: standard.width });
+    expect(rect.pixelRatio).toBe(1000 / 19);
+    expect(rect.width * rect.pixelRatio).toBeLessThan(standard.width);
+    expect(Math.trunc(rect.width * rect.pixelRatio)).toBe(standard.width - 1);
+  });
+
+  it("is null until there is a measured size to export", () => {
+    const ok = { displayW: 400, displayH: 800, nativeW: 1000 };
+    expect(artExportRect()).toBeNull();
+    expect(artExportRect({})).toBeNull();
+    for (const key of ["displayW", "displayH", "nativeW"]) {
+      for (const bad of [0, -1, undefined, null, NaN, Infinity, "400"]) {
+        expect(artExportRect({ ...ok, [key]: bad }), `${key}: ${String(bad)}`).toBeNull();
+      }
+    }
   });
 });

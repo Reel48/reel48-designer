@@ -15,6 +15,7 @@ export {
 
 export {
   IDENTITY_CAMERA,
+  artExportRect,
   cameraFor,
   cameraForResize,
   cameraPoint,

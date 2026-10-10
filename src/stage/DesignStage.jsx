@@ -81,6 +81,16 @@
 //     brought back, and which side it was being dragged towards, so the host
 //     can say how to put artwork there.
 // ---------------------------------------------------------------------------
+// v1.8.0: two more ref methods, for the storefront's 3D can cooler preview.
+// No prop changes, and nothing either does reaches a render.
+//
+// 14. `exportArtCanvas()` returns the artwork layer alone at the die's native
+//     size (core/camera.js `artExportRect`), synchronously, with no export
+//     lock: a texture a host can take on every design change without ever
+//     getting in the way of `exportProof`.
+// 15. `isTextEditing()` says whether the inline text editor is open, since
+//     the text being edited is hidden from that texture.
+// ---------------------------------------------------------------------------
 
 import {
   forwardRef,
@@ -109,6 +119,7 @@ import {
   DIE_LINE_OPACITY,
   DIE_LINE_WIDTH,
   IDENTITY_CAMERA,
+  artExportRect,
   cameraFor,
   cameraForResize,
   cameraPoint,
@@ -548,7 +559,8 @@ function InlineTextEditor({ el, displayW, displayH, camera, viewportWidth, class
  *                                        outside its side was brought back
  *
  * Imperative handle: `beginTextEdit(id)`, `exportProof() → Promise<Blob>`,
- * `hint(id, {reducedMotion}) → Promise<void>`.
+ * `hint(id, {reducedMotion}) → Promise<void>`, and (v1.8.0)
+ * `exportArtCanvas() → HTMLCanvasElement | null`, `isTextEditing() → boolean`.
  */
 const DesignStage = forwardRef(function DesignStage(
   {
@@ -1734,6 +1746,64 @@ const DesignStage = forwardRef(function DesignStage(
           uiLayer.draw();
         }
         exportingRef.current = false;
+      }
+    },
+    // v1.8.0: whether the inline text editor is open. The text being edited
+    // is hidden on the stage, so a host painting from exportArtCanvas skips
+    // (or retries) a paint while this is true. Read from the latest committed
+    // render through a ref: asking never renders.
+    isTextEditing() {
+      return latestRef.current?.editingId != null;
+    },
+    // v1.8.0: the artwork layer alone, at the die's native size, for a host's
+    // 3D preview texture: colour, pattern and artwork, clipped to the die,
+    // transparent outside it. No die line or magnet (the overlay layer) and
+    // no guides or handles (the UI layer): only the art layer is drawn.
+    //
+    // Synchronous, and called often (a host repaints on every design change),
+    // so unlike exportProof it takes no lock, waits for nothing, and touches
+    // no React state and nothing of the readiness tracker: it can never abort
+    // a proof in flight or be refused by one. The text being edited inline is
+    // hidden on the stage, so it is missing here too; a host skips painting
+    // while `isTextEditing()`. A logo whose bitmap is still loading is not
+    // drawn yet; a host paints again when `onReadyChange` reports true.
+    exportArtCanvas() {
+      const art = artLayerRef.current;
+      // The layout as it is now, as exportProof reads it.
+      const rect = artExportRect({
+        displayW: latestRef.current?.displayW || displayW,
+        displayH: latestRef.current?.displayH || displayH,
+        nativeW: native.width,
+      });
+      if (!rect || !art?.getStage()) return null;
+      // What exportProof lands before its draw, held instead: a sway is not an
+      // edit, and a settle glide is going to the document's own position. Each
+      // node is put where the document has it for this one draw and put back,
+      // so the motion carries on untouched (stopping either would resolve the
+      // host's hint early or render, for the settle's outline).
+      const held = [];
+      const hold = (node, attrs) => {
+        if (!node?.getStage()) return;
+        held.push([node, Object.fromEntries(Object.keys(attrs).map((k) => [k, node.getAttr(k)]))]);
+        node.setAttrs(attrs);
+      };
+      // The camera, as exportProof saves and restores it, on the one layer
+      // drawn. A camera tween is NOT landed: this runs between its frames and
+      // puts back exactly what it found, so a view change keeps gliding.
+      // Every write here is a Konva attr, and the batchDraws they queue run
+      // on the next frame, after the restore: the screen never shows this.
+      const saved = readCamera(art);
+      try {
+        const sway = hintRef.current;
+        if (sway) hold(sway.node, { x: sway.x0 });
+        const settle = settleTweenRef.current;
+        if (settle) hold(settle.node, settle.to);
+        art.setAttrs(IDENTITY_CAMERA);
+        return art.toCanvas(rect);
+      } finally {
+        art.setAttrs(saved);
+        for (let i = held.length - 1; i >= 0; i--) held[i][0].setAttrs(held[i][1]);
+        art.batchDraw();
       }
     },
   }));

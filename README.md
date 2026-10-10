@@ -273,3 +273,42 @@ the attr.
 | --- | --- | --- |
 | `confine` | `false` | Each element stays wholly on the side its centre was on when a drag, anchor transform or pinch began, measured by its rotated bounding box. Dragged past the edge it gives way less and less (at most 24 screen px) and the side's dashed outline shows. Released outside, or made bigger than the side, ONE `UPDATE_ELEMENT` commits the nearest place it fits (shrunk if need be) and the node glides there from where it was let go: 250ms, `StrongEaseOut`, instant when `animate` is `false`. A proof always shows the committed position. |
 | `onConfine({ id, face, toward })` | none | After a release had to be brought back. `toward` is the side the artwork's leading edge was being taken onto, or `null` past the can's outer edge, so a host can say "switch to the base to put it there". |
+
+## v1.8.0: the artwork as a texture
+
+Two more ref methods, for the storefront's 3D can cooler preview, which wraps
+the flat artwork round a model and repaints it on every design change. No prop
+changes: a v1.7.0 host is unchanged.
+
+### `core`
+
+- `artExportRect({ displayW, displayH, nativeW })` → `{ x: 0, y: 0, width,
+  height, pixelRatio }`: the Konva export config that takes the die, and only
+  the die, at native resolution from a stage laid out at that display size.
+  Passed explicitly because a Konva layer's export otherwise defaults to the
+  whole Konva stage, which in contain mode is the host's box. `null` while any
+  size is missing, zero, negative or not finite. Not rounded: `width ×
+  pixelRatio` can be 999.9999999999999 for a 1000px die, so the canvas can come
+  out a pixel short. Pinned by `tests/camera.test.js`.
+
+### Ref methods
+
+- `exportArtCanvas() → HTMLCanvasElement | null`: the artwork layer alone,
+  colour, pattern, logos and text, clipped to the die and **transparent
+  outside it**, at the die's native stage size (1000 × 2000 for
+  `koozie-standard`, 875 × 2600 for `koozie-slim`; give or take the pixel
+  above, so draw it at the die's own size). No die line, no magnet, no guides,
+  handles or side outline. Camera-independent like `exportProof`: the layer is
+  taken at identity and put back in the same call, and a camera glide carries
+  on. A sway or settle glide is drawn where the document has the element.
+  `null` before the stage is measured (the placeholder is showing).
+
+  **Synchronous, with no lock.** It touches no React state and nothing
+  `exportProof` waits on, so it can be called on every change, never refuses
+  while a proof is being made, and never aborts one. It does not wait for
+  images either: a logo whose bitmap is still loading is not drawn yet, so a
+  host paints again when `onReadyChange` reports `true`.
+- `isTextEditing() → boolean`: `true` while the inline text editor is open.
+  The text being edited is hidden on the stage, so it is missing from
+  `exportArtCanvas()` too; a host skips (or retries) a paint while this is
+  `true`. Read through a ref: asking never renders.

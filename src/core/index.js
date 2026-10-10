@@ -23,6 +23,7 @@ export {
 } from "./camera.js";
 
 export { MAGNET_INCHES, magnetRect } from "./magnet.js";
+export { confineCenter, faceAt, faceRegions, fitScale, rubberBand, scaleRegion } from "./confine.js";
 
 export {
   DEFAULT_COLOR,

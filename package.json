@@ -1,6 +1,6 @@
 {
   "name": "@reel48/designer",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Reel48's product designer: die geometry, design document, and production spec. Shared by www.reel48.com and account.reel48.com.",
   "type": "module",
   "license": "UNLICENSED",

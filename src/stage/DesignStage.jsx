@@ -81,8 +81,10 @@
 //     brought back, and which side it was being dragged towards, so the host
 //     can say how to put artwork there.
 // ---------------------------------------------------------------------------
-// v1.8.0: two more ref methods, for the storefront's 3D can cooler preview.
-// No prop changes, and nothing either does reaches a render.
+// v1.8.0: for the storefront, where a 3D can cooler is the view everywhere and
+// the flat stage only shows the side artwork is being placed on. Two ref
+// methods (neither reaches a render) and one opt-in prop; unpassed, the stage
+// draws and behaves as v1.7.0.
 //
 // 14. `exportArtCanvas()` returns the artwork layer alone at the die's native
 //     size (core/camera.js `artExportRect`), synchronously, with no export
@@ -90,6 +92,11 @@
 //     getting in the way of `exportProof`.
 // 15. `isTextEditing()` says whether the inline text editor is open, since
 //     the text being edited is hidden from that texture.
+// 16. `isolate` draws only the focused side (core/confine.js
+//     `faceClipRegion`): the art layer and the magnet clipped to it, the die
+//     line its own outline. Never the UI layer, and never an export: the clip
+//     applies only to the layers' own canvases. Mid-glide, the side being
+//     left stays drawn until the camera lands.
 // ---------------------------------------------------------------------------
 
 import {
@@ -127,6 +134,7 @@ import {
   containDisplayWidth,
   dieGeometry,
   faceAt,
+  faceClipRegion,
   faceRegions,
   fitScale,
   focusRects,
@@ -136,6 +144,7 @@ import {
   resolveDie,
   snapTargets,
   traceDie,
+  traceRegion,
 } from "../core/index.js";
 import { useImage } from "./useImage.js";
 import { createImageReadiness } from "./imageReadiness.js";
@@ -204,6 +213,25 @@ const MAGNET_PAD_TOP = "#3a3a3a";
 const MAGNET_PAD_BOTTOM = "#1c1c1c";
 const MAGNET_STITCH = "rgba(255, 255, 255, 0.45)";
 const MAGNET_GHOST_OPACITY = 0.35;
+
+/**
+ * Whether Konva is drawing `node` onto its layer's own canvases: the screen,
+ * or the hit canvas that takes taps. Every export (`toBlob`, `toCanvas`) draws
+ * each layer into a canvas of its own instead. v1.8.0's `isolate` is a way of
+ * LOOKING, like the camera, so its clip and its side outline apply only here,
+ * and every export draws the whole die exactly as before, with no change to
+ * the export paths themselves.
+ */
+function onLayerCanvas(ctx, node) {
+  const layer = node.getLayer();
+  return !!layer && (ctx.canvas === layer.getCanvas() || ctx.canvas === layer.getHitCanvas());
+}
+
+/** Two lists of regions, the same regions (null is no clip). */
+function sameRegions(a, b) {
+  if (!a || !b) return a === b;
+  return a.length === b.length && a.every((region, i) => region === b[i]);
+}
 
 /** The transform a camera writes, read back off a layer. */
 function readCamera(layer) {
@@ -558,6 +586,11 @@ function InlineTextEditor({ el, displayW, displayH, camera, viewportWidth, class
  * @param {function} [props.onConfine]   ({id, face, toward}) after a release
  *                                        outside its side was brought back
  *
+ * v1.8.0, opt-in (the default is v1.7.0's behaviour):
+ * @param {boolean}  [props.isolate=false] with `view.focus` set, draw only
+ *                                        that side, outlined on its own.
+ *                                        Never in an export
+ *
  * Imperative handle: `beginTextEdit(id)`, `exportProof() → Promise<Blob>`,
  * `hint(id, {reducedMotion}) → Promise<void>`, and (v1.8.0)
  * `exportArtCanvas() → HTMLCanvasElement | null`, `isTextEditing() → boolean`.
@@ -593,6 +626,8 @@ const DesignStage = forwardRef(function DesignStage(
     // v1.7.0. Every default is what v1.6.0 did.
     confine = false,
     onConfine,
+    // v1.8.0. The default is what v1.7.0 did.
+    isolate = false,
   },
   ref,
 ) {
@@ -770,6 +805,7 @@ const DesignStage = forwardRef(function DesignStage(
       editingId,
       displayW,
       displayH,
+      scale,
       viewRotation,
       onManipulate,
       onSnap,
@@ -1045,6 +1081,63 @@ const DesignStage = forwardRef(function DesignStage(
     }
   }, [state.elements, displayW, displayH, stopSettle]);
 
+  // ---- Isolate (v1.8.0) ---------------------------------------------------
+  // With `isolate` and a focused view, the stage draws that one side: the art
+  // layer and the magnet are clipped to the side's region (core/confine.js
+  // `faceClipRegion`), and the die line becomes that region's own outline.
+  // The UI layer is never clipped, so handles at the side's edge stay visible
+  // and grabbable. Written imperatively, like the camera, so the clip can wait
+  // for a camera glide to land without a render; and only ever on the stage's
+  // own canvases (onLayerCanvas), so no export sees it.
+  const clipRef = useRef(null); // the regions drawn, NATIVE px, or null: the whole die
+  const clipTargetRef = useRef(null); // the regions this render's view asks for
+  // One object per side per die, so a side is the same region every render.
+  const clipRegionOf = useMemo(() => {
+    const cache = new Map();
+    return (face) => {
+      if (!cache.has(face)) cache.set(face, faceClipRegion(geom, face));
+      return cache.get(face);
+    };
+  }, [geom]);
+  const isolateRegion = isolate && focusRect ? clipRegionOf(focus) : null;
+
+  // The clip: the regions in clipRef at the latest scale. Drawn into anything
+  // but the layer's own canvases (an export), it is the die's whole frame, so
+  // nothing an export takes is lost.
+  const clipToFaces = useMemo(
+    () => (ctx, node) => {
+      const L = latestRef.current;
+      const regions = clipRef.current;
+      if (regions && onLayerCanvas(ctx, node)) {
+        for (const region of regions) traceRegion(ctx, region, L.scale);
+      } else {
+        ctx.rect(0, 0, L.displayW, L.displayH);
+      }
+    },
+    [],
+  );
+
+  // Put `regions` up (null takes the clip down) and redraw if they changed. A
+  // node already carrying the right clip is left alone, so with `isolate` off
+  // nothing is ever written.
+  const applyClip = useMemo(
+    () => (regions) => {
+      const changed = !sameRegions(regions, clipRef.current);
+      clipRef.current = regions;
+      const fn = regions ? clipToFaces : null;
+      for (const node of [artLayerRef.current, magnetRef.current]) {
+        if (node && (node.clipFunc() ?? null) !== fn) node.clipFunc(fn);
+      }
+      if (changed) {
+        artLayerRef.current?.batchDraw();
+        overlayLayerRef.current?.batchDraw(); // the die line reads clipRef
+      }
+    },
+    [clipToFaces],
+  );
+  // A camera glide has landed: the side it left can go.
+  const landClip = useMemo(() => () => applyClip(clipTargetRef.current), [applyClip]);
+
   // ---- Camera -------------------------------------------------------------
   const stopCameraTween = useMemo(
     () => (finish = false) => {
@@ -1130,6 +1223,8 @@ const DesignStage = forwardRef(function DesignStage(
         // start + diff × 1 is not always the target to the last bit; land on it.
         setCamera(layers, camera);
         tween.destroy();
+        // v1.8.0 `isolate`: the side the glide left is off screen now.
+        landClip();
       },
     });
     // Assigned rather than passed in the config: Konva tweens every config key
@@ -1146,7 +1241,22 @@ const DesignStage = forwardRef(function DesignStage(
     // `animate` (and `animateResize`, `die`, `displayW`, all of which reach the
     // effect through `camera`) are read, not depended on: switching motion off
     // mid-session must not re-run (or re-tween) the camera.
-  }, [camera, viewKey, stopCameraTween]);
+  }, [camera, viewKey, stopCameraTween, landClip]);
+
+  // v1.8.0 `isolate`: which regions to draw, once the camera has had its say
+  // this commit. While a glide is in flight what is on screen stays drawn as
+  // well as the new side (a union; null, the whole die, absorbs any side), so
+  // the camera travels between two drawn sides, and landClip takes it down to
+  // the new side when the glide lands. With no glide the new side is drawn at
+  // once. Every commit, because a resize or a die swap can cut a glide short
+  // with no landing, and the Konva nodes can be new ones.
+  useLayoutEffect(() => {
+    const target = isolateRegion ? [isolateRegion] : null;
+    clipTargetRef.current = target;
+    const shown = clipRef.current;
+    if (!cameraTweenRef.current) applyClip(target);
+    else applyClip(shown && target ? [...shown, ...target.filter((r) => !shown.includes(r))] : null);
+  });
 
   // Nothing of ours may outlive the stage.
   useEffect(
@@ -1850,6 +1960,21 @@ const DesignStage = forwardRef(function DesignStage(
     traceDie(ctx, geom, scale);
     ctx.fillStrokeShape(shape);
   };
+  // The die line. While `isolate` shows a side, that side's own outline (both
+  // sides', mid-glide) rather than fragments of the whole cut line; drawn
+  // anywhere but the screen (an export), the whole die as ever. It is a stroke
+  // with no fill, which Konva never draws through a buffer canvas (where
+  // onLayerCanvas would read the screen as an export).
+  const drawDieLine = (ctx, shape) => {
+    const regions = clipRef.current;
+    if (regions && onLayerCanvas(ctx, shape)) {
+      ctx.beginPath();
+      for (const region of regions) traceRegion(ctx, region, scale);
+    } else {
+      traceDie(ctx, geom, scale);
+    }
+    ctx.fillStrokeShape(shape);
+  };
 
   const nodeProps = {
     displayW,
@@ -1972,11 +2097,13 @@ const DesignStage = forwardRef(function DesignStage(
         {/* Overlay layer — die-line outline. Not scaled with the camera's
             zoom: Konva resets the transform for the stroke, so it stays a
             DIE_LINE_WIDTH hairline on screen (and DIE_LINE_WIDTH × pixelRatio
-            in a proof, as before). */}
+            in a proof, as before). Under v1.8.0's `isolate` the line is the
+            side's outline and the magnet is clipped to the side; the layer
+            itself is not clipped, so the outline keeps its full width. */}
         <Layer listening={false} ref={overlayLayerRef}>
           <Shape
             ref={dieLineRef}
-            sceneFunc={drawDie}
+            sceneFunc={drawDieLine}
             stroke={DIE_LINE_COLOR}
             strokeWidth={DIE_LINE_WIDTH}
             strokeScaleEnabled={false}

@@ -1,6 +1,15 @@
 import { describe, it, expect } from "vitest";
 import { DIES, dieGeometry } from "../src/core/dies.js";
-import { confineCenter, faceAt, faceRegions, fitScale, rubberBand, scaleRegion } from "../src/core/confine.js";
+import {
+  confineCenter,
+  faceAt,
+  faceClipRegion,
+  faceRegions,
+  fitScale,
+  rubberBand,
+  scaleRegion,
+  traceRegion,
+} from "../src/core/confine.js";
 import * as core from "../src/core/index.js";
 
 const rect = { kind: "rect", x0: 0, y0: 0, x1: 100, y1: 50 };
@@ -125,7 +134,87 @@ describe("scaleRegion", () => {
 });
 
 it("is exported from core", () => {
-  for (const k of ["confineCenter", "faceAt", "faceRegions", "fitScale", "rubberBand", "scaleRegion"]) {
+  for (const k of ["confineCenter", "faceAt", "faceClipRegion", "faceRegions", "fitScale", "rubberBand", "scaleRegion", "traceRegion"]) {
     expect(typeof core[k], k).toBe("function");
   }
+});
+
+describe("faceClipRegion", () => {
+  // What `isolate` clips the stage to: one side, nothing of its neighbours.
+  for (const id of ["koozie-standard", "koozie-slim"]) {
+    const geom = dieGeometry(DIES[id]);
+    const zone = (side) => geom.zones.find((z) => z.id === side).bounds;
+
+    it(`${id}: a panel is its zone rect, with no exclude`, () => {
+      for (const side of ["front", "back"]) {
+        const { x0, y0, x1, y1 } = zone(side);
+        expect(faceClipRegion(geom, side)).toEqual({ kind: "rect", x0, y0, x1, y1 });
+      }
+    });
+
+    it(`${id}: the base is its whole disc`, () => {
+      expect(faceClipRegion(geom, "base")).toEqual({ kind: "circle", cx: geom.cx, cy: geom.cy, r: geom.r });
+    });
+
+    it(`${id}: the gap between the panels, where the disc shows, is in neither panel`, () => {
+      const front = faceClipRegion(geom, "front");
+      const back = faceClipRegion(geom, "back");
+      expect(front.y1).toBe(geom.y1);
+      expect(back.y0).toBe(geom.y2);
+      expect(front.y1).toBeLessThan(geom.cy);
+      expect(back.y0).toBeGreaterThan(geom.cy);
+    });
+
+    it(`${id}: matches faceRegions, the one source of the sides`, () => {
+      const regions = faceRegions(geom);
+      for (const side of ["front", "back", "base"]) {
+        const { exclude, ...shape } = regions[side];
+        expect(faceClipRegion(geom, side)).toEqual(shape);
+      }
+    });
+
+    it(`${id}: no face, or one the die doesn't have, is null`, () => {
+      for (const face of [null, undefined, "", "side", "constructor", "__proto__"]) {
+        expect(faceClipRegion(geom, face), String(face)).toBeNull();
+      }
+    });
+  }
+
+  it("a die with no zones and no disc has no sides to isolate", () => {
+    expect(faceClipRegion({ zones: [] }, "front")).toBeNull();
+    expect(faceClipRegion({ zones: [] }, "base")).toBeNull();
+  });
+});
+
+describe("traceRegion", () => {
+  // A context that records what it is told.
+  const recorder = () => {
+    const calls = [];
+    const ctx = new Proxy({}, { get: (_, name) => (...args) => calls.push([name, ...args]) });
+    return { ctx, calls };
+  };
+
+  it("adds a rect, scaled, and starts no path", () => {
+    const { ctx, calls } = recorder();
+    traceRegion(ctx, { kind: "rect", x0: 10, y0: 20, x1: 110, y1: 70 }, 0.5);
+    expect(calls).toEqual([["rect", 5, 10, 50, 25]]);
+  });
+
+  it("adds a circle as its own closed subpath, scaled", () => {
+    const { ctx, calls } = recorder();
+    traceRegion(ctx, { kind: "circle", cx: 100, cy: 200, r: 50 }, 2);
+    expect(calls).toEqual([
+      ["moveTo", 300, 400],
+      ["arc", 200, 400, 100, 0, 2 * Math.PI, false],
+      ["closePath"],
+    ]);
+  });
+
+  it("defaults to native px, and several make one path", () => {
+    const { ctx, calls } = recorder();
+    traceRegion(ctx, { kind: "rect", x0: 0, y0: 0, x1: 4, y1: 2 });
+    traceRegion(ctx, { kind: "circle", cx: 1, cy: 1, r: 1 });
+    expect(calls.map(([name]) => name)).toEqual(["rect", "moveTo", "arc", "closePath"]);
+    expect(calls[0]).toEqual(["rect", 0, 0, 4, 2]);
+  });
 });

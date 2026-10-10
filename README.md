@@ -188,7 +188,7 @@ golden file is unchanged.
 | Prop | Default | |
 | --- | --- | --- |
 | `fit` | `"width"` | `"contain"` fits the die inside the container. The host gives the container a definite height (e.g. a flex child at `height: 100%`). The Konva stage fills the box; the placeholder fills it too. |
-| `view` | `{ focus: null }` | `{ focus: "front" \| "back" \| "base" \| null, rotate180?: boolean, inset?: { top, right, bottom, left } }`. Contain mode only. `rotate180` shows a focused face turned over, so artwork on the back panel (which prints upside down) reads upright. `inset` keeps the die clear of host overlays without resizing the stage (a resize re-fits instantly; a view or inset change glides). |
+| `view` | `{ focus: null }` | `{ focus: "front" \| "back" \| "base" \| null, rotate180?: boolean, inset?: { top, right, bottom, left } }`. Contain mode only. `rotate180` shows a focused face turned over, so artwork on the back panel (which prints upside down) reads upright. `inset` keeps the die clear of host overlays without resizing the stage (a resize re-fits instantly; a view or inset change glides). With `isolate` (v1.8.0, below), a focused view draws that side alone. |
 | `animate` | `true` | Tween view changes (0.3s, StrongEaseOut). Pass `false` for `prefers-reduced-motion`. First layout and resizes are instant (resizes can glide from v1.6.0, see `animateResize`). |
 | `interactive` | `true` | `false`: elements can't be selected, dragged or transformed, the transformer is hidden, and stage taps don't change selection. Selection itself is left alone. |
 | `gestures` | `false` | Two-finger pinch (scale), twist (rotation, soft-snaps to 0/90/180/270 within 4°) and pan of the **selected** element, wherever the fingers land. One gesture is one undo step (`coalesceKey: "pinch-<ts>"`), including a drag or anchor transform it took over from. While on, a touch on bare stage clears selection on tap instead of touchdown, so the first finger of a pinch can land anywhere. |
@@ -274,11 +274,13 @@ the attr.
 | `confine` | `false` | Each element stays wholly on the side its centre was on when a drag, anchor transform or pinch began, measured by its rotated bounding box. Dragged past the edge it gives way less and less (at most 24 screen px) and the side's dashed outline shows. Released outside, or made bigger than the side, ONE `UPDATE_ELEMENT` commits the nearest place it fits (shrunk if need be) and the node glides there from where it was let go: 250ms, `StrongEaseOut`, instant when `animate` is `false`. A proof always shows the committed position. |
 | `onConfine({ id, face, toward })` | none | After a release had to be brought back. `toward` is the side the artwork's leading edge was being taken onto, or `null` past the can's outer edge, so a host can say "switch to the base to put it there". |
 
-## v1.8.0: the artwork as a texture
+## v1.8.0: the artwork as a texture, and one side at a time
 
-Two more ref methods, for the storefront's 3D can cooler preview, which wraps
-the flat artwork round a model and repaints it on every design change. No prop
-changes: a v1.7.0 host is unchanged.
+For the storefront, where a 3D can cooler is now the view everywhere: it wraps
+the flat artwork round a model and repaints it on every design change, and the
+flat stage appears only while artwork is being placed, framed on one side. Two
+ref methods and one opt-in prop. With `isolate` unpassed, `DesignStage` draws
+and behaves as v1.7.0, and every existing golden file is unchanged.
 
 ### `core`
 
@@ -290,6 +292,20 @@ changes: a v1.7.0 host is unchanged.
   size is missing, zero, negative or not finite. Not rounded: `width ×
   pixelRatio` can be 999.9999999999999 for a 1000px die, so the canvas can come
   out a pixel short. Pinned by `tests/camera.test.js`.
+- `faceClipRegion(geom, face)` → `{ kind: "rect", x0, y0, x1, y1 }` (a panel's
+  zone rect) or `{ kind: "circle", cx, cy, r }` (the base disc), native px:
+  the side `isolate` draws. The same sides as `faceRegions`, without the
+  `exclude` only confinement needs. `null` for no face, or one the die
+  doesn't have.
+- `traceRegion(ctx, region, scale = 1)`: adds a region's outline to any 2D
+  context's current path as its own closed subpath, with no `beginPath`, so
+  several make one path. Both pinned by `tests/confine.test.js`.
+
+### `DesignStage` props
+
+| Prop | Default | |
+| --- | --- | --- |
+| `isolate` | `false` | With `view.focus` naming a side, the stage draws that side alone: colour, pattern, artwork and the magnet are clipped to it (a panel's rect, or the base's disc) and nothing of its neighbours shows, so the host's own background shows round it. The die line becomes that side's own outline, in the die line's usual style, rather than fragments of the whole cut. The UI layer is not clipped: handles, guides and the side outline near the edge stay visible and grabbable, and artwork dragged past the edge is clipped until `confine` brings it back. When the focus changes under a glide, the side being left stays drawn until the camera lands; with no glide the new side is drawn at once. `focus: null` draws the whole die. **Never in an export**: the clip applies only to the stage's own canvases, so `exportProof` and `exportArtCanvas` take the whole die exactly as before. |
 
 ### Ref methods
 

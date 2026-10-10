@@ -36,6 +36,38 @@ export function faceRegions(geom) {
 }
 
 /**
+ * The shape the stage clips one side to when it shows that side alone
+ * (v1.8.0 `isolate`), in native stage px: a panel's zone rect, or the base's
+ * disc. The same sides as `faceRegions`, without the `exclude` that only
+ * confinement needs. `null` for no face, or one this die doesn't have.
+ */
+export function faceClipRegion(geom, face) {
+  const regions = faceRegions(geom);
+  if (!face || !Object.prototype.hasOwnProperty.call(regions, face)) return null;
+  const region = regions[face];
+  if (region.kind === "circle") return { kind: "circle", cx: region.cx, cy: region.cy, r: region.r };
+  return { kind: "rect", x0: region.x0, y0: region.y0, x1: region.x1, y1: region.y1 };
+}
+
+/**
+ * Add a region's outline to `ctx`'s current path, times `scale`, as a closed
+ * subpath of its own. No `beginPath`, so several make one path: a union when
+ * clipped to, every outline when stroked. Any canvas-like `ctx` (a 2D
+ * context, a Konva context) works.
+ */
+export function traceRegion(ctx, region, scale = 1) {
+  const s = (v) => v * scale;
+  if (region.kind === "circle") {
+    // Its own subpath: an arc continues from the current point otherwise.
+    ctx.moveTo(s(region.cx + region.r), s(region.cy));
+    ctx.arc(s(region.cx), s(region.cy), s(region.r), 0, 2 * Math.PI, false);
+    ctx.closePath();
+  } else {
+    ctx.rect(s(region.x0), s(region.y0), s(region.x1 - region.x0), s(region.y1 - region.y0));
+  }
+}
+
+/**
  * Which side a point is on, `point` in stage FRACTIONS (as the design document
  * stores positions): the base disc if it is inside it, otherwise the panel on
  * that side of the fold. The storefront's `faceOf` is the same rule.

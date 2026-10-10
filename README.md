@@ -189,7 +189,7 @@ golden file is unchanged.
 | --- | --- | --- |
 | `fit` | `"width"` | `"contain"` fits the die inside the container. The host gives the container a definite height (e.g. a flex child at `height: 100%`). The Konva stage fills the box; the placeholder fills it too. |
 | `view` | `{ focus: null }` | `{ focus: "front" \| "back" \| "base" \| null, rotate180?: boolean, inset?: { top, right, bottom, left } }`. Contain mode only. `rotate180` shows a focused face turned over, so artwork on the back panel (which prints upside down) reads upright. `inset` keeps the die clear of host overlays without resizing the stage (a resize re-fits instantly; a view or inset change glides). |
-| `animate` | `true` | Tween view changes (0.3s, StrongEaseOut). Pass `false` for `prefers-reduced-motion`. First layout and resizes are always instant. |
+| `animate` | `true` | Tween view changes (0.3s, StrongEaseOut). Pass `false` for `prefers-reduced-motion`. First layout and resizes are instant (resizes can glide from v1.6.0, see `animateResize`). |
 | `interactive` | `true` | `false`: elements can't be selected, dragged or transformed, the transformer is hidden, and stage taps don't change selection. Selection itself is left alone. |
 | `gestures` | `false` | Two-finger pinch (scale), twist (rotation, soft-snaps to 0/90/180/270 within 4°) and pan of the **selected** element, wherever the fingers land. One gesture is one undo step (`coalesceKey: "pinch-<ts>"`), including a drag or anchor transform it took over from. While on, a touch on bare stage clears selection on tap instead of touchdown, so the first finger of a pinch can land anywhere. |
 | `touchAction` | `"pan-y"` | The container's `touch-action`. A full-screen host passes `"none"`. |
@@ -220,3 +220,26 @@ hairlines under any zoom, and the snap distance stays constant on screen.
   die's own rectangle at native resolution, and puts the camera back, all
   without a React render. The result is pixel-identical to a width-mode proof
   at the same display width, whatever the view.
+
+## v1.6.0: the magnet, and a camera that glides on resize
+
+Two more opt-in props for the storefront's phone designer. With neither passed,
+`DesignStage` is v1.5.0 to the attr, and every existing golden file is
+unchanged.
+
+### `core`
+
+- `magnetRect(geom)` → `{ x0, y0, x1, y1, pads: [{ x0, y0, x1, y1 } ×3] }` in
+  native stage px: where a "with magnet" koozie's magnet strip sits, centred on
+  the `back` zone. `null` for a die with no back zone. The part is measured, not
+  chosen (Reel48's own product photo, 2026-10-09): `MAGNET_INCHES` is a strip
+  1.15" × 3.35" with three near-square pads inside a stitched border, converted
+  with the die's `pxPerInch`, so it is the same physical part on every die.
+  Pinned by `tests/magnet.golden.json`.
+
+### `DesignStage` props
+
+| Prop | Default | |
+| --- | --- | --- |
+| `magnet` | `null` | `"solid"` draws the magnet strip on the back panel; `"ghost"` draws it at 35% so artwork under it stays visible while it is being placed. Drawn in the die-line overlay layer: it follows the camera and never takes a tap. **Never in a proof**: `exportProof` hides it for its one synchronous draw, in both fits, so the screen never shows a frame without it. |
+| `animateResize` | `false` | Contain only. When the container changes size under an unchanged view and die (a host panel growing or shrinking below the canvas), the camera tweens to the new fit instead of jumping. It starts from the camera that shows the re-laid-out die exactly where it was, so the die glides rather than jumping and then gliding. Still instant when `animate` is `false`, and on a die swap. |

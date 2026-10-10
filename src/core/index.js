@@ -21,6 +21,8 @@ export {
   focusRects,
 } from "./camera.js";
 
+export { MAGNET_INCHES, magnetRect } from "./magnet.js";
+
 export {
   DEFAULT_COLOR,
   DEFAULT_TEXT,

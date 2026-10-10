@@ -58,6 +58,17 @@
 //  9. The die-line and snap guides draw with `strokeScaleEnabled={false}`, so
 //     they stay hairlines under a zoom. At scale 1 that is the same pixels.
 // ---------------------------------------------------------------------------
+// v1.6.0: two more opt-in props for the same phone host. Unpassed, the stage is
+// v1.5.0 to the attr.
+//
+// 10. `magnet` draws a "with magnet" koozie's magnet strip (core/magnet.js) on
+//     the back panel, in the die-line overlay layer so it follows the camera
+//     and never takes a tap. It is a part, not print: every proof is taken
+//     with it hidden.
+// 11. `animateResize` glides the camera when the container changes size under
+//     an unchanged view (a host panel growing or shrinking), where v1.5.0
+//     jumps.
+// ---------------------------------------------------------------------------
 
 import {
   forwardRef,
@@ -72,6 +83,7 @@ import Konva from "konva";
 import {
   Stage,
   Layer,
+  Group,
   Rect,
   Line,
   Shape,
@@ -89,6 +101,7 @@ import {
   containDisplayWidth,
   dieGeometry,
   focusRects,
+  magnetRect,
   resolveDie,
   snapTargets,
   traceDie,
@@ -140,6 +153,15 @@ const MAX_LOGO_WIDTH_OF_STAGE = 1.5;
 
 /** Twist rotation sticks to 0/90/180/270 within this many degrees. */
 const PINCH_ROTATION_SNAP = 4;
+
+// The magnet strip's look. Charcoal like the part in the photo, with a pale
+// stitched border and pads that catch a little light from above. "ghost" lets
+// the artwork under it show while the customer is placing it.
+const MAGNET_FILL = "#262626";
+const MAGNET_PAD_TOP = "#3a3a3a";
+const MAGNET_PAD_BOTTOM = "#1c1c1c";
+const MAGNET_STITCH = "rgba(255, 255, 255, 0.45)";
+const MAGNET_GHOST_OPACITY = 0.35;
 
 /** The transform a camera writes, read back off a layer. */
 function readCamera(layer) {
@@ -320,6 +342,52 @@ function TextNode({
 // Under a camera (contain mode) the same point is pushed through the camera's
 // own transform, so the editor still opens over the text rather than where the
 // text would be if the die were drawn at the top-left of the box.
+// The magnet strip (v1.6.0): a charcoal strip, three pads lit softly from
+// above, and a stitch line run midway through the border, all from
+// core/magnet.js's native rect times the stage's `scale`. The stitch is a
+// screen hairline like the die line. Never hit-tested, never in a proof (the
+// export hides it by ref).
+const MagnetStrip = forwardRef(function MagnetStrip({ box, scale, opacity }, ref) {
+  const x = box.x0 * scale;
+  const y = box.y0 * scale;
+  const w = (box.x1 - box.x0) * scale;
+  const h = (box.y1 - box.y0) * scale;
+  const border = (box.pads[0].x0 - box.x0) * scale;
+  const radius = w * 0.08;
+  return (
+    <Group ref={ref} listening={false} opacity={opacity}>
+      <Rect x={x} y={y} width={w} height={h} cornerRadius={radius} fill={MAGNET_FILL} />
+      {box.pads.map((pad, i) => {
+        const padH = (pad.y1 - pad.y0) * scale;
+        return (
+          <Rect
+            key={i}
+            x={pad.x0 * scale}
+            y={pad.y0 * scale}
+            width={(pad.x1 - pad.x0) * scale}
+            height={padH}
+            cornerRadius={radius / 2}
+            fillLinearGradientStartPoint={{ x: 0, y: 0 }}
+            fillLinearGradientEndPoint={{ x: 0, y: padH }}
+            fillLinearGradientColorStops={[0, MAGNET_PAD_TOP, 1, MAGNET_PAD_BOTTOM]}
+          />
+        );
+      })}
+      <Rect
+        x={x + border / 2}
+        y={y + border / 2}
+        width={w - border}
+        height={h - border}
+        cornerRadius={radius}
+        stroke={MAGNET_STITCH}
+        strokeWidth={1}
+        strokeScaleEnabled={false}
+        dash={[3, 2]}
+      />
+    </Group>
+  );
+});
+
 function InlineTextEditor({ el, displayW, displayH, camera, viewportWidth, className, onCommit, onCancel }) {
   const taRef = useRef(null);
   const doneRef = useRef(false); // Enter commits, then the unmount fires blur — settle once
@@ -434,6 +502,14 @@ function InlineTextEditor({ el, displayW, displayH, camera, viewportWidth, class
  *                                        start of each manipulation
  * @param {function} [props.onSnap]      () when a snap engages
  *
+ * v1.6.0, both opt-in (the defaults are v1.5.0's behaviour):
+ * @param {null|"solid"|"ghost"} [props.magnet=null] draw the magnet strip on
+ *                                        the back panel; ghost is see-through.
+ *                                        Never in a proof
+ * @param {boolean}  [props.animateResize=false] contain only: a resize under
+ *                                        an unchanged view tweens the camera
+ *                                        too (still instant without `animate`)
+ *
  * Imperative handle: `beginTextEdit(id)`, `exportProof() → Promise<Blob>`,
  * `hint(id, {reducedMotion}) → Promise<void>`.
  */
@@ -462,6 +538,9 @@ const DesignStage = forwardRef(function DesignStage(
     inlineTextEdit = true,
     onManipulate,
     onSnap,
+    // v1.6.0. Every default is what v1.5.0 did.
+    magnet = null,
+    animateResize = false,
   },
   ref,
 ) {
@@ -471,6 +550,7 @@ const DesignStage = forwardRef(function DesignStage(
   const artLayerRef = useRef(null);
   const overlayLayerRef = useRef(null);
   const dieLineRef = useRef(null);
+  const magnetRef = useRef(null);
   const uiLayerRef = useRef(null);
   const patternRef = useRef(null);
   const exportingRef = useRef(false);
@@ -489,7 +569,7 @@ const DesignStage = forwardRef(function DesignStage(
   // a tween writes Konva attrs sixty times a second, and the export keys its
   // revision to React state (a render mid-export aborts the proof).
   const cameraTweenRef = useRef(null); // the running Konva.Tween, if any
-  const appliedCameraRef = useRef(null); // {layer, viewKey} last written
+  const appliedCameraRef = useRef(null); // {layer, viewKey, dieId, displayW} last written
   const hintRef = useRef(null); // the running sway, if any
   const pinchRef = useRef(null); // the gesture in progress, if any
   const multiTouchRef = useRef(false); // a second finger has been down since the last all-up
@@ -659,6 +739,11 @@ const DesignStage = forwardRef(function DesignStage(
   // expressions the storefront hardcoded.
   const targets = useMemo(() => snapTargets(geom), [geom]);
 
+  // The magnet strip, native px, or null for a die with no back panel. Memoized
+  // on `geom` for the same reason as the targets.
+  const magnetBox = useMemo(() => magnetRect(geom), [geom]);
+  const showMagnet = (magnet === "solid" || magnet === "ghost") && !!magnetBox;
+
   // Attach the transformer to the selected element node (hidden while a text
   // element is being edited inline, and absent when the host has made the
   // stage non-interactive — selection itself is left alone).
@@ -744,7 +829,8 @@ const DesignStage = forwardRef(function DesignStage(
   //
   // The key is the EFFECTIVE view: a view change tweens; a resize, a die swap
   // or the first layout sets the camera at once, because there is nothing on
-  // screen yet (or nothing that moved) for a tween to start from.
+  // screen yet (or nothing that moved) for a tween to start from. v1.6.0's
+  // `animateResize` makes a resize under the same die tween as well.
   const viewKey = `${focusRect ? focus : ""}|${viewRotation}|${insetKey}`;
   useLayoutEffect(() => {
     const layers = [artLayerRef.current, overlayLayerRef.current, uiLayerRef.current];
@@ -765,13 +851,36 @@ const DesignStage = forwardRef(function DesignStage(
     // identity, so it is a first layout even if a camera was applied before.
     const sameStage = applied && applied.layer === art;
     const viewChanged = sameStage && applied.viewKey !== viewKey;
-    appliedCameraRef.current = { layer: art, viewKey };
+    // v1.6.0, opt-in: the box changed size under the same die (a host panel
+    // growing or shrinking below the canvas), so glide from where the die is
+    // to its new fit. Never across a die swap: the die changed shape then, so
+    // there is no "where it was" to start from.
+    const glide = animateResize && sameStage && applied.dieId === die.id;
+    appliedCameraRef.current = { layer: art, viewKey, dieId: die.id, displayW };
     // Interrupt rather than finish: the next tween starts from wherever the
     // layers are now, so a quick second tap retargets instead of jumping.
     stopCameraTween();
-    if (!(animate && viewChanged)) {
+    if (!(animate && (viewChanged || glide))) {
       setCamera(layers, camera);
       return;
+    }
+    if (glide && applied.displayW > 0 && applied.displayW !== displayW) {
+      // React has already laid every node out at the NEW display width, while
+      // the layers still hold the old camera, so the first frame would jump by
+      // the ratio. Start instead from the camera that puts the new layout
+      // exactly where the old one was on screen: scale times old/new, offsets
+      // times new/old, the same viewport point and turn. (The Konva stage's
+      // origin is the container's top-left either way.) Nothing has painted
+      // yet, since Konva draws on the next animation frame, so it never shows.
+      const r = applied.displayW / displayW;
+      const now = readCamera(art);
+      setCamera(layers, {
+        ...now,
+        scaleX: now.scaleX * r,
+        scaleY: now.scaleY * r,
+        offsetX: now.offsetX / r,
+        offsetY: now.offsetY / r,
+      });
     }
     const [, ...followers] = layers;
     // ONE tween, on the artwork layer, mirrored to the other two every frame,
@@ -802,8 +911,9 @@ const DesignStage = forwardRef(function DesignStage(
     };
     cameraTweenRef.current = tween;
     tween.play();
-    // `animate` is read, not depended on: switching motion off mid-session must
-    // not re-run (or re-tween) the camera.
+    // `animate` (and `animateResize`, `die`, `displayW`, all of which reach the
+    // effect through `camera`) are read, not depended on: switching motion off
+    // mid-session must not re-run (or re-tween) the camera.
   }, [camera, viewKey, stopCameraTween]);
 
   // Nothing of ours may outlive the stage.
@@ -1213,9 +1323,8 @@ const DesignStage = forwardRef(function DesignStage(
         uiLayer?.hide();
         stage.draw();
         const pixelRatio = native.width / (displayW || native.width);
-        const blob = await readiness.capture(() => {
-          // A sway is not an edit; it must never reach a proof.
-          stopHint();
+        // The proof itself, one synchronous toBlob draw.
+        const captureDie = () => {
           if (!contain) return stage.toBlob({ pixelRatio, mimeType: "image/png" });
           // Contain mode: the proof is camera-independent — the whole die at
           // native resolution, exactly as width mode exports it. Land any
@@ -1258,6 +1367,24 @@ const DesignStage = forwardRef(function DesignStage(
             dieLine?.strokeWidth(lineWidth);
             layers.forEach((layer, i) => layer.setAttrs(saved[i]));
             for (const layer of layers) layer.batchDraw();
+          }
+        };
+        const blob = await readiness.capture(() => {
+          // A sway is not an edit; it must never reach a proof.
+          stopHint();
+          // Nor is the magnet: it is sewn on, not printed. Hidden for this
+          // synchronous draw only (toBlob renders inside its own call), so the
+          // screen never shows a frame without it.
+          const magnetNode = magnetRef.current;
+          const magnetShown = magnetNode?.visible();
+          magnetNode?.hide();
+          try {
+            return captureDie();
+          } finally {
+            if (magnetNode) {
+              magnetNode.visible(magnetShown);
+              magnetNode.getLayer()?.batchDraw();
+            }
           }
         });
         if (!blob) throw new Error("The proof could not be created. Please try again.");
@@ -1442,6 +1569,14 @@ const DesignStage = forwardRef(function DesignStage(
             strokeScaleEnabled={false}
             opacity={DIE_LINE_OPACITY}
           />
+          {showMagnet && (
+            <MagnetStrip
+              ref={magnetRef}
+              box={magnetBox}
+              scale={scale}
+              opacity={magnet === "ghost" ? MAGNET_GHOST_OPACITY : 1}
+            />
+          )}
         </Layer>
 
         {/* UI layer — alignment guides + transform handles (not exported).

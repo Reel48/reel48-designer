@@ -309,9 +309,9 @@ and behaves as v1.7.0, and every existing golden file is unchanged.
 
 ### Ref methods
 
-- `exportArtCanvas() → HTMLCanvasElement | null`: the artwork layer alone,
-  colour, pattern, logos and text, clipped to the die and **transparent
-  outside it**, at the die's native stage size (1000 × 2000 for
+- `exportArtCanvas({ color = true } = {}) → HTMLCanvasElement | null`: the
+  artwork layer alone, colour, pattern, logos and text, clipped to the die and
+  **transparent outside it**, at the die's native stage size (1000 × 2000 for
   `koozie-standard`, 875 × 2600 for `koozie-slim`; give or take the pixel
   above, so draw it at the die's own size). No die line, no magnet, no guides,
   handles or side outline. Camera-independent like `exportProof`: the layer is
@@ -324,6 +324,12 @@ and behaves as v1.7.0, and every existing golden file is unchanged.
   while a proof is being made, and never aborts one. It does not wait for
   images either: a logo whose bitmap is still loading is not drawn yet, so a
   host paints again when `onReadyChange` reports `true`.
+
+  **`{ color: false }`** (v1.9.0) leaves the ground colour out: the pattern,
+  logos and text, still clipped to the die, with the colour's area
+  transparent. Fill the colour under it yourself and the picture is the same;
+  a colour change then needs only a new fill, not a new export, which is what
+  lets a 3D view follow a colour drag frame by frame.
 - `isTextEditing() → boolean`: `true` while the inline text editor is open.
   The text being edited is hidden on the stage, so it is missing from
   `exportArtCanvas()` too; a host skips (or retries) a paint while this is

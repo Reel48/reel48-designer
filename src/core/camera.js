@@ -213,3 +213,33 @@ export function cameraForResize(camera, fromDisplayW, toDisplayW) {
     offsetY: camera.offsetY / r,
   };
 }
+
+/**
+ * The Konva export config that takes the die, and only the die, at native
+ * resolution from a stage laid out at `displayW` x `displayH` display px
+ * (v1.8.0, for the stage's `exportArtCanvas`). Under IDENTITY_CAMERA the die
+ * is drawn from the stage origin, so the rect is the die's own display box.
+ *
+ * It is always passed explicitly: a Konva Layer's export otherwise defaults
+ * to the whole Konva stage, which in contain mode is the host's box, not the
+ * die.
+ *
+ * `null` when there is nothing measured to export: a size that is missing,
+ * zero, negative or not finite. A zero width would make Konva fall back to the
+ * stage size, and the ratio would be Infinity.
+ *
+ * Not rounded. `width * pixelRatio` is `nativeW` only up to float dust
+ * (19 * (1000 / 19) is 999.9999999999999) and a canvas truncates its size, so
+ * the exported canvas can be a pixel short of native. A caller that needs the
+ * exact die size draws the canvas at that size rather than trusting its own.
+ *
+ * @param {object} p
+ * @param {number} p.displayW  width the die is drawn at, display px
+ * @param {number} p.displayH  its height, display px
+ * @param {number} p.nativeW   the die's stage frame width (`die.stage.width`)
+ * @returns {{x: 0, y: 0, width: number, height: number, pixelRatio: number}|null}
+ */
+export function artExportRect({ displayW, displayH, nativeW } = {}) {
+  if (![displayW, displayH, nativeW].every((n) => Number.isFinite(n) && n > 0)) return null;
+  return { x: 0, y: 0, width: displayW, height: displayH, pixelRatio: nativeW / displayW };
+}

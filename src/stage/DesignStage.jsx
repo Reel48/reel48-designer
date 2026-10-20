@@ -118,6 +118,25 @@
 //     `canOverflow`, and `onClip({ id, face })` reports each release that
 //     newly trims an element, so the host can say what happened.
 // ---------------------------------------------------------------------------
+// v1.11.0: hats. A die that is not a koozie (core/hats.js) is an atlas of rect
+// zones, and a version 4 document (core/design.js) names it in `dieId`. One
+// opt-in prop; a koozie, without it, draws and behaves as v1.10.0.
+//
+// 19. The die is `dieId ?? state.dieId ?? state.size`, so a version 4
+//     document draws on its own die with no prop (and throws, rather than
+//     drawing a koozie, when its die is not in this build). Its sides (confine,
+//     isolate, a trim, the camera's focus) are its zones, by id, through
+//     core/confine.js. No magnet: `magnetRect` is null for it.
+// 20. `zoneFill` (`{ [zoneId]: colour }`) fills each named zone's island under
+//     the artwork: the hat's part colour behind a spot, a label's ground. It
+//     is print, in `exportProof` as on screen; `exportArtCanvas({ color:
+//     false })` leaves it out with the ground colour, for a 3D host that
+//     colours the parts itself.
+// 21. On such a die a dragged element snaps to the centre lines of the zone
+//     it is on (confined to, or over), not to every zone's: the atlas packs
+//     spots side by side, and a neighbour's centre line is not a place on
+//     this spot.
+// ---------------------------------------------------------------------------
 
 import {
   forwardRef,
@@ -151,6 +170,7 @@ import {
   cameraForResize,
   cameraPoint,
   confineCenter,
+  designDie,
   containDisplayWidth,
   dieGeometry,
   faceAt,
@@ -159,6 +179,7 @@ import {
   fitScale,
   focusRects,
   insideRegion,
+  isKoozieGeometry,
   magnetRect,
   rubberBand,
   scaleRegion,
@@ -569,7 +590,7 @@ function InlineTextEditor({ el, displayW, displayH, camera, viewportWidth, class
  * v1.5.0, all opt-in (the defaults are v1.4.1's behaviour):
  * @param {"width"|"contain"} [props.fit="width"] contain = fit inside a box the
  *                                        host gives a definite height
- * @param {object}   [props.view={focus:null}] {focus: "front"|"back"|"base"|null,
+ * @param {object}   [props.view={focus:null}] {focus: "front"|"back"|"base"|a zone id|null,
  *                                        rotate180?: boolean, inset?: {top,
  *                                        right,bottom,left} px the host's own
  *                                        overlays cover}; contain only
@@ -619,6 +640,12 @@ function InlineTextEditor({ el, displayW, displayH, camera, viewportWidth, class
  * @param {function} [props.onClip]      ({id, face}) after a release that
  *                                        newly trims an element to its side
  *
+ * v1.11.0, opt-in (the default is v1.10.0's behaviour):
+ * @param {object}   [props.zoneFill]    {zoneId: colour}: fill those zones'
+ *                                        islands under the artwork, on screen
+ *                                        and in exportProof (not in
+ *                                        exportArtCanvas({color:false}))
+ *
  * Imperative handle: `beginTextEdit(id)`, `exportProof() → Promise<Blob>`,
  * `hint(id, {reducedMotion}) → Promise<void>`, and (v1.8.0)
  * `exportArtCanvas() → HTMLCanvasElement | null`, `isTextEditing() → boolean`.
@@ -659,6 +686,8 @@ const DesignStage = forwardRef(function DesignStage(
     // v1.10.0. Every default is what v1.9.0 did.
     overflow = false,
     onClip,
+    // v1.11.0. The default is what v1.10.0 did.
+    zoneFill,
   },
   ref,
 ) {
@@ -669,6 +698,9 @@ const DesignStage = forwardRef(function DesignStage(
   // The ground colour under everything on the art layer, which
   // exportArtCanvas({ color: false }) leaves out.
   const colorRectRef = useRef(null);
+  // v1.11.0: the zone fills, which exportArtCanvas({ color: false }) leaves
+  // out with the colour.
+  const zoneFillRef = useRef(null);
   const overlayLayerRef = useRef(null);
   const dieLineRef = useRef(null);
   const magnetRef = useRef(null);
@@ -711,8 +743,9 @@ const DesignStage = forwardRef(function DesignStage(
 
   // `dieId ?? state.size` — the prop wins so a picker can preview another die,
   // and the document is the fallback so a stage rendered with no prop still
-  // draws what was stored.
-  const die = resolveDie(dieId ?? state.size);
+  // draws what was stored. A version 4 document names its die (v1.11.0), and
+  // throws (designDie) rather than drawing a koozie when this build lacks it.
+  const die = dieId != null ? resolveDie(dieId) : designDie(state);
   const native = die.stage;
   const geom = dieGeometry(die);
   const contain = fit === "contain";
@@ -763,6 +796,13 @@ const DesignStage = forwardRef(function DesignStage(
   const editingEl =
     state.elements.find((el) => el.id === editingId && el.type === "text") || null;
 
+  // v1.11.0: the zones to fill, and what with. Keyed by value: hosts pass a
+  // fresh object every render.
+  const fills = zoneFill
+    ? geom.zones.filter((z) => Object.prototype.hasOwnProperty.call(zoneFill, z.id) && typeof zoneFill[z.id] === "string")
+    : [];
+  const zoneFillKey = fills.length ? JSON.stringify(fills.map((z) => [z.id, zoneFill[z.id]])) : "";
+
   // Drop a stale editing id if the element was deleted out from under it.
   useEffect(() => {
     if (editingId && !editingEl) setEditingId(null);
@@ -784,9 +824,12 @@ const DesignStage = forwardRef(function DesignStage(
     // the customer taps Checkout), and the proof does not depend on it, since
     // the contain export reads the live layout at capture time (below). Width
     // mode keeps v1.4.1's key exactly.
+    // v1.11.0: the zone fills are print, so a change to one is a change to the
+    // proof. Left out when unset, so a koozie's key is v1.10.0's exactly.
     readiness.commit(entries, displayW > 0 && !!stageRef.current,
-      JSON.stringify([state, contain ? 0 : displayW, native.width, native.height, fontVersion]));
-  }, [readiness, state, logoSources, patternSrc, displayW, native.width, native.height, fontVersion]);
+      JSON.stringify([state, contain ? 0 : displayW, native.width, native.height, fontVersion,
+        ...(zoneFillKey ? [zoneFillKey] : [])]));
+  }, [readiness, state, logoSources, patternSrc, displayW, native.width, native.height, fontVersion, zoneFillKey]);
 
   useLayoutEffect(() => {
     if (patternSrc) reportImage("pattern", patternSrc,
@@ -878,6 +921,14 @@ const DesignStage = forwardRef(function DesignStage(
   // testable with no DOM — tests/dies.test.js pins the result against the three
   // expressions the storefront hardcoded.
   const targets = useMemo(() => snapTargets(geom), [geom]);
+  // v1.11.0: on a zoned die, each zone's own lines, by zone id. A koozie keeps
+  // the die's whole set, as it always snapped.
+  const zoneTargets = useMemo(() => {
+    if (isKoozieGeometry(geom)) return null;
+    const byZone = {};
+    for (const z of geom.zones) byZone[z.id] = snapTargets({ zones: [z] });
+    return byZone;
+  }, [geom]);
 
   // The magnet strip, native px, or null for a die with no back panel. Memoized
   // on `geom` for the same reason as the targets.
@@ -1615,6 +1666,19 @@ const DesignStage = forwardRef(function DesignStage(
     confineRef.current = c ? { ...c, node, raw: null } : null;
   }
 
+  /**
+   * The lines a drag of `node` snaps to (v1.11.0): on a zoned die, those of
+   * the zone it is confined to, or else of the zone it is over now, so a free
+   * drag from one spot into the next takes up that spot's lines.
+   */
+  function dragTargetsFor(node) {
+    if (!zoneTargets) return targets;
+    const c = confineRef.current;
+    const zone =
+      c?.node === node ? c.face : faceAt(geom, native, { x: node.x() / displayW, y: node.y() / displayH });
+    return (zone && zoneTargets[zone]) || targets;
+  }
+
   function handleDragStart(e) {
     stopHint();
     beginConfine(e.target);
@@ -1623,11 +1687,12 @@ const DesignStage = forwardRef(function DesignStage(
     // element that was placed on a centre line (which is where adds land).
     // Konva fires dragstart before it moves the node, so this is the start.
     const node = e.target;
+    const lines = dragTargetsFor(node);
     const snap = snapDistance();
     const on = (v, list) => list.some((t) => Math.abs(v - t * scale) < snap);
     snapRef.current = {
-      x: on(node.x(), targets.x) ? node.x() : null,
-      y: on(node.y(), targets.y) ? node.y() : null,
+      x: on(node.x(), lines.x) ? node.x() : null,
+      y: on(node.y(), lines.y) ? node.y() : null,
     };
     onManipulate?.("drag");
   }
@@ -1649,8 +1714,9 @@ const DesignStage = forwardRef(function DesignStage(
     }
     if (confining?.node === node) confining.konva = { x: node.x(), y: node.y() };
 
+    const lines = dragTargetsFor(node);
     let x = null;
-    for (const target of targets.x) {
+    for (const target of lines.x) {
       const t = target * scale;
       if (Math.abs(node.x() - t) < snap) {
         node.x(t);
@@ -1659,7 +1725,7 @@ const DesignStage = forwardRef(function DesignStage(
       }
     }
     let y = null;
-    for (const target of targets.y) {
+    for (const target of lines.y) {
       const t = target * scale;
       if (Math.abs(node.y() - t) < snap) {
         node.y(t);
@@ -2008,6 +2074,7 @@ const DesignStage = forwardRef(function DesignStage(
         const settle = settleTweenRef.current;
         if (settle) hold(settle.node, settle.to);
         if (!color) hold(colorRectRef.current, { visible: false });
+        if (!color) hold(zoneFillRef.current, { visible: false });
         art.setAttrs(IDENTITY_CAMERA);
         return art.toCanvas(rect);
       } finally {
@@ -2165,6 +2232,22 @@ const DesignStage = forwardRef(function DesignStage(
               fillPatternRepeat="repeat"
               fillPatternScale={{ x: scale, y: scale }}
             />
+          )}
+
+          {/* v1.11.0: each filled zone's island, under its artwork. */}
+          {fills.length > 0 && (
+            <Group ref={zoneFillRef} listening={false}>
+              {fills.map((z) => (
+                <Rect
+                  key={z.id}
+                  x={z.bounds.x0 * scale}
+                  y={z.bounds.y0 * scale}
+                  width={(z.bounds.x1 - z.bounds.x0) * scale}
+                  height={(z.bounds.y1 - z.bounds.y0) * scale}
+                  fill={zoneFill[z.id]}
+                />
+              ))}
+            </Group>
           )}
 
           {state.elements.map((el) => (

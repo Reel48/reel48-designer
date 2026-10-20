@@ -35,6 +35,8 @@
 // before changing either.
 // ---------------------------------------------------------------------------
 
+import { HAT_DIES } from "./hats.js";
+
 /**
  * The panels span this fraction of the stage width; the rest is margin. Shared
  * by both koozie dies so a logo's `scale` covers the same share of the panel on
@@ -146,7 +148,9 @@ function koozieOutline({ panelW, panelH, discD, gap }, { width, height }) {
  * artwork on orders already placed. Add a new id rather than changing a frame.
  *
  * Adding a hat, polo or cooler is an entry here plus an outline function —
- * nothing in the renderer or the design document changes.
+ * nothing in the renderer or the design document changes. The hats (v1.11.0)
+ * live in hats.js, one atlas die per style, and are spread in after the
+ * koozies.
  */
 export const DIES = {
   "koozie-standard": {
@@ -171,6 +175,7 @@ export const DIES = {
     stage: { width: 875, height: 2600 },
     outline: koozieOutline,
   },
+  ...HAT_DIES,
 };
 
 /** What a design authored before `dieId` existed meant by `size`. */
@@ -298,6 +303,42 @@ export function zoneAt(geom, nx, ny, stage) {
     if (x >= b.x0 && x <= b.x1 && y >= b.y0 && y <= b.y1) return z;
   }
   return null;
+}
+
+/**
+ * The zone a normalized point belongs to (v1.11.0): the one it sits in, by
+ * `zoneAt`, or else the zone whose rect is nearest. A point in a gutter of a
+ * hat's atlas belongs to the island beside it, so an element nudged a little
+ * past its spot's edge still counts as that spot's. Ties go to the earlier
+ * zone. Null only for a die with no zones.
+ */
+export function nearestZone(geom, nx, ny, stage) {
+  if (!geom?.zones?.length) return null;
+  const inside = zoneAt(geom, nx, ny, stage);
+  if (inside) return inside;
+  const x = nx * stage.width;
+  const y = ny * stage.height;
+  let best = null;
+  let bestD = Infinity;
+  for (const z of geom.zones) {
+    const b = z.bounds;
+    const d = Math.hypot(Math.max(b.x0 - x, 0, x - b.x1), Math.max(b.y0 - y, 0, y - b.y1));
+    if (d < bestD) {
+      best = z;
+      bestD = d;
+    }
+  }
+  return best;
+}
+
+/**
+ * Whether `geom` is a koozie's (v1.11.0): the one die with a fold, below which
+ * artwork prints upside down (`bottomPanelStartY`), and a base disc. Its sides
+ * keep the rules v1.7.0 pinned for them. Every other die's sides are simply
+ * its zones.
+ */
+export function isKoozieGeometry(geom) {
+  return Number.isFinite(geom?.bottomPanelStartY);
 }
 
 // Colour of the die-line drawn over the artwork, and its width in *display*

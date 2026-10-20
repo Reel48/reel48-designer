@@ -10,6 +10,13 @@
 // Artwork is measured by its axis-aligned bounding box, half extents
 // `{ hx, hy }` around its centre, which is what a rotated node's client rect
 // gives. "Inside" means the whole box is inside.
+//
+// v1.11.0: any die, not only a koozie. A die without the koozie's fold (a
+// hat's atlas, say) has one side per zone, under the zone's own id, each its
+// max imprint; a point between them belongs to the nearest one. The koozie's
+// sides and their rules are unchanged.
+
+import { isKoozieGeometry, nearestZone } from "./dies.js";
 
 /**
  * Each side as a region, in native stage px: the front and back panels as
@@ -21,18 +28,35 @@
  * carries the disc as `exclude`: artwork on a panel may overlap it, but its
  * centre is kept out of it, or a settle at the panel's edge would turn the
  * artwork into base artwork.
+ *
+ * v1.11.0: every zone is a side, keyed by its id (a koozie's zones are just
+ * the two panels, so its sides are as before). A zone whose `maxImprint` is
+ * smaller than its rect is kept to the imprint, centred in the rect, so
+ * confining artwork to its side is confining it to what can be made. A hat's
+ * rects are their imprints already.
  */
 export function faceRegions(geom) {
   const regions = {};
   const disc = geom?.r > 0 ? { cx: geom.cx, cy: geom.cy, r: geom.r } : null;
   for (const zone of geom?.zones ?? []) {
-    if (zone.id === "front" || zone.id === "back") {
-      const { x0, y0, x1, y1 } = zone.bounds;
-      regions[zone.id] = { kind: "rect", x0, y0, x1, y1, ...(disc ? { exclude: disc } : {}) };
-    }
+    const { x0, y0, x1, y1 } = imprintBounds(zone, geom.pxPerInch);
+    regions[zone.id] = { kind: "rect", x0, y0, x1, y1, ...(disc ? { exclude: disc } : {}) };
   }
   if (disc) regions.base = { kind: "circle", ...disc };
   return regions;
+}
+
+/** A zone's bounds, narrowed to its `maxImprint` (inches) where that is smaller. */
+function imprintBounds(zone, pxPerInch) {
+  const b = zone.bounds;
+  const max = zone.maxImprint;
+  if (!max || !(pxPerInch > 0)) return b;
+  const w = Math.min(b.x1 - b.x0, max.w * pxPerInch);
+  const h = Math.min(b.y1 - b.y0, max.h * pxPerInch);
+  if (w === b.x1 - b.x0 && h === b.y1 - b.y0) return b;
+  const cx = (b.x0 + b.x1) / 2;
+  const cy = (b.y0 + b.y1) / 2;
+  return { x0: cx - w / 2, x1: cx + w / 2, y0: cy - h / 2, y1: cy + h / 2 };
 }
 
 /**
@@ -71,12 +95,56 @@ export function traceRegion(ctx, region, scale = 1) {
  * Which side a point is on, `point` in stage FRACTIONS (as the design document
  * stores positions): the base disc if it is inside it, otherwise the panel on
  * that side of the fold. The storefront's `faceOf` is the same rule.
+ *
+ * v1.11.0: on a die with no fold, the zone the point is in, or the nearest
+ * zone to it (`nearestZone`), by id. Null only for a die with no zones.
  */
 export function faceAt(geom, stage, point) {
+  if (!isKoozieGeometry(geom)) return nearestZone(geom, point.x, point.y, stage)?.id ?? null;
   const x = point.x * stage.width;
   const y = point.y * stage.height;
   if (geom.r > 0 && Math.hypot(x - geom.cx, y - geom.cy) <= geom.r) return "base";
   return point.y < geom.bottomPanelStartY ? "front" : "back";
+}
+
+/**
+ * The side an element belongs to (v1.11.0), by its centre (`faceAt`), or the
+ * side it is trimmed to when it carries a `clip`: a trimmed element stays its
+ * side's even with its centre at the edge. On a hat that is the zone id, and
+ * it is what a host counts spots by. Null for a die with no sides.
+ */
+export function zoneOfElement(geom, stage, el) {
+  if (el?.clip && Object.prototype.hasOwnProperty.call(faceRegions(geom), el.clip)) return el.clip;
+  return faceAt(geom, stage, { x: el.x, y: el.y });
+}
+
+/**
+ * Whether an element lies wholly inside its side's region (v1.11.0), which on
+ * a hat is that zone's max imprint. Its box is its drawn size turned by its
+ * rotation, in native stage px: a logo's from `scale` and its natural aspect,
+ * as the stage draws it. Text has no size without font metrics, so the host
+ * passes `size` (`{ width, height }`, native px, unturned), measured; without
+ * it the answer for text is null, not known.
+ *
+ * A trimmed element fits: what lies past its side's edge is not printed.
+ */
+export function elementFits(geom, stage, el, size) {
+  const side = zoneOfElement(geom, stage, el);
+  const region = side ? faceRegions(geom)[side] : null;
+  if (!region) return false;
+  if (el.clip === side) return true;
+  let w = size?.width;
+  let h = size?.height;
+  if (!(Number.isFinite(w) && Number.isFinite(h))) {
+    if (el.type !== "logo") return null;
+    w = el.scale * stage.width;
+    h = w * (el.naturalHeight / el.naturalWidth || 1);
+  }
+  const a = ((el.rotation || 0) * Math.PI) / 180;
+  const cos = Math.abs(Math.cos(a));
+  const sin = Math.abs(Math.sin(a));
+  const half = { hx: (w * cos + h * sin) / 2, hy: (w * sin + h * cos) / 2 };
+  return insideRegion(region, { x: el.x * stage.width, y: el.y * stage.height }, half);
 }
 
 /** A region scaled by `k` (native px to display px, say). */

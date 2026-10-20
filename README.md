@@ -368,3 +368,116 @@ off takes no tap; the transformer still shows the element's whole box.
 | --- | --- | --- |
 | `overflow` | `false` | With `confine`: an element's first release past its side is brought back, exactly as v1.7.0. After that (for this stage's life, or at once for an element already trimmed) it moves freely, no rubber band, with the side's outline showing while it is past the edge. Let go, it stays where it was put, its centre kept on the side, and ONE `UPDATE_ELEMENT` sets `clip` to the side, or removes it when the element ends up wholly inside. A trimmed element is confined to the side it is trimmed to. |
 | `onClip({ id, face })` | none | After a release that newly trims an element. With `overflow`, `onConfine` also carries `canOverflow: true`, so the host can say the next drag out will stay. |
+
+## v1.11.0: hats, starting with the No. 7
+
+The first die that is not a koozie, and the document shape it needs. Every
+addition is keyed to the die's kind: a koozie document on a stage without the
+new prop draws, behaves and serializes exactly as v1.10.0, and every existing
+golden file is unchanged.
+
+### The `hat-no-7` die
+
+One **atlas** per hat style: each print spot is a rect island on one sheet,
+1560 x 1296 px at a fixed 200 px/in, with gutters of at least 0.4 in between.
+One sheet keeps one document, one undo history, one art texture and one proof,
+as the koozie has. The 3D model's print UVs are this frame (u = x/W,
+v = 1 - y/H).
+
+| Zone | Rect (in) | `methods` |
+| --- | --- | --- |
+| `front` | 4.5 x 2.25 | `embroidery`, `pvc_patch`, `silicon_patch`, `woven_patch` |
+| `left`, `right` | 2.0 x 1.5 | `embroidery` |
+| `back` | 2.5 x 0.875 | `embroidery` |
+| `label_tall` | 1.75 x 1.0 | `woven_label` (`shape: "tall"`) |
+| `label_square` | 1.0 x 1.0 | `woven_label` (`shape: "square"`) |
+
+- `kind: "hat"`, `productHandle: "no-7"`, built by `hatOutline` (src/core/hats.js)
+  from a transcription of the model build's `die_no7.json`.
+  `tests/hat-no-7.golden.json` is a byte copy of that file, and
+  `tests/hat.test.js` asserts the die equals it.
+- **Each rect is its zone's maximum imprint** (`maxImprint`, inches), so
+  keeping artwork in its zone is keeping it inside what can be made.
+- `reserved` holds empty rects for the bill top and under the bill: not in
+  `zones`, not in the cut, kept free so adding those spots later never moves the
+  frame.
+- `status` is "proposed: pending the physical fit test". **The frame is pinned
+  like a koozie's once an order exists against it**; until then a new
+  `die_no7.json` replaces `hats.js` and the golden together.
+
+### `core`
+
+- **Schema version 4** (`ZONED_SCHEMA_VERSION`) for any die that is not a
+  koozie. `initialDesignState("hat-no-7")` is
+  `{ schemaVersion: 4, kind: "hat", dieId: "hat-no-7", parts: {}, zones: {}, elements: [], selectedId: null }`,
+  and `toDesignDescription` writes it without `selectedId`. The elements are
+  v3's, positions as fractions of the die's frame. Koozies keep version 3 with
+  `size`; `legacySizeId` is untouched. (Before this, a hat id fell through
+  `legacySizeId` as `"standard"`: a hat read back as a can cooler.)
+  - `parts`: `{ <partId>: <colour> }`.
+  - `zones`: `{ <zoneId>: { method, threads?, shape?, ground? } }`: the
+    method, the thread ids, a label's shape, and the spot's ground colour (a
+    label's background).
+  - A colour is a hex `#RRGGBB` or the host's palette id, and thread ids are
+    ids. The package checks their shape; the host checks its palettes.
+- **Reducer actions.** Each refused action returns the same state (no undo step).
+  - `SET_PARTS { parts }`: a preset, every part at once, as one undo step.
+  - `SET_PART_COLOR { part, color }`: one part; `color: null` takes it off.
+  - `SET_ZONE { zone, method?, threads?, shape?, ground? }`: merges into the
+    spot's decoration, and `null` takes a field off. `method: null` takes the
+    whole spot off. A method the die zone does not list is refused; a zone
+    that lists one method takes it without being told.
+  - **The inside label is one spot in two shapes, one at a time.** Pass
+    `shape`, or name the other label zone. The other shape's decoration goes,
+    its settings carry over, and its artwork moves across (`moveToZone`).
+    All of it is one undo step.
+  - `MOVE_TO_ZONE { from, to }`: the same move on its own.
+- **Refusals on the other kind.**
+  - A version 4 document refuses `SET_COLOR`, `SET_PATTERN` and every
+    `SET_SIZE`.
+  - A koozie refuses the new actions, and a `SET_SIZE` to a die that is not a
+    koozie.
+  - `NUDGE_ELEMENT` converts by `dieId ?? size`.
+- **Placement on add, version 4 only.**
+  - `ADD_LOGO` / `ADD_TEXT` take a finite positive `scale` / `fontScale`.
+  - `fitToZone` (a zone id, or `true` for the side at `x, y`) centres the new
+    element in that zone at 80% of it, turned by `rotation`. Text is sized by
+    the default text's Arial box (4.002 x 1 em).
+  - Explicit `x`, `y`, `scale` or `fontScale` win, and an unknown zone is
+    ignored.
+  - A koozie add ignores all three, as v1.10.0 did. The storefront's can
+    cooler designer already sends a `scale` on every add, so honouring it
+    would change every can cooler's first placement.
+- **Sides are zones.** On a die without the koozie's fold
+  (`isKoozieGeometry(geom)` is false):
+  - `faceRegions` / `faceClipRegion` are the zone rects, by zone id, each kept
+    to its `maxImprint`.
+  - `faceAt` is the zone a point is in, or the nearest one (`nearestZone`), so
+    a gutter belongs to the island beside it.
+  - So `confine`, `overflow`, `clip`, `isolate` and `view.focus` all work per
+    zone with no stage change. `magnetRect` is null: only a koozie has a
+    magnet, and the hat has a zone named `back` too.
+- **Spot helpers.**
+  - `zoneOfElement(geom, stage, el)`: the side an element counts for (its
+    centre's, or its `clip`'s).
+  - `elementFits(geom, stage, el, size?)`: whether its turned box lies inside
+    that side's imprint. A logo is measured from `scale`. Text needs its
+    measured `size` (native px) and is `null` without it; a trimmed element
+    fits.
+  - `moveToZone(state, from, to)`: one similarity about the two zones' centres,
+    shrunk (never grown) to fit.
+  - `designDie(state)`: the die a document is on. A version 4 document whose
+    `dieId` is not a die of its `kind` in this build **throws**, and so does
+    the stage drawing it, rather than opening on a koozie's frame. Check a
+    stored document with `resolveDie(id, { kind })` before loading it.
+
+### `DesignStage`
+
+The die is `dieId ?? state.dieId ?? state.size`, so a version 4 document draws
+on its own die with no prop. On a zoned die a dragged element snaps only to
+the centre lines of the zone it is confined to, or is over: the atlas packs
+spots side by side, and a neighbour's centre line is not a place on this spot.
+
+| Prop | Default | |
+| --- | --- | --- |
+| `zoneFill` | none | `{ [zoneId]: colour }`: fills those zones' islands under the artwork, such as the part colour behind a spot or a label's ground. It is print: in `exportProof` as on screen. `exportArtCanvas({ color: false })` leaves it out with the ground colour, for a 3D host that colours the parts itself. A fill change during an export fails that export, as a design change does. |

@@ -10,8 +10,11 @@
 // stacked one above the other inside a stitched border, centred on the back
 // panel. It is expressed in INCHES and converted with the die's pxPerInch, so
 // it is the same part on every die: about 27% x 82% of the standard back
-// panel, a shorter share of the taller slim one. A die with no back zone (a hat,
-// say) has no magnet: `magnetRect` returns null.
+// panel, a shorter share of the taller slim one. Only a koozie has a magnet:
+// `magnetRect` returns null for any other die, including a hat, whose atlas
+// has a zone named `back` too (v1.11.0).
+
+import { isKoozieGeometry } from "./dies.js";
 
 /** The strip, in inches, as measured. */
 export const MAGNET_INCHES = Object.freeze({
@@ -27,14 +30,15 @@ export const MAGNET_INCHES = Object.freeze({
 /**
  * The magnet strip on `geom`'s back panel, in NATIVE stage px:
  * `{ x0, y0, x1, y1, pads: [{ x0, y0, x1, y1 }, ...] }`, or null when the die
- * has no back zone.
+ * is not a koozie or has no back zone.
  *
  * Centred on the back zone both ways. The back panel is turned 180 degrees on
  * the finished koozie, but the strip is symmetric, so centring it is the same
  * answer either way up.
  */
 export function magnetRect(geom) {
-  const back = geom?.zones?.find((z) => z.id === "back");
+  if (!isKoozieGeometry(geom)) return null;
+  const back = geom.zones?.find((z) => z.id === "back");
   if (!back || !(geom.pxPerInch > 0)) return null;
   const k = geom.pxPerInch;
   const { x0: bx0, x1: bx1, y0: by0, y1: by1 } = back.bounds;

@@ -1,0 +1,149 @@
+{
+  "id": "hat-no-7",
+  "kind": "hat",
+  "productHandle": "no-7",
+  "status": "proposed: pending the physical fit test",
+  "pxPerInch": 200,
+  "stage": {
+    "width": 1560,
+    "height": 1296
+  },
+  "zones": [
+    {
+      "id": "front",
+      "label": "Front",
+      "rect": {
+        "x": 40,
+        "y": 40,
+        "w": 900,
+        "h": 450
+      },
+      "maxImprint": {
+        "w": 4.5,
+        "h": 2.25
+      },
+      "methods": [
+        "embroidery",
+        "pvc_patch",
+        "silicon_patch",
+        "woven_patch"
+      ]
+    },
+    {
+      "id": "left",
+      "label": "Left side",
+      "rect": {
+        "x": 1020,
+        "y": 40,
+        "w": 400,
+        "h": 300
+      },
+      "maxImprint": {
+        "w": 2.0,
+        "h": 1.5
+      },
+      "methods": [
+        "embroidery"
+      ]
+    },
+    {
+      "id": "right",
+      "label": "Right side",
+      "rect": {
+        "x": 1020,
+        "y": 420,
+        "w": 400,
+        "h": 300
+      },
+      "maxImprint": {
+        "w": 2.0,
+        "h": 1.5
+      },
+      "methods": [
+        "embroidery"
+      ]
+    },
+    {
+      "id": "back",
+      "label": "Back",
+      "rect": {
+        "x": 1020,
+        "y": 800,
+        "w": 500,
+        "h": 175
+      },
+      "maxImprint": {
+        "w": 2.5,
+        "h": 0.875
+      },
+      "methods": [
+        "embroidery"
+      ]
+    },
+    {
+      "id": "label_tall",
+      "label": "Inside label, rectangle",
+      "rect": {
+        "x": 1020,
+        "y": 1055,
+        "w": 350,
+        "h": 200
+      },
+      "maxImprint": {
+        "w": 1.75,
+        "h": 1.0
+      },
+      "methods": [
+        "woven_label"
+      ]
+    },
+    {
+      "id": "label_square",
+      "label": "Inside label, square",
+      "rect": {
+        "x": 720,
+        "y": 1000,
+        "w": 200,
+        "h": 200
+      },
+      "maxImprint": {
+        "w": 1.0,
+        "h": 1.0
+      },
+      "methods": [
+        "woven_label"
+      ]
+    }
+  ],
+  "reserved": [
+    {
+      "id": "bill_top",
+      "label": "Bill top (reserved)",
+      "rect": {
+        "x": 40,
+        "y": 1000,
+        "w": 600,
+        "h": 200
+      },
+      "maxImprint": {
+        "w": 3.0,
+        "h": 1.0
+      }
+    },
+    {
+      "id": "under_bill",
+      "label": "Under the bill (reserved)",
+      "rect": {
+        "x": 40,
+        "y": 570,
+        "w": 900,
+        "h": 350
+      },
+      "maxImprint": {
+        "w": 4.5,
+        "h": 1.75
+      }
+    }
+  ],
+  "gutterIn": 0.4
+}

@@ -100,6 +100,24 @@
 //     applies only to the layers' own canvases. Mid-glide, the side being
 //     left stays drawn until the camera lands.
 // ---------------------------------------------------------------------------
+// v1.10.0: artwork that is meant to run past its side, for the same storefront.
+// One field in the document and one opt-in prop; a document without the field
+// and a stage without the prop draw and behave as v1.9.0.
+//
+// 17. An element's `clip` (core/design.js) trims it to that side
+//     (`faceClipRegion`), on the stage and in every export, the proof and
+//     `exportArtCanvas` alike: the trim is print, not a way of looking. Each
+//     element is drawn inside a Group of its own for it, clipped or not, so a
+//     trim coming or going never remounts the element (a remount reloads a
+//     logo's bitmap).
+// 18. `overflow`, with `confine`: the first release of an element past its
+//     side is brought back, as v1.7.0 does. After that, the element may be let
+//     go past the edge (a big logo stretched to fill the side): it stays where
+//     it was put, its centre kept on the side, and is trimmed there. Let go
+//     wholly inside again, the trim comes off. `onConfine` then says
+//     `canOverflow`, and `onClip({ id, face })` reports each release that
+//     newly trims an element, so the host can say what happened.
+// ---------------------------------------------------------------------------
 
 import {
   forwardRef,
@@ -140,6 +158,7 @@ import {
   faceRegions,
   fitScale,
   focusRects,
+  insideRegion,
   magnetRect,
   rubberBand,
   scaleRegion,
@@ -593,6 +612,13 @@ function InlineTextEditor({ el, displayW, displayH, camera, viewportWidth, class
  *                                        that side, outlined on its own.
  *                                        Never in an export
  *
+ * v1.10.0, both opt-in (the defaults are v1.9.0's behaviour):
+ * @param {boolean}  [props.overflow=false] with `confine`, an element brought
+ *                                        back once may then be let go past
+ *                                        its side's edge, trimmed there
+ * @param {function} [props.onClip]      ({id, face}) after a release that
+ *                                        newly trims an element to its side
+ *
  * Imperative handle: `beginTextEdit(id)`, `exportProof() → Promise<Blob>`,
  * `hint(id, {reducedMotion}) → Promise<void>`, and (v1.8.0)
  * `exportArtCanvas() → HTMLCanvasElement | null`, `isTextEditing() → boolean`.
@@ -630,6 +656,9 @@ const DesignStage = forwardRef(function DesignStage(
     onConfine,
     // v1.8.0. The default is what v1.7.0 did.
     isolate = false,
+    // v1.10.0. Every default is what v1.9.0 did.
+    overflow = false,
+    onClip,
   },
   ref,
 ) {
@@ -672,6 +701,9 @@ const DesignStage = forwardRef(function DesignStage(
   const settleRef = useRef(null); // a settle to start after the next commit: {id, from, to}
   const settleTweenRef = useRef(null); // the running settle: {tween, node, to}
   const boundaryShownRef = useRef(false);
+  // v1.10.0: the elements already brought back once, which `overflow` lets
+  // past the edge from then on. A ref: it changes no drawing.
+  const broughtBackRef = useRef(new Set());
   const boundaryTimerRef = useRef(0);
   // The side's outline while artwork is pressed past it, NATIVE px (scaled at
   // draw time, so a resize mid-glide can't leave it stale), or null.
@@ -817,8 +849,8 @@ const DesignStage = forwardRef(function DesignStage(
       animate,
       confine,
       confineFor,
-      settleTarget,
-      reportConfine,
+      releaseConfined,
+      clipPatch,
       showBoundary,
     };
   });
@@ -857,11 +889,18 @@ const DesignStage = forwardRef(function DesignStage(
   // Plain functions of this render. The gesture listener reaches them through
   // latestRef, so they are defined before the placeholder's early return.
 
-  /** The side `el` is on, and that side in display px (and native); null if none. */
+  /**
+   * The side `el` is on, and that side in display px (and native); null if
+   * none. A trimmed element is on the side it is trimmed to (v1.10.0), and
+   * `free` when `overflow` lets it past the edge: it is trimmed already, or
+   * has been brought back once.
+   */
   function confineFor(el) {
-    const face = faceAt(geom, native, { x: el.x, y: el.y });
+    const face = el.clip && regions[el.clip] ? el.clip : faceAt(geom, native, { x: el.x, y: el.y });
     const region = regions[face];
-    return region ? { id: el.id, face, region: scaleRegion(region, scale), native: region } : null;
+    if (!region) return null;
+    const free = overflow && (!!el.clip || broughtBackRef.current.has(el.id));
+    return { id: el.id, face, region: scaleRegion(region, scale), native: region, free, clipped: !!el.clip };
   }
 
   /** A node's drawn box in its layer's own (display px) frame: centre and half extents. */
@@ -874,13 +913,18 @@ const DesignStage = forwardRef(function DesignStage(
    * Where a released node must go to sit wholly on its side: the node position
    * (not its box centre) and the factor its size must shrink by (1 unless
    * `allowFit` and it was made too big). `moved` is whether either changed.
+   *
+   * v1.10.0: a `free` element stays as it was let go, with only its centre
+   * kept on the side. `clip` is the side it must be trimmed to there, or null
+   * when it lies wholly inside.
    */
   function settleTarget(node, c, allowFit) {
     // The side at THIS render's scale: the box may have resized mid-gesture.
     const region = scaleRegion(c.native, scale);
     const box = boxOf(node);
-    const fit = allowFit ? fitScale(region, box) : 1;
-    const t = confineCenter(region, { x: box.cx, y: box.cy }, { hx: box.hx * fit, hy: box.hy * fit });
+    const fit = allowFit && !c.free ? fitScale(region, box) : 1;
+    const half = { hx: box.hx * fit, hy: box.hy * fit };
+    const t = confineCenter(region, { x: box.cx, y: box.cy }, c.free ? { hx: 0, hy: 0 } : half);
     return {
       x: node.x() + (t.x - box.cx),
       y: node.y() + (t.y - box.cy),
@@ -888,7 +932,36 @@ const DesignStage = forwardRef(function DesignStage(
       moved: t.moved || fit < 1,
       box,
       target: { x: t.x, y: t.y },
+      // Only where a trim can come or go: without `overflow`, an untrimmed
+      // element is never given one, as v1.9.0 never gave one.
+      clip:
+        overflow || c.clipped
+          ? insideRegion(region, { x: t.x, y: t.y }, half) ? null : c.face
+          : undefined,
     };
+  }
+
+  /** The patch that puts `settled`'s trim on `el`, or nothing when it has it already. */
+  function clipPatch(el, settled) {
+    if (settled.clip === undefined || (el.clip ?? null) === settled.clip) return {};
+    return { clip: settled.clip };
+  }
+
+  /**
+   * A release of a confined element (v1.7.0, v1.10.0): where it settles, and
+   * what the host is told. The first release that has to be brought back is
+   * the one `overflow` remembers; a free release that newly trims the element
+   * is reported to `onClip`. Shows the side's outline while a glide back runs.
+   */
+  function releaseConfined(node, c, allowFit, raw = null) {
+    const settled = settleTarget(node, c, allowFit);
+    showBoundary(settled.moved ? c.native : null);
+    if (settled.moved && !c.free) {
+      if (overflow) broughtBackRef.current.add(c.id);
+      reportConfine(c, settled, raw);
+    }
+    if (c.free && settled.clip && !c.clipped) onClip?.({ id: c.id, face: c.face });
+    return settled;
   }
 
   /**
@@ -912,7 +985,7 @@ const DesignStage = forwardRef(function DesignStage(
       const face = faceAt(geom, native, probe);
       if (face !== c.face) toward = face;
     }
-    onConfine?.({ id: c.id, face: c.face, toward });
+    onConfine?.({ id: c.id, face: c.face, toward, ...(overflow ? { canOverflow: true } : {}) });
   }
 
   /** Show (region) or hide (null) the side's outline, without a render per move. */
@@ -1105,6 +1178,20 @@ const DesignStage = forwardRef(function DesignStage(
     };
   }, [geom]);
   const isolateRegion = isolate && focusRect ? clipRegionOf(focus) : null;
+
+  // v1.10.0: a trimmed element's clip, one function per side at this scale.
+  // A Group's clipFunc applies to every draw of it, so the trim is in the
+  // proof and the art canvas as it is on screen, and the part trimmed off
+  // takes no tap.
+  const elementClip = useMemo(() => {
+    const cache = new Map();
+    return (face) => {
+      const region = face ? clipRegionOf(face) : null;
+      if (!region) return undefined;
+      if (!cache.has(face)) cache.set(face, (ctx) => traceRegion(ctx, region, scale));
+      return cache.get(face);
+    };
+  }, [clipRegionOf, scale]);
 
   // The clip: the regions in clipRef at the latest scale. Drawn into anything
   // but the layer's own canvases (an export), it is the die's whole frame, so
@@ -1442,8 +1529,9 @@ const DesignStage = forwardRef(function DesignStage(
       // fits, as a release from a drag or an anchor does.
       let at = { x: node.x(), y: node.y() };
       let fit = 1;
+      let clip = {};
       if (g.confine) {
-        const settled = L.settleTarget(node, g.confine, g.moved || g.transformed);
+        const settled = L.releaseConfined(node, g.confine, g.moved || g.transformed);
         if (settled.moved) {
           fit = settled.fit;
           settleRef.current = {
@@ -1452,11 +1540,10 @@ const DesignStage = forwardRef(function DesignStage(
             to: { x: settled.x, y: settled.y, scaleX: 1, scaleY: 1 },
           };
           at = { x: settled.x, y: settled.y };
-          L.showBoundary(g.confine.native);
-          L.reportConfine(g.confine, settled);
         }
+        clip = L.clipPatch(element, settled);
       }
-      const patch = { x: at.x / L.displayW, y: at.y / L.displayH };
+      const patch = { x: at.x / L.displayW, y: at.y / L.displayH, ...clip };
       if (g.moved || g.transformed) {
         const scaleX = node.scaleX() * fit;
         node.scaleX(1);
@@ -1596,7 +1683,9 @@ const DesignStage = forwardRef(function DesignStage(
       const box = boxOf(node);
       const t = confineCenter(region, { x: box.cx, y: box.cy }, box);
       c.raw = { x: box.cx, y: box.cy };
-      if (t.moved) {
+      // v1.10.0: a free element goes where the finger takes it; the outline
+      // still shows where it will be trimmed.
+      if (t.moved && !c.free) {
         const limit = CONFINE_OVERSHOOT_PX / cameraScale;
         const ox = box.cx - t.x;
         const oy = box.cy - t.y;
@@ -1626,22 +1715,20 @@ const DesignStage = forwardRef(function DesignStage(
     let y = node.y();
     const c = confineRef.current;
     confineRef.current = null;
+    let clip = {};
     if (c && c.node === node) {
-      const settled = settleTarget(node, c, false);
+      const settled = releaseConfined(node, c, false, c.raw);
       if (settled.moved) {
         settleRef.current = { id: el.id, from: { x, y }, to: { x: settled.x, y: settled.y } };
         x = settled.x;
         y = settled.y;
-        showBoundary(c.native);
-        reportConfine(c, settled, c.raw);
-      } else {
-        showBoundary(null);
       }
+      clip = clipPatch(el, settled);
     }
     dispatch({
       type: "UPDATE_ELEMENT",
       id: el.id,
-      patch: { x: x / displayW, y: y / displayH },
+      patch: { x: x / displayW, y: y / displayH, ...clip },
     });
   }
 
@@ -1674,8 +1761,9 @@ const DesignStage = forwardRef(function DesignStage(
     confineRef.current = null;
     let at = { x: node.x(), y: node.y() };
     let fit = 1;
+    let clip = {};
     if (c && c.node === node) {
-      const settled = settleTarget(node, c, true);
+      const settled = releaseConfined(node, c, true);
       if (settled.moved) {
         fit = settled.fit;
         settleRef.current = {
@@ -1684,9 +1772,8 @@ const DesignStage = forwardRef(function DesignStage(
           to: { x: settled.x, y: settled.y, scaleX: 1, scaleY: 1 },
         };
         at = { x: settled.x, y: settled.y };
-        showBoundary(c.native);
-        reportConfine(c, settled);
       }
+      clip = clipPatch(el, settled);
     }
     const scaleX = node.scaleX() * fit;
     // Bake the scale into the element's own size and reset the node's, so the
@@ -1703,6 +1790,7 @@ const DesignStage = forwardRef(function DesignStage(
           y: at.y / displayH,
           scale: newWidthPx / displayW,
           rotation: node.rotation(),
+          ...clip,
         },
       });
     } else {
@@ -1715,6 +1803,7 @@ const DesignStage = forwardRef(function DesignStage(
           y: at.y / displayH,
           fontScale: newFontSize / displayW,
           rotation: node.rotation(),
+          ...clip,
         },
       });
     }
@@ -2078,23 +2167,26 @@ const DesignStage = forwardRef(function DesignStage(
             />
           )}
 
-          {state.elements.map((el) =>
-            el.type === "logo" ? (
-              <LogoNode key={el.id} el={el} src={logoSources[el.id]} {...nodeProps} />
-            ) : (
-              <TextNode
-                key={el.id}
-                el={el}
-                fontVersion={fontVersion}
-                editing={el.id === editingId}
-                onStartEdit={(id, e) => {
-                  if (!inlineTextEdit || isMultiTouch(e)) return;
-                  setEditingId(id);
-                }}
-                {...nodeProps}
-              />
-            ),
-          )}
+          {state.elements.map((el) => (
+            // v1.10.0: every element in a Group of its own, trimmed or not, so
+            // a trim coming or going never remounts it.
+            <Group key={el.id} clipFunc={elementClip(el.clip)}>
+              {el.type === "logo" ? (
+                <LogoNode el={el} src={logoSources[el.id]} {...nodeProps} />
+              ) : (
+                <TextNode
+                  el={el}
+                  fontVersion={fontVersion}
+                  editing={el.id === editingId}
+                  onStartEdit={(id, e) => {
+                    if (!inlineTextEdit || isMultiTouch(e)) return;
+                    setEditingId(id);
+                  }}
+                  {...nodeProps}
+                />
+              )}
+            </Group>
+          ))}
 
           {/* Clip everything above to the die: keep only what the shape covers. */}
           <Shape

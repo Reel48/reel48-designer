@@ -6,6 +6,7 @@ import {
   faceClipRegion,
   faceRegions,
   fitScale,
+  insideRegion,
   rubberBand,
   scaleRegion,
   traceRegion,
@@ -216,5 +217,37 @@ describe("traceRegion", () => {
     traceRegion(ctx, { kind: "circle", cx: 1, cy: 1, r: 1 });
     expect(calls.map(([name]) => name)).toEqual(["rect", "moveTo", "arc", "closePath"]);
     expect(calls[0]).toEqual(["rect", 0, 0, 4, 2]);
+  });
+});
+
+describe("insideRegion (v1.10.0)", () => {
+  it("a box wholly inside a rect is inside, edges included", () => {
+    expect(insideRegion(rect, { x: 50, y: 25 }, { hx: 10, hy: 10 })).toBe(true);
+    expect(insideRegion(rect, { x: 10, y: 10 }, { hx: 10, hy: 10 })).toBe(true);
+  });
+
+  it("a box hanging over any edge is not", () => {
+    expect(insideRegion(rect, { x: 5, y: 25 }, { hx: 10, hy: 10 })).toBe(false);
+    expect(insideRegion(rect, { x: 50, y: 45 }, { hx: 10, hy: 10 })).toBe(false);
+  });
+
+  it("a box too big for the rect is not, even centred (where confineCenter does not move it)", () => {
+    const half = { hx: 60, hy: 10 };
+    expect(confineCenter(rect, { x: 50, y: 25 }, half).moved).toBe(false);
+    expect(insideRegion(rect, { x: 50, y: 25 }, half)).toBe(false);
+  });
+
+  it("ignores a panel's excluded disc: artwork may overlap it", () => {
+    const panel = { ...rect, exclude: { cx: 50, cy: 50, r: 20 } };
+    expect(insideRegion(panel, { x: 50, y: 35 }, { hx: 10, hy: 10 })).toBe(true);
+  });
+
+  it("measures the disc by the box's corners", () => {
+    expect(insideRegion(disc, { x: 0, y: 0 }, { hx: 6, hy: 6 })).toBe(true);
+    expect(insideRegion(disc, { x: 0, y: 0 }, { hx: 8, hy: 8 })).toBe(false);
+  });
+
+  it("is exported from core", () => {
+    expect(core.insideRegion).toBe(insideRegion);
   });
 });

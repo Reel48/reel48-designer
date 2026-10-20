@@ -334,3 +334,37 @@ and behaves as v1.7.0, and every existing golden file is unchanged.
   The text being edited is hidden on the stage, so it is missing from
   `exportArtCanvas()` too; a host skips (or retries) a paint while this is
   `true`. Read through a ref: asking never renders.
+
+## v1.10.0: artwork that runs past its side, trimmed at the edge
+
+A big logo often has to run past its side to fill it (a wide mark on a tall
+panel). One optional field in the document and one opt-in prop pair. A
+document without the field, on a stage without the props, draws, behaves and
+serializes as v1.9.0, and every existing golden file is unchanged.
+
+### `core`
+
+- An element may carry `clip: "front" | "back" | "base"`: the side it is
+  trimmed to. Whatever of it lies past that side's edge (`faceClipRegion`) is
+  not printed. Absent when the element is whole; `UPDATE_ELEMENT` with
+  `clip: null` removes the key; `toDesignDescription` writes it only when set.
+  Pinned by `tests/design.test.js`. Schema version unchanged (an added
+  optional field, like `source`).
+- `insideRegion(region, center, { hx, hy })`: whether a box lies wholly inside
+  a region, so nothing of it would be trimmed. Not `!confineCenter().moved`,
+  which is also false for a box too big to fit, centred. Pinned by
+  `tests/confine.test.js`.
+
+### `DesignStage`
+
+Every element is drawn inside a `Group` of its own, whose `clipFunc` traces its
+`clip` side, so the trim is in **every** draw: the screen, `exportProof` and
+`exportArtCanvas`. (Unlike `isolate`, a trim is print, not a way of looking.)
+The group is there for every element, trimmed or not, so a trim coming or going
+never remounts the element and never reloads a logo's bitmap. The part trimmed
+off takes no tap; the transformer still shows the element's whole box.
+
+| Prop | Default | |
+| --- | --- | --- |
+| `overflow` | `false` | With `confine`: an element's first release past its side is brought back, exactly as v1.7.0. After that (for this stage's life, or at once for an element already trimmed) it moves freely, no rubber band, with the side's outline showing while it is past the edge. Let go, it stays where it was put, its centre kept on the side, and ONE `UPDATE_ELEMENT` sets `clip` to the side, or removes it when the element ends up wholly inside. A trimmed element is confined to the side it is trimmed to. |
+| `onClip({ id, face })` | none | After a release that newly trims an element. With `overflow`, `onConfine` also carries `canOverflow: true`, so the host can say the next drag out will stay. |

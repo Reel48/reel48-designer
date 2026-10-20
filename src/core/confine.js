@@ -130,6 +130,28 @@ export function confineCenter(region, center, half) {
 }
 
 /**
+ * Whether a box of half extents `half` around `center` lies wholly inside
+ * `region` (v1.10.0): nothing of it would be trimmed by `faceClipRegion`. A
+ * panel's excluded disc does not count, since artwork may overlap it. For the
+ * disc, the box is measured by its corners, as `confineCenter` measures it.
+ * Not `!confineCenter(...).moved`: a box too big for the region is centred,
+ * and one already centred does not move.
+ */
+export function insideRegion(region, center, half) {
+  const { hx, hy } = half;
+  const e = 1e-6;
+  if (region.kind === "circle") {
+    return Math.hypot(center.x - region.cx, center.y - region.cy) + Math.hypot(hx, hy) <= region.r + e;
+  }
+  return (
+    center.x - hx >= region.x0 - e &&
+    center.x + hx <= region.x1 + e &&
+    center.y - hy >= region.y0 - e &&
+    center.y + hy <= region.y1 + e
+  );
+}
+
+/**
  * The largest factor (at most 1) a box of half extents `half` can be scaled by
  * and still fit inside `region`.
  */

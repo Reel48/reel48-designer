@@ -30,6 +30,7 @@ export {
   faceClipRegion,
   faceRegions,
   fitScale,
+  insideRegion,
   rubberBand,
   scaleRegion,
   traceRegion,

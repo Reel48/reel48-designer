@@ -20,6 +20,10 @@
 //                      — see ADD_LOGO
 //   text:   + { text, fontFamily, fontStyle, fill, align, fontScale }
 //             fontScale = font size as a fraction of stage width
+//   either: + { clip? }   (v1.10.0)
+//             clip = the side ("front" | "back" | "base") the element is
+//                    trimmed to: whatever of it lies past that side's edge is
+//                    not printed. Omitted when the element is whole.
 //
 // EVERY COORDINATE IS A FRACTION of the die's stage frame, which is why those
 // frames are pinned in dies.js. The original uploaded File objects and custom
@@ -173,7 +177,14 @@ export function designReducer(state, action) {
       const { id, patch } = action;
       return {
         ...state,
-        elements: state.elements.map((el) => (el.id === id ? { ...el, ...patch } : el)),
+        elements: state.elements.map((el) => {
+          if (el.id !== id) return el;
+          const next = { ...el, ...patch };
+          // `clip: null` takes a trim off (v1.10.0). The key goes, rather than
+          // staying as null, so a whole element is the shape it always was.
+          if ("clip" in patch && !patch.clip) delete next.clip;
+          return next;
+        }),
       };
     }
 
@@ -321,6 +332,9 @@ export function toDesignDescription(state) {
         y: el.y,
         rotation: el.rotation,
         opacity: el.opacity,
+        // v1.10.0, and only when set, so an untrimmed design serializes
+        // byte-for-byte as before.
+        ...(el.clip ? { clip: el.clip } : {}),
       };
       if (el.type === "logo") {
         return {

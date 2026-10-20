@@ -188,6 +188,39 @@ describe("brand-library logos", () => {
   });
 });
 
+describe("trimmed elements (v1.10.0)", () => {
+  const withLogo = () =>
+    designReducer(initialDesignState("standard"), {
+      type: "ADD_LOGO", id: "l1", fileName: "mark.png", mimeType: "image/png",
+      naturalWidth: 400, naturalHeight: 200,
+    });
+
+  it("an untrimmed element has no clip key, in state or serialized", () => {
+    const s = withLogo();
+    expect("clip" in s.elements[0]).toBe(false);
+    expect("clip" in toDesignDescription(s).elements[0]).toBe(false);
+  });
+
+  it("records the side an element is trimmed to, and serializes it", () => {
+    const s = designReducer(withLogo(), { type: "UPDATE_ELEMENT", id: "l1", patch: { clip: "front" } });
+    expect(s.elements[0].clip).toBe("front");
+    expect(toDesignDescription(s).elements[0].clip).toBe("front");
+  });
+
+  it("clip: null takes the key away rather than storing null", () => {
+    let s = designReducer(withLogo(), { type: "UPDATE_ELEMENT", id: "l1", patch: { clip: "back" } });
+    s = designReducer(s, { type: "UPDATE_ELEMENT", id: "l1", patch: { x: 0.4, clip: null } });
+    expect("clip" in s.elements[0]).toBe(false);
+    expect(s.elements[0].x).toBe(0.4);
+  });
+
+  it("a text element is trimmed the same way", () => {
+    let s = designReducer(initialDesignState("standard"), { type: "ADD_TEXT", id: "t1" });
+    s = designReducer(s, { type: "UPDATE_ELEMENT", id: "t1", patch: { clip: "base" } });
+    expect(toDesignDescription(s).elements[0].clip).toBe("base");
+  });
+});
+
 describe("NUDGE_ELEMENT", () => {
   // The standard die's stage is 1000x2000, so a `dy` in fractions of stage
   // WIDTH becomes half that in fractions of stage height. That conversion is

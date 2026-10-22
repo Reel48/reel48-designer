@@ -137,6 +137,25 @@
 //     spots side by side, and a neighbour's centre line is not a place on
 //     this spot.
 // ---------------------------------------------------------------------------
+// v1.12.0: whole-panel areas, and handles for editing art on a 3D hat. A die
+// without areas, and a host that passes none of the new options, draws and
+// behaves as v1.11.0.
+//
+// 22. A side of kind "area" (core/confine.js: a zone's polygon, holes cut out,
+//     and its cap) is kept by region.js's rule, in native die px. A drag goes
+//     from its last valid pose (`from`), so it stops at an edge and slides
+//     along it, never jumping a keep-out, with region.js's rubber band past
+//     it. A release (drag, anchors, pinch) commits `confinePose` of where the
+//     finger had it, shrunk to the cap when it was resized or turned. The
+//     art mask, the isolate clip and a trim follow the area's polygon.
+// 23. `exportArtCanvas({ rect, only, exclude, scale })`: one part of the die
+//     (native die px), only one element or without some, at any output
+//     scale. The elements left out are held invisible for that one draw.
+// 24. `measureElement(id)` → `{ cx, cy, w, h, rotation }`: an element as the
+//     stage draws it, in native die px, its size unturned. Text's size is
+//     known only here (font metrics), so a host re-reads it after a font
+//     loads (`fontVersion`).
+// ---------------------------------------------------------------------------
 
 import {
   forwardRef,
@@ -166,10 +185,12 @@ import {
   DIE_LINE_WIDTH,
   IDENTITY_CAMERA,
   artExportRect,
+  bandPose,
   cameraFor,
   cameraForResize,
   cameraPoint,
   confineCenter,
+  confinePose,
   designDie,
   containDisplayWidth,
   dieGeometry,
@@ -181,6 +202,7 @@ import {
   insideRegion,
   isKoozieGeometry,
   magnetRect,
+  poseValid,
   rubberBand,
   scaleRegion,
   resolveDie,
@@ -648,7 +670,9 @@ function InlineTextEditor({ el, displayW, displayH, camera, viewportWidth, class
  *
  * Imperative handle: `beginTextEdit(id)`, `exportProof() → Promise<Blob>`,
  * `hint(id, {reducedMotion}) → Promise<void>`, and (v1.8.0)
- * `exportArtCanvas() → HTMLCanvasElement | null`, `isTextEditing() → boolean`.
+ * `exportArtCanvas({color, rect, only, exclude, scale}) → HTMLCanvasElement | null`
+ * (the options after `color` v1.12.0), `isTextEditing() → boolean`, and
+ * (v1.12.0) `measureElement(id) → {cx, cy, w, h, rotation} | null`.
  */
 const DesignStage = forwardRef(function DesignStage(
   {
@@ -895,6 +919,7 @@ const DesignStage = forwardRef(function DesignStage(
       releaseConfined,
       clipPatch,
       showBoundary,
+      trackArea,
     };
   });
 
@@ -951,7 +976,39 @@ const DesignStage = forwardRef(function DesignStage(
     const region = regions[face];
     if (!region) return null;
     const free = overflow && (!!el.clip || broughtBackRef.current.has(el.id));
-    return { id: el.id, face, region: scaleRegion(region, scale), native: region, free, clipped: !!el.clip };
+    return {
+      id: el.id,
+      face,
+      region: scaleRegion(region, scale),
+      native: region,
+      free,
+      clipped: !!el.clip,
+      // v1.12.0: an area side's last valid centre, native px: where region.js
+      // moves the piece FROM, so it never jumps a keep-out. Its place now.
+      ...(region.kind === "area" ? { last: [el.x * native.width, el.y * native.height] } : {}),
+    };
+  }
+
+  /**
+   * Keep an area side's last valid pose current through a gesture that does
+   * not band (anchors, a pinch): where region.js takes the piece this frame,
+   * from the last one, at its size now. A free piece moves only its centre.
+   */
+  function trackArea(c, node) {
+    const p = poseOf(node);
+    const fit = confinePose(c.free ? { ...p, w: 0, h: 0 } : p, { area: c.native.area, from: c.last });
+    c.last = [fit.cx, fit.cy];
+  }
+
+  /** A node as region.js measures it (v1.12.0): native die px, its size unturned. */
+  function poseOf(node) {
+    return {
+      cx: node.x() / scale,
+      cy: node.y() / scale,
+      w: (node.width() * Math.abs(node.scaleX())) / scale,
+      h: (node.height() * Math.abs(node.scaleY())) / scale,
+      rotation: node.rotation(),
+    };
   }
 
   /** A node's drawn box in its layer's own (display px) frame: centre and half extents. */
@@ -969,7 +1026,8 @@ const DesignStage = forwardRef(function DesignStage(
    * kept on the side. `clip` is the side it must be trimmed to there, or null
    * when it lies wholly inside.
    */
-  function settleTarget(node, c, allowFit) {
+  function settleTarget(node, c, allowFit, raw = null) {
+    if (c.native.kind === "area") return settleArea(node, c, allowFit, raw);
     // The side at THIS render's scale: the box may have resized mid-gesture.
     const region = scaleRegion(c.native, scale);
     const box = boxOf(node);
@@ -992,6 +1050,39 @@ const DesignStage = forwardRef(function DesignStage(
     };
   }
 
+  /**
+   * settleTarget on an area side (v1.12.0): region.js's `confinePose` of the
+   * pose the finger asked for (`raw`, the unbanded centre, display px; else
+   * the node's), from the last valid centre. Shrunk to the cap only when
+   * `allowFit` (a resize or a turn); a drag keeps its size unless the piece
+   * fits nowhere in the area at it. A `free` piece keeps its size and only its
+   * centre is kept in the area.
+   */
+  function settleArea(node, c, allowFit, raw) {
+    const p = poseOf(node);
+    if (raw) {
+      p.cx = raw.x / scale;
+      p.cy = raw.y / scale;
+    }
+    const { area, cap } = c.native;
+    const r = c.free
+      ? confinePose({ ...p, w: 0, h: 0 }, { area, from: c.last })
+      : confinePose(p, { area, cap: allowFit ? cap : null, from: c.last });
+    const fit = c.free ? 1 : r.scale;
+    const x = r.cx * scale;
+    const y = r.cy * scale;
+    const inside = poseValid({ cx: r.cx, cy: r.cy, w: p.w * fit, h: p.h * fit, rotation: p.rotation }, { area });
+    return {
+      x,
+      y,
+      fit,
+      moved: Math.abs(x - node.x()) > 1e-6 || Math.abs(y - node.y()) > 1e-6 || fit < 1,
+      box: boxOf(node),
+      target: { x, y },
+      clip: overflow || c.clipped ? (inside ? null : c.face) : undefined,
+    };
+  }
+
   /** The patch that puts `settled`'s trim on `el`, or nothing when it has it already. */
   function clipPatch(el, settled) {
     if (settled.clip === undefined || (el.clip ?? null) === settled.clip) return {};
@@ -1005,7 +1096,7 @@ const DesignStage = forwardRef(function DesignStage(
    * is reported to `onClip`. Shows the side's outline while a glide back runs.
    */
   function releaseConfined(node, c, allowFit, raw = null) {
-    const settled = settleTarget(node, c, allowFit);
+    const settled = settleTarget(node, c, allowFit, raw);
     showBoundary(settled.moved ? c.native : null);
     if (settled.moved && !c.free) {
       if (overflow) broughtBackRef.current.add(c.id);
@@ -1468,6 +1559,10 @@ const DesignStage = forwardRef(function DesignStage(
       // v1.7.0: the pinch keeps the element on its side, and owns that from
       // here (a drag or transform it interrupts leaves it to the pinch).
       g.confine = L.confine ? L.confineFor(element) : null;
+      // v1.12.0: a pinch that takes over a drag on an area side goes on from
+      // the drag's last valid pose, not from where the drag began.
+      const dragging = confineRef.current;
+      if (g.confine?.last && dragging?.node === node && dragging.last) g.confine.last = dragging.last;
       confineRef.current = null;
       L.showBoundary(null);
       // Set BEFORE stopping anything, so the dragend / transformend those stops
@@ -1563,6 +1658,10 @@ const DesignStage = forwardRef(function DesignStage(
       layer.batchDraw();
       tr?.getLayer()?.batchDraw();
       setLiveRotation(badgeAngle(rotation, L.viewRotation));
+      // v1.12.0: on an area side, follow the piece as region.js would, so the
+      // release travels from the last valid pose and never back across an
+      // eyelet the fingers took it round.
+      if (g.confine?.last) L.trackArea(g.confine, node);
     };
 
     // Bake exactly as handleTransformEnd does, and commit ONE step.
@@ -1595,7 +1694,9 @@ const DesignStage = forwardRef(function DesignStage(
         clip = L.clipPatch(element, settled);
       }
       const patch = { x: at.x / L.displayW, y: at.y / L.displayH, ...clip };
-      if (g.moved || g.transformed) {
+      // v1.12.0: an area side can shrink a piece that fits nowhere at its
+      // size even when only a drag moved it; that shrink is saved too.
+      if (g.moved || g.transformed || fit < 1) {
         const scaleX = node.scaleX() * fit;
         node.scaleX(1);
         node.scaleY(1);
@@ -1744,7 +1845,26 @@ const DesignStage = forwardRef(function DesignStage(
     // finger's own position is kept for the release, which reads where the
     // customer was taking it.
     const c = confineRef.current;
-    if (c && c.node === node) {
+    if (c && c.node === node && c.native.kind === "area") {
+      // v1.12.0: an area side. From the last valid centre to where the finger
+      // has it, stopping at an edge and sliding along it (region.js), with
+      // its rubber band past the edge. The band's most is the same 24 screen
+      // px, in native die px here.
+      const p = poseOf(node);
+      c.raw = { x: node.x(), y: node.y() };
+      let pushed;
+      if (c.free) {
+        pushed = !poseValid(p, { area: c.native.area });
+      } else {
+        const shown = bandPose(p, { area: c.native.area, from: c.last }, CONFINE_OVERSHOOT_PX / cameraScale / scale);
+        c.last = [shown.fit.cx, shown.fit.cy];
+        node.x(shown.cx * scale);
+        node.y(shown.cy * scale);
+        pushed = shown.pushed;
+      }
+      c.out = { x: node.x(), y: node.y() };
+      showBoundary(pushed ? c.native : null);
+    } else if (c && c.node === node) {
       const region = scaleRegion(c.native, scale);
       const box = boxOf(node);
       const t = confineCenter(region, { x: box.cx, y: box.cy }, box);
@@ -1782,19 +1902,32 @@ const DesignStage = forwardRef(function DesignStage(
     const c = confineRef.current;
     confineRef.current = null;
     let clip = {};
+    let size = {};
     if (c && c.node === node) {
       const settled = releaseConfined(node, c, false, c.raw);
       if (settled.moved) {
-        settleRef.current = { id: el.id, from: { x, y }, to: { x: settled.x, y: settled.y } };
+        // v1.12.0: on an area side a piece that fits nowhere at its size is
+        // shrunk even by a drag, so the glide carries the scale too.
+        const shrunk = settled.fit < 1;
+        settleRef.current = {
+          id: el.id,
+          from: { x, y, ...(shrunk ? { scaleX: 1 / settled.fit, scaleY: 1 / settled.fit } : {}) },
+          to: { x: settled.x, y: settled.y, ...(shrunk ? { scaleX: 1, scaleY: 1 } : {}) },
+        };
         x = settled.x;
         y = settled.y;
+        if (shrunk) {
+          size = el.type === "logo"
+            ? { scale: (node.width() * settled.fit) / displayW }
+            : { fontScale: (node.fontSize() * settled.fit) / displayW };
+        }
       }
       clip = clipPatch(el, settled);
     }
     dispatch({
       type: "UPDATE_ELEMENT",
       id: el.id,
-      patch: { x: x / displayW, y: y / displayH, ...clip },
+      patch: { x: x / displayW, y: y / displayH, ...size, ...clip },
     });
   }
 
@@ -1809,6 +1942,10 @@ const DesignStage = forwardRef(function DesignStage(
   // panel turned to read upright in the back view reads 0°, not 180°.
   function handleTransform(e) {
     setLiveRotation(badgeAngle(e.target.rotation(), viewRotation));
+    // v1.12.0: an anchor resize or turn on an area side keeps its last valid
+    // pose current, as a drag does.
+    const c = confineRef.current;
+    if (c?.node === e.target && c.last) trackArea(c, e.target);
   }
 
   function handleTransformEnd(e, el) {
@@ -2025,6 +2162,29 @@ const DesignStage = forwardRef(function DesignStage(
     isTextEditing() {
       return latestRef.current?.editingId != null;
     },
+    // v1.12.0: an element as the stage draws it, in native die px: its centre,
+    // its size unturned, its rotation in degrees. Where a sway or a settle
+    // glide has it on its way, where it is going (the document's place). Null
+    // for an element with no node yet (a logo whose bitmap is loading). Text's
+    // size is measured with its font, so re-read after `fontVersion` changes.
+    measureElement(id) {
+      const node = nodesRef.current.get(id);
+      const k = (latestRef.current?.displayW || displayW) / native.width;
+      if (!node?.getStage() || !(k > 0)) return null;
+      const sway = hintRef.current?.node === node ? hintRef.current : null;
+      const settle = settleTweenRef.current?.node === node ? settleTweenRef.current.to : null;
+      const x = settle?.x ?? sway?.x0 ?? node.x();
+      const y = settle?.y ?? node.y();
+      const sx = Math.abs(settle?.scaleX ?? node.scaleX());
+      const sy = Math.abs(settle?.scaleY ?? node.scaleY());
+      return {
+        cx: x / k,
+        cy: y / k,
+        w: (node.width() * sx) / k,
+        h: (node.height() * sy) / k,
+        rotation: node.rotation(),
+      };
+    },
     // v1.8.0: the artwork layer alone, at the die's native size, for a host's
     // 3D preview texture: colour, pattern and artwork, clipped to the die,
     // transparent outside it. No die line or magnet (the overlay layer) and
@@ -2042,13 +2202,22 @@ const DesignStage = forwardRef(function DesignStage(
     // pattern, logos and text, still clipped to the die, transparent where
     // the colour was. A host that fills its own colour under it has the same
     // picture, and on a colour change needs only to fill again, not to export.
-    exportArtCanvas({ color = true } = {}) {
+    //
+    // v1.12.0, all optional: `rect` ({ x, y, w, h }, native die px) takes that
+    // part of the die alone; `scale` is output px per native die px (1);
+    // `only` (an element id) draws that element and no other, `exclude` (ids)
+    // leaves those out. The elements left out are held invisible for this one
+    // draw, as a sway is held. `only` and `exclude` leave the ground to
+    // `color`: pass `color: false` for the piece alone, on transparent.
+    exportArtCanvas({ color = true, rect: part, only, exclude, scale: outScale } = {}) {
       const art = artLayerRef.current;
       // The layout as it is now, as exportProof reads it.
       const rect = artExportRect({
         displayW: latestRef.current?.displayW || displayW,
         displayH: latestRef.current?.displayH || displayH,
         nativeW: native.width,
+        ...(part != null ? { rect: part } : {}),
+        ...(outScale !== undefined ? { scale: outScale } : {}),
       });
       if (!rect || !art?.getStage()) return null;
       // What exportProof lands before its draw, held instead: a sway is not an
@@ -2075,6 +2244,12 @@ const DesignStage = forwardRef(function DesignStage(
         if (settle) hold(settle.node, settle.to);
         if (!color) hold(colorRectRef.current, { visible: false });
         if (!color) hold(zoneFillRef.current, { visible: false });
+        const left = Array.isArray(exclude) ? new Set(exclude) : null;
+        if (only != null || left) {
+          for (const [id, node] of nodesRef.current) {
+            if ((only != null && id !== only) || left?.has(id)) hold(node, { visible: false });
+          }
+        }
         art.setAttrs(IDENTITY_CAMERA);
         return art.toCanvas(rect);
       } finally {
@@ -2313,7 +2488,21 @@ const DesignStage = forwardRef(function DesignStage(
           {/* v1.7.0: the side artwork is being kept on, while it is pressed
               past it and as it glides back. A screen hairline, dashed. */}
           {drawnBoundary &&
-            (drawnBoundary.kind === "circle" ? (
+            (drawnBoundary.kind === "area" ? (
+              // v1.12.0: an area's outline and holes, the same hairline.
+              <Shape
+                sceneFunc={(ctx, shape) => {
+                  ctx.beginPath();
+                  traceRegion(ctx, drawnBoundary);
+                  ctx.fillStrokeShape(shape);
+                }}
+                stroke={accent}
+                strokeWidth={1.5}
+                strokeScaleEnabled={false}
+                dash={[6, 4]}
+                listening={false}
+              />
+            ) : drawnBoundary.kind === "circle" ? (
               <Circle
                 x={drawnBoundary.cx}
                 y={drawnBoundary.cy}

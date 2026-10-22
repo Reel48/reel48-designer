@@ -15,8 +15,16 @@
 // hat's atlas, say) has one side per zone, under the zone's own id, each its
 // max imprint; a point between them belongs to the nearest one. The koozie's
 // sides and their rules are unchanged.
+//
+// v1.12.0: a zone with an `area` (hats.js) is a side of a third kind, "area":
+// its polygon, holes cut out, and its CAP (`maxImprint`, in px), two limits
+// kept apart. Its rules are region.js's, verbatim from the storefront's hat
+// placer: where art may sit and how big it may print, a drag that goes round a
+// keep-out rather than jumping it, and the overhang a server refuses.
 
 import { isKoozieGeometry, nearestZone } from "./dies.js";
+import { cutRings } from "./hats.js";
+import { areaBounds, areaHome, confinePose, poseValid } from "./region.js";
 
 /**
  * Each side as a region, in native stage px: the front and back panels as
@@ -34,16 +42,50 @@ import { isKoozieGeometry, nearestZone } from "./dies.js";
  * smaller than its rect is kept to the imprint, centred in the rect, so
  * confining artwork to its side is confining it to what can be made. A hat's
  * rects are their imprints already.
+ *
+ * v1.12.0: a zone with an `area` is `{ kind: "area", x0, y0, x1, y1, rings,
+ * area, cap }`: the area's bounding box, its rings as the cut traces them,
+ * the area itself (for region.js) and the cap in px (null without one). The
+ * cap is NOT a box centred in the rect, as it is for a rect zone: art may sit
+ * anywhere in the area, at up to the cap's size. The same object for a zone
+ * every time, so a side keeps its identity.
  */
 export function faceRegions(geom) {
   const regions = {};
   const disc = geom?.r > 0 ? { cx: geom.cx, cy: geom.cy, r: geom.r } : null;
   for (const zone of geom?.zones ?? []) {
+    if (zone.area) {
+      regions[zone.id] = areaRegion(zone, geom.pxPerInch);
+      continue;
+    }
     const { x0, y0, x1, y1 } = imprintBounds(zone, geom.pxPerInch);
     regions[zone.id] = { kind: "rect", x0, y0, x1, y1, ...(disc ? { exclude: disc } : {}) };
   }
   if (disc) regions.base = { kind: "circle", ...disc };
   return regions;
+}
+
+const areaRegions = new WeakMap();
+
+/** A zone with an area, as a side (faceRegions), built once per zone. */
+function areaRegion(zone, pxPerInch) {
+  let region = areaRegions.get(zone);
+  if (!region) {
+    const b = areaBounds(zone.area);
+    const max = zone.maxImprint;
+    region = {
+      kind: "area",
+      x0: b.x,
+      y0: b.y,
+      x1: b.x + b.w,
+      y1: b.y + b.h,
+      rings: cutRings(zone.area),
+      area: zone.area,
+      cap: max && pxPerInch > 0 ? { w: max.w * pxPerInch, h: max.h * pxPerInch } : null,
+    };
+    areaRegions.set(zone, region);
+  }
+  return region;
 }
 
 /** A zone's bounds, narrowed to its `maxImprint` (inches) where that is smaller. */
@@ -70,6 +112,8 @@ export function faceClipRegion(geom, face) {
   if (!face || !Object.prototype.hasOwnProperty.call(regions, face)) return null;
   const region = regions[face];
   if (region.kind === "circle") return { kind: "circle", cx: region.cx, cy: region.cy, r: region.r };
+  // v1.12.0: an area is its own clip, holes cut out (it carries no exclude).
+  if (region.kind === "area") return region;
   return { kind: "rect", x0: region.x0, y0: region.y0, x1: region.x1, y1: region.y1 };
 }
 
@@ -86,6 +130,13 @@ export function traceRegion(ctx, region, scale = 1) {
     ctx.moveTo(s(region.cx + region.r), s(region.cy));
     ctx.arc(s(region.cx), s(region.cy), s(region.r), 0, 2 * Math.PI, false);
     ctx.closePath();
+  } else if (region.kind === "area") {
+    // v1.12.0: each ring its own closed subpath, the holes wound against the
+    // outline, so a clip or fill by the default rule cuts them out.
+    for (const ring of region.rings) {
+      ring.forEach(([x, y], i) => (i === 0 ? ctx.moveTo(s(x), s(y)) : ctx.lineTo(s(x), s(y))));
+      ctx.closePath();
+    }
   } else {
     ctx.rect(s(region.x0), s(region.y0), s(region.x1 - region.x0), s(region.y1 - region.y0));
   }
@@ -127,6 +178,9 @@ export function zoneOfElement(geom, stage, el) {
  * it the answer for text is null, not known.
  *
  * A trimmed element fits: what lies past its side's edge is not printed.
+ *
+ * v1.12.0: on an area side, inside the area (clear of its holes) AND within
+ * its cap, by region.js's `poseValid`.
  */
 export function elementFits(geom, stage, el, size) {
   const side = zoneOfElement(geom, stage, el);
@@ -140,16 +194,34 @@ export function elementFits(geom, stage, el, size) {
     w = el.scale * stage.width;
     h = w * (el.naturalHeight / el.naturalWidth || 1);
   }
+  const cx = el.x * stage.width;
+  const cy = el.y * stage.height;
+  if (region.kind === "area") {
+    return poseValid({ cx, cy, w, h, rotation: el.rotation || 0 }, { area: region.area, cap: region.cap });
+  }
   const a = ((el.rotation || 0) * Math.PI) / 180;
   const cos = Math.abs(Math.cos(a));
   const sin = Math.abs(Math.sin(a));
   const half = { hx: (w * cos + h * sin) / 2, hy: (w * sin + h * cos) / 2 };
-  return insideRegion(region, { x: el.x * stage.width, y: el.y * stage.height }, half);
+  return insideRegion(region, { x: cx, y: cy }, half);
 }
 
 /** A region scaled by `k` (native px to display px, say). */
 export function scaleRegion(region, k) {
   if (region.kind === "circle") return { kind: "circle", cx: region.cx * k, cy: region.cy * k, r: region.r * k };
+  if (region.kind === "area") {
+    const ring = (r) => r.map(([x, y]) => [x * k, y * k]);
+    return {
+      kind: "area",
+      x0: region.x0 * k,
+      y0: region.y0 * k,
+      x1: region.x1 * k,
+      y1: region.y1 * k,
+      rings: region.rings.map(ring),
+      area: { outline: ring(region.area.outline), holes: (region.area.holes ?? []).map(ring) },
+      cap: region.cap ? { w: region.cap.w * k, h: region.cap.h * k } : null,
+    };
+  }
   const rect = { kind: "rect", x0: region.x0 * k, y0: region.y0 * k, x1: region.x1 * k, y1: region.y1 * k };
   if (region.exclude) {
     const { cx, cy, r } = region.exclude;
@@ -167,6 +239,11 @@ export function confineCenter(region, center, half) {
   const { hx, hy } = half;
   let x = center.x;
   let y = center.y;
+  if (region.kind === "area") {
+    // v1.12.0: region.js's rule, the box at its size (the cap is fitScale's).
+    const r = confinePose({ cx: x, cy: y, w: 2 * hx, h: 2 * hy, rotation: 0 }, { area: region.area });
+    return { x: r.cx, y: r.cy, moved: r.moved };
+  }
   if (region.kind === "circle") {
     const room = region.r - Math.hypot(hx, hy);
     const dx = x - region.cx;
@@ -208,6 +285,8 @@ export function confineCenter(region, center, half) {
 export function insideRegion(region, center, half) {
   const { hx, hy } = half;
   const e = 1e-6;
+  // v1.12.0: region.js's own tolerance, so what confinePose leaves is inside.
+  if (region.kind === "area") return poseValid({ cx: center.x, cy: center.y, w: 2 * hx, h: 2 * hy, rotation: 0 }, { area: region.area });
   if (region.kind === "circle") {
     return Math.hypot(center.x - region.cx, center.y - region.cy) + Math.hypot(hx, hy) <= region.r + e;
   }
@@ -226,6 +305,11 @@ export function insideRegion(region, center, half) {
 export function fitScale(region, half) {
   const { hx, hy } = half;
   if (!(hx > 0) && !(hy > 0)) return 1;
+  if (region.kind === "area") {
+    // v1.12.0: the cap, and the most the area holds anywhere (region.js).
+    const [cx, cy] = areaHome(region.area);
+    return confinePose({ cx, cy, w: 2 * hx, h: 2 * hy, rotation: 0 }, { area: region.area, cap: region.cap }).scale;
+  }
   if (region.kind === "circle") return Math.min(1, region.r / Math.hypot(hx, hy));
   const w = region.x1 - region.x0;
   const h = region.y1 - region.y0;

@@ -16,6 +16,17 @@
 // THE FRAME IS PINNED like a koozie's, the moment an order exists against it.
 // `reserved` holds rects for spots not offered yet (the bill top, under the
 // bill), so adding them later never moves the frame. See dies.js's header.
+//
+// v1.12.0: whole-panel AREAS. A zone may carry `area`, the printable region of
+// its spot as a polygon (`outline`, with `holes` for keep-outs such as the
+// eyelets), in die px. Then its `rect` is only the island's bounding box,
+// bleed included, and two limits apply, kept apart: the AREA is where art may
+// sit, and `maxImprint` (the CAP) is how big it may print. A new frame is a new
+// die id (`hat-no-7-v2`), so every document on the first one still opens
+// exactly as it was made.
+
+import { HAT_NO_7_V2_LAYOUT } from "./hat-no-7-v2.js";
+import { areaHome } from "./region.js";
 
 /**
  * The No. 7 (unstructured 6-panel strap-back dad hat), as the model build's
@@ -117,6 +128,25 @@ function boundsOf({ x, y, w, h }) {
   return { x0: x, x1: x + w, y0: y, y1: y + h };
 }
 
+/** Twice a ring's signed area, y down: its winding's sign. */
+function winding(ring) {
+  let a = 0;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) a += ring[j][0] * ring[i][1] - ring[i][0] * ring[j][1];
+  return Math.sign(a);
+}
+
+/**
+ * An area's rings as the cut traces them: the outline as given, each hole
+ * wound against it. Filled or clipped by the canvas's default nonzero rule,
+ * every hole is then cut out, whichever way the die file wound it.
+ */
+export function cutRings(area) {
+  const outline = area.outline;
+  const turn = winding(outline);
+  const holes = (area.holes ?? []).map((h) => (winding(h) === turn ? [...h].reverse() : h));
+  return [outline, ...holes];
+}
+
 /**
  * Hat geometry: one rect island per zone.
  *
@@ -129,25 +159,45 @@ function boundsOf({ x, y, w, h }) {
  * Every zone carries `maxImprint` (inches, equal to its rect) and `methods`,
  * the decoration methods the spot can be made with. A label zone also carries
  * its `shape`.
+ *
+ * v1.12.0: a zone with an `area` carries it (die px, as the die file has it),
+ * and its subpaths in `cmds` are the area's rings rather than the rect, so the
+ * art is masked to the area with its holes cut out. Its snap lines run through
+ * the area's home (`areaHome`, where a new piece goes), not the rect's centre:
+ * on the E1 front that is the centre seam to a fifth of a pixel (the model's
+ * chart puts the seam at x 874.85). A zone without one is exactly as v1.11.0
+ * made it.
  */
 export function hatOutline(layout) {
   const zones = layout.zones.map((z) => {
     const bounds = boundsOf(z.rect);
+    const area = z.area
+      ? { outline: z.area.outline.map((p) => [...p]), holes: (z.area.holes ?? []).map((h) => h.map((p) => [...p])) }
+      : null;
+    const home = area ? areaHome(area) : [(bounds.x0 + bounds.x1) / 2, (bounds.y0 + bounds.y1) / 2];
     return {
       id: z.id,
       label: z.label,
       bounds,
       // A hat has no fold: nothing on it prints upside down.
       flipped: false,
-      snapLines: { x: [(bounds.x0 + bounds.x1) / 2], y: [(bounds.y0 + bounds.y1) / 2] },
+      snapLines: { x: [home[0]], y: [home[1]] },
       maxImprint: { ...z.maxImprint },
       methods: [...z.methods],
       ...(LABEL_SHAPES[z.id] ? { shape: LABEL_SHAPES[z.id] } : {}),
+      ...(area ? { area } : {}),
     };
   });
   const cmds = [];
-  for (const { bounds: b } of zones) {
-    cmds.push(["M", b.x0, b.y0], ["L", b.x1, b.y0], ["L", b.x1, b.y1], ["L", b.x0, b.y1], ["Z"]);
+  for (const { bounds: b, area } of zones) {
+    if (!area) {
+      cmds.push(["M", b.x0, b.y0], ["L", b.x1, b.y0], ["L", b.x1, b.y1], ["L", b.x0, b.y1], ["Z"]);
+      continue;
+    }
+    for (const ring of cutRings(area)) {
+      ring.forEach(([x, y], i) => cmds.push([i === 0 ? "M" : "L", x, y]));
+      cmds.push(["Z"]);
+    }
   }
   return {
     pxPerInch: layout.pxPerInch,
@@ -163,6 +213,14 @@ export function hatOutline(layout) {
   };
 }
 
+/**
+ * The No. 7 with whole-panel areas (round E1, Brayden 2026-10-21): the front
+ * is both front panels as one area round the eyelets, each side its whole
+ * panel; the caps are unchanged. Stage 3720 x 1808 at 200 px/in. Transcribed
+ * in hat-no-7-v2.js from the model build's e1/die_no7.json.
+ */
+const HAT_NO_7_V2 = deepFreeze(HAT_NO_7_V2_LAYOUT);
+
 /** The hat entries of `DIES` (dies.js spreads them in). */
 export const HAT_DIES = {
   "hat-no-7": {
@@ -172,8 +230,22 @@ export const HAT_DIES = {
     blurb: "Unstructured 6-panel dad hat, strap back",
     productHandle: "no-7",
     status: HAT_NO_7.status,
+    // v1.12.0: new designs start on the whole-panel die. This one stays, its
+    // frame unchanged, for every document already made on it.
+    supersededBy: "hat-no-7-v2",
     measurements: HAT_NO_7,
     stage: { width: HAT_NO_7.stage.width, height: HAT_NO_7.stage.height },
+    outline: hatOutline,
+  },
+  "hat-no-7-v2": {
+    id: "hat-no-7-v2",
+    kind: "hat",
+    label: "No. 7",
+    blurb: "Unstructured 6-panel dad hat, strap back",
+    productHandle: "no-7",
+    status: HAT_NO_7_V2.status,
+    measurements: HAT_NO_7_V2,
+    stage: { width: HAT_NO_7_V2.stage.width, height: HAT_NO_7_V2.stage.height },
     outline: hatOutline,
   },
 };

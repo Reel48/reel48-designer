@@ -46,6 +46,7 @@
 
 import { DIES, dieGeometry, resolveDie } from "./dies.js";
 import { faceAt, faceRegions, zoneOfElement } from "./confine.js";
+import { areaHome, confinePose } from "./region.js";
 
 // 3 added `size`. Documents written before it default to the standard die on
 // read, so the bump is informational rather than a branch point.
@@ -205,8 +206,14 @@ const DEFAULT_TEXT_BOX = Object.freeze({ width: 4.002, height: 1 });
  *
  * `box` is the element's width and height at size 1, in stage widths.
  * Version 4 documents only (see `placedSize`).
+ *
+ * v1.12.0: on an area side the piece goes to the area's home (`areaHome`) at
+ * FIT_TO_ZONE of the CAP, not of the area (a whole panel is far bigger than
+ * what prints). An explicit x/y or size is kept, and then the piece is
+ * confined (region.js `confinePose`), so it lands inside the area and within
+ * the cap wherever it was asked for. `confined` says the x/y are final.
  */
-function fitToZone(state, action, box) {
+function fitToZone(state, action, box, explicitSize = null) {
   const target = action.fitToZone;
   if (!target || !isZoned(state)) return null;
   const die = designDie(state);
@@ -224,6 +231,21 @@ function fitToZone(state, action, box) {
   const sin = Math.abs(Math.sin(a));
   const bw = (box.width * cos + box.height * sin) * W;
   const bh = (box.width * sin + box.height * cos) * W;
+  if (region.kind === "area") {
+    const room = region.cap ?? { w: region.x1 - region.x0, h: region.y1 - region.y0 };
+    const size = explicitSize ?? FIT_TO_ZONE * Math.min(room.w / bw, room.h / bh);
+    if (!(size > 0) || !Number.isFinite(size)) return null;
+    const [hx, hy] = areaHome(region.area);
+    const pose = {
+      cx: Number.isFinite(action.x) ? clamp01(action.x) * W : hx,
+      cy: Number.isFinite(action.y) ? clamp01(action.y) * H : hy,
+      w: box.width * W * size,
+      h: box.height * W * size,
+      rotation: placedRotation(action.rotation),
+    };
+    const r = confinePose(pose, { area: region.area, cap: region.cap });
+    return { x: r.cx / W, y: r.cy / H, size: size * r.scale, confined: true };
+  }
   let size;
   let cx;
   let cy;
@@ -352,39 +374,64 @@ function setZone(state, action) {
  *
  * The inside label's two shapes share one centre on the hat, which is what
  * makes this the right move when the label switches shape. A version 4
- * document and rect sides only (a koozie's back panel is turned over, which a
- * similarity does not do); anything else, or nothing to move, returns `state`
- * itself.
+ * document and rect or area sides only (a koozie's back panel is turned over,
+ * which a similarity does not do); anything else, or nothing to move, returns
+ * `state` itself.
+ *
+ * v1.12.0: an area side is measured by its CAP about its home, not by its
+ * whole area, and art moved onto one is then confined to it (region.js): a
+ * logo by its box, text by its centre (its width needs font metrics; the
+ * stage's `measureElement` has it).
  */
 export function moveToZone(state, from, to) {
   if (!isZoned(state) || from === to) return state;
   const die = designDie(state);
   const geom = dieGeometry(die);
   const regions = faceRegions(geom);
-  const a = hasOwn(regions, from) ? regions[from] : null;
-  const b = hasOwn(regions, to) ? regions[to] : null;
-  if (a?.kind !== "rect" || b?.kind !== "rect") return state;
+  const a = sideFrame(hasOwn(regions, from) ? regions[from] : null);
+  const b = sideFrame(hasOwn(regions, to) ? regions[to] : null);
+  if (!a || !b) return state;
   const { width: W, height: H } = die.stage;
-  const k = Math.min(1, (b.x1 - b.x0) / (a.x1 - a.x0), (b.y1 - b.y0) / (a.y1 - a.y0));
-  const ax = (a.x0 + a.x1) / 2;
-  const ay = (a.y0 + a.y1) / 2;
-  const bx = (b.x0 + b.x1) / 2;
-  const by = (b.y0 + b.y1) / 2;
+  const k = Math.min(1, b.w / a.w, b.h / a.h);
   let moved = false;
   const elements = state.elements.map((el) => {
     if (zoneOfElement(geom, die.stage, el) !== from) return el;
     moved = true;
     const next = {
       ...el,
-      x: (bx + (el.x * W - ax) * k) / W,
-      y: (by + (el.y * H - ay) * k) / H,
+      x: (b.cx + (el.x * W - a.cx) * k) / W,
+      y: (b.cy + (el.y * H - a.cy) * k) / H,
     };
     if (el.type === "logo") next.scale = el.scale * k;
     else next.fontScale = el.fontScale * k;
     if (el.clip === from) next.clip = to;
+    if (b.region.kind === "area") {
+      const w = el.type === "logo" ? next.scale * W : 0;
+      const h = el.type === "logo" ? w * (el.naturalHeight / el.naturalWidth || 1) : 0;
+      const r = confinePose(
+        { cx: next.x * W, cy: next.y * H, w, h, rotation: el.rotation || 0 },
+        { area: b.region.area, cap: el.type === "logo" ? b.region.cap : null },
+      );
+      next.x = r.cx / W;
+      next.y = r.cy / H;
+      if (el.type === "logo") next.scale *= r.scale;
+    }
     return next;
   });
   return moved ? { ...state, elements } : state;
+}
+
+/** A side as moveToZone measures it: centre and size, the rect's, or an area's home and cap. */
+function sideFrame(region) {
+  if (region?.kind === "rect") {
+    return { region, cx: (region.x0 + region.x1) / 2, cy: (region.y0 + region.y1) / 2, w: region.x1 - region.x0, h: region.y1 - region.y0 };
+  }
+  if (region?.kind === "area") {
+    const [cx, cy] = areaHome(region.area);
+    const size = region.cap ?? { w: region.x1 - region.x0, h: region.y1 - region.y0 };
+    return { region, cx, cy, w: size.w, h: size.h };
+  }
+  return null;
 }
 
 export function designReducer(state, action) {
@@ -450,7 +497,7 @@ export function designReducer(state, action) {
 
     case "ADD_LOGO": {
       const aspect = action.naturalHeight / action.naturalWidth || 1;
-      const fit = fitToZone(state, action, { width: 1, height: aspect });
+      const fit = fitToZone(state, action, { width: 1, height: aspect }, placedSize(state, action.scale));
       const el = {
         id: action.id,
         type: "logo",
@@ -458,9 +505,9 @@ export function designReducer(state, action) {
         mimeType: action.mimeType,
         naturalWidth: action.naturalWidth,
         naturalHeight: action.naturalHeight,
-        x: placedOn(action.x, fit?.x),
-        y: placedOn(action.y, fit?.y),
-        scale: placedSize(state, action.scale) ?? fit?.size ?? 0.4,
+        x: fit?.confined ? fit.x : placedOn(action.x, fit?.x),
+        y: fit?.confined ? fit.y : placedOn(action.y, fit?.y),
+        scale: fit?.confined ? fit.size : placedSize(state, action.scale) ?? fit?.size ?? 0.4,
         rotation: placedRotation(action.rotation),
         opacity: 1,
         // Optional, and omitted entirely when absent rather than set to
@@ -482,16 +529,16 @@ export function designReducer(state, action) {
     }
 
     case "ADD_TEXT": {
-      const fit = fitToZone(state, action, DEFAULT_TEXT_BOX);
-      const fontScale = placedSize(state, action.fontScale) ?? fit?.size;
+      const fit = fitToZone(state, action, DEFAULT_TEXT_BOX, placedSize(state, action.fontScale));
+      const fontScale = fit?.confined ? fit.size : placedSize(state, action.fontScale) ?? fit?.size;
       const el = {
         id: action.id,
         type: "text",
         ...DEFAULT_TEXT,
         // Spread over DEFAULT_TEXT's own key, so it keeps that key's place.
         ...(fontScale ? { fontScale } : {}),
-        x: placedOn(action.x, fit?.x),
-        y: placedOn(action.y, fit?.y),
+        x: fit?.confined ? fit.x : placedOn(action.x, fit?.x),
+        y: fit?.confined ? fit.y : placedOn(action.y, fit?.y),
         rotation: placedRotation(action.rotation),
         opacity: 1,
       };

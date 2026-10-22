@@ -17,6 +17,23 @@ export {
 
 export { hatOutline } from "./hats.js";
 
+// v1.12.0: the hat placer's confine rule (region.js, verbatim). Its rubber
+// band is `areaRubberBand` here: `rubberBand` is confine.js's, a different
+// curve that the koozie stage has used since v1.7.0.
+export {
+  areaBounds,
+  areaHome,
+  areaRect,
+  areaRings,
+  bandPose,
+  confinePose,
+  overhang,
+  pointInArea,
+  poseValid,
+  rotatedSize,
+  rubberBand as areaRubberBand,
+} from "./region.js";
+
 export {
   IDENTITY_CAMERA,
   artExportRect,

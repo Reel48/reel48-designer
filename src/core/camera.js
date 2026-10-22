@@ -233,13 +233,31 @@ export function cameraForResize(camera, fromDisplayW, toDisplayW) {
  * the exported canvas can be a pixel short of native. A caller that needs the
  * exact die size draws the canvas at that size rather than trusting its own.
  *
+ * v1.12.0, both optional: `rect` (`{ x, y, w, h }`, native die px) takes that
+ * part of the die alone, for a host repainting one spot of a 3D texture; and
+ * `scale` is the output's pixels per native die px (1, the default, is native
+ * resolution; 0.5 half). Without them the answer is v1.8.0's exactly. A rect
+ * or scale that is not finite and positive is null, like a bad size.
+ *
  * @param {object} p
  * @param {number} p.displayW  width the die is drawn at, display px
  * @param {number} p.displayH  its height, display px
  * @param {number} p.nativeW   the die's stage frame width (`die.stage.width`)
- * @returns {{x: 0, y: 0, width: number, height: number, pixelRatio: number}|null}
+ * @param {{x,y,w,h}} [p.rect] native die px
+ * @param {number} [p.scale]   output px per native die px
+ * @returns {{x: number, y: number, width: number, height: number, pixelRatio: number}|null}
  */
-export function artExportRect({ displayW, displayH, nativeW } = {}) {
+export function artExportRect({ displayW, displayH, nativeW, rect, scale } = {}) {
   if (![displayW, displayH, nativeW].every((n) => Number.isFinite(n) && n > 0)) return null;
-  return { x: 0, y: 0, width: displayW, height: displayH, pixelRatio: nativeW / displayW };
+  let pixelRatio = nativeW / displayW;
+  if (scale !== undefined) {
+    if (!(Number.isFinite(scale) && scale > 0)) return null;
+    pixelRatio *= scale;
+  }
+  if (rect == null) return { x: 0, y: 0, width: displayW, height: displayH, pixelRatio };
+  if (![rect.x, rect.y].every(Number.isFinite) || ![rect.w, rect.h].every((n) => Number.isFinite(n) && n > 0)) {
+    return null;
+  }
+  const k = displayW / nativeW;
+  return { x: rect.x * k, y: rect.y * k, width: rect.w * k, height: rect.h * k, pixelRatio };
 }

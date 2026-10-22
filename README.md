@@ -481,3 +481,82 @@ spots side by side, and a neighbour's centre line is not a place on this spot.
 | Prop | Default | |
 | --- | --- | --- |
 | `zoneFill` | none | `{ [zoneId]: colour }`: fills those zones' islands under the artwork, such as the part colour behind a spot or a label's ground. It is print: in `exportProof` as on screen. `exportArtCanvas({ color: false })` leaves it out with the ground colour, for a 3D host that colours the parts itself. A fill change during an export fails that export, as a design change does. |
+
+## v1.12.0: whole-panel areas on the No. 7, and handles for editing on the 3D hat
+
+For round E1 (Brayden, 2026-10-21): a logo may go "anywhere on the front two
+panels", and a side embroidery gets "the entire panel". The `hat-no-7` die and
+every document on it are unchanged; the koozie dies and their golden files are
+too.
+
+### The `hat-no-7-v2` die
+
+- A new die id. The frame moved (3720 x 1808 at 200 px/in), and documents
+  already made on `hat-no-7` keep opening on that one, which now says
+  `supersededBy: "hat-no-7-v2"`. Both are "No. 7" with the same
+  `productHandle`, so a host listing hat dies for new designs skips the ones
+  with `supersededBy`.
+- It is built by `hatOutline` from round E1's `e1/die_no7.json`, transcribed
+  in `src/core/hat-no-7-v2.js`. `tests/hat-no-7-v2.golden.json` is a byte
+  copy of that file. It names its die `"hat-no-7"` (the product's); the test
+  checks every other field.
+- Zones: `front`, `left`, `right`, `back` and `label_tall`. There is no square
+  label.
+- **Two limits per zone, kept apart:**
+  - `area` (`{ outline, holes }`, die px) is where art may sit. The front is
+    both front panels with the eyelets as holes, and each side is its whole
+    panel. The back and the label are rects.
+  - `maxImprint` (the CAP) is how big it may print, unchanged at 4.5 x 2.25
+    front, 2 x 1.5 sides, 2.5 x 0.875 back, 1.75 x 1 label.
+  - `rect` is only the island's bounding box, bleed included.
+- The cut (`cmds`) traces each area's rings, holes wound against the outline,
+  so the art mask, the die line, `isolate` and a trim all follow the area with
+  its holes cut out.
+- Snap lines run through each area's home. On the front that is the centre
+  seam, to a fifth of a pixel.
+
+### `core`
+
+- **`region.js`, the hat placer's confine rule, verbatim** from the
+  storefront's `hat-confine.js`, with its tests (`tests/region.test.ts`).
+  Exported: `confinePose`, `bandPose`, `poseValid`, `overhang`, `areaHome`,
+  `areaRings`, `areaBounds`, `areaRect`, `pointInArea`, `rotatedSize`, and its
+  rubber band as `areaRubberBand`. `rubberBand` stays confine.js's koozie curve.
+- **Area sides.** `faceRegions` gives a zone with an area
+  `{ kind: "area", x0, y0, x1, y1, rings, area, cap }`: no cap-sized box
+  centred in the rect. The same object every time.
+  - `faceClipRegion`, `traceRegion`, `scaleRegion`, `confineCenter`,
+    `insideRegion`, `fitScale` and `elementFits` take it.
+  - `elementFits` is region.js's `poseValid`: in the area, clear of the holes,
+    within the cap.
+- **`fitToZone` on an area** places a new piece at `areaHome` at 80% of the
+  cap. An explicit `x` / `y` / `scale` is kept, then confined, so the piece
+  always lands valid.
+- **`moveToZone` on an area** measures each side by its cap about its home,
+  and confines what it moves (a logo by its box, text by its centre).
+- **`artExportRect({ rect, scale })`**: one part of the die, at an output
+  scale. Without them it is v1.8.0's answer.
+
+### `DesignStage`
+
+- **Live confine on an area side** uses region.js:
+  - a drag travels from the last valid pose, stopping at an edge and sliding
+    along it, and never jumps an eyelet, with region.js's rubber band past the
+    edge;
+  - an anchor resize or turn and a pinch keep the last valid pose current
+    each frame too (a pinch that takes over a drag goes on from the drag's);
+  - a release from a drag, the anchors or a pinch commits `confinePose` of
+    where the finger had it, from that pose. Resizes and turns are shrunk to
+    the cap; a drag keeps its size unless the piece fits nowhere at it;
+  - the side's outline, holes included, shows while art is pressed past it.
+- **`exportArtCanvas({ color, rect, only, exclude, scale })`**:
+  - `rect` (native die px) takes one part of the die;
+  - `scale` is output px per die px, 1 by default;
+  - `only` (an element id) draws that element alone, and `exclude` (ids)
+    leaves those out. The ones left out are held invisible for that one draw;
+  - the ground still follows `color`, so pass `color: false` for a piece on
+    transparent.
+- **`measureElement(id)` → `{ cx, cy, w, h, rotation } | null`**: an element
+  as the stage draws it, in native die px, its size unturned. It reads where a
+  sway or a settle is going. Text's size needs its font, so re-read it after
+  `fontVersion` changes.

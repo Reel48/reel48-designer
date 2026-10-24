@@ -68,7 +68,7 @@ describe("the hat-no-7 die", () => {
   it("is a hat, found by kind, and never falls back to a koozie", () => {
     expect(resolveDie("hat-no-7", { kind: "hat" })).toBe(DIE);
     expect(() => resolveDie("hat-no-7", { kind: "koozie" })).toThrow();
-    expect(diesOfKind("hat").map((d) => d.id)).toEqual(["hat-no-7", "hat-no-7-v2"]);
+    expect(diesOfKind("hat").map((d) => d.id)).toEqual(["hat-no-7", "hat-no-7-v2", "hat-no-6"]);
     expect(diesOfKind("koozie").map((d) => d.id)).toEqual(["koozie-standard", "koozie-slim"]);
   });
 

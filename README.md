@@ -560,3 +560,36 @@ too.
   as the stage draws it, in native die px, its size unturned. It reads where a
   sway or a settle is going. Text's size needs its font, so re-read it after
   `fontVersion` changes.
+
+## v1.13.0: the No. 6
+
+A second hat style (Brayden signed its model off on 2026-10-24). The No. 7's
+dies, every document on them, the koozie dies and their golden files are
+unchanged.
+
+### The `hat-no-6` die
+
+- A structured 5-panel canvas cap with a plastic snapback: `label: "No. 6"`,
+  `productHandle: "no-6"`, its own frame (3480 x 2336 at 200 px/in), no
+  `supersededBy`.
+- It is built by `hatOutline` from the No. 6 model build's `die_no6.json`,
+  transcribed in `src/core/hat-no-6.js`. `tests/hat-no-6.golden.json` is a
+  byte copy of that file, and the test rebuilds every field of it, under the
+  file's own id.
+- Zones: `front` (the flat front face below the top bend; the No. 6's front
+  has no eyelets), `left` and `right` (each whole side panel, round its
+  eyelet), `back` (above the snapback, round two eyelets) and `label_tall`.
+  There is no square label. The caps are the No. 7's: 4.5 x 2.25 front,
+  2 x 1.5 sides, 2.5 x 0.875 back, 1.75 x 1 label. `reserved` keeps the bill
+  top and under the bill.
+- **Levels.** Each zone of its die file has a `level`: the turn, in degrees
+  as `rotation` is stored, at which art runs parallel to the bottom of the
+  hat. The sides are -6 and +6, the rest 0.
+
+### `core`
+
+- **`hatOutline` carries a zone's `level`** when its layout has one (0
+  included). The No. 7's dies have none, so their geometry is as v1.12.0 made
+  it.
+- `diesOfKind("hat")` is now `["hat-no-7", "hat-no-7-v2", "hat-no-6"]`, and the
+  stage frames test pins all three hat frames.

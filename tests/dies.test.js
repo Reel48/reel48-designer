@@ -92,6 +92,12 @@ describe("stage frames are pinned", () => {
     expect(DIES["koozie-slim"].stage).toEqual({ width: 875, height: 2600 });
   });
 
+  it("has not changed any hat frame", () => {
+    expect(DIES["hat-no-7"].stage).toEqual({ width: 1560, height: 1296 });
+    expect(DIES["hat-no-7-v2"].stage).toEqual({ width: 3720, height: 1808 });
+    expect(DIES["hat-no-6"].stage).toEqual({ width: 3480, height: 2336 });
+  });
+
   it("keeps a slim stage pixel the same physical size as a standard one", () => {
     const a = dieGeometry("koozie-standard").pxPerInch;
     const b = dieGeometry("koozie-slim").pxPerInch;

@@ -24,7 +24,14 @@
 // sit, and `maxImprint` (the CAP) is how big it may print. A new frame is a new
 // die id (`hat-no-7-v2`), so every document on the first one still opens
 // exactly as it was made.
+//
+// v1.13.0: a second style, the No. 6 (`hat-no-6`), on its own sheet. Its die
+// file gives each zone a `level`: the turn, in degrees as `rotation` is
+// stored, at which art runs parallel to the bottom of the hat (the No. 6's
+// sides are -6 and +6). A zone carries it when its file has it; the No. 7's
+// dies have none and are unchanged.
 
+import { HAT_NO_6_LAYOUT } from "./hat-no-6.js";
 import { HAT_NO_7_V2_LAYOUT } from "./hat-no-7-v2.js";
 import { areaHome } from "./region.js";
 
@@ -167,6 +174,8 @@ export function cutRings(area) {
  * on the E1 front that is the centre seam to a fifth of a pixel (the model's
  * chart puts the seam at x 874.85). A zone without one is exactly as v1.11.0
  * made it.
+ *
+ * v1.13.0: a zone whose layout has a `level` carries it (degrees, 0 included).
  */
 export function hatOutline(layout) {
   const zones = layout.zones.map((z) => {
@@ -186,6 +195,7 @@ export function hatOutline(layout) {
       methods: [...z.methods],
       ...(LABEL_SHAPES[z.id] ? { shape: LABEL_SHAPES[z.id] } : {}),
       ...(area ? { area } : {}),
+      ...(typeof z.level === "number" ? { level: z.level } : {}),
     };
   });
   const cmds = [];
@@ -221,6 +231,16 @@ export function hatOutline(layout) {
  */
 const HAT_NO_7_V2 = deepFreeze(HAT_NO_7_V2_LAYOUT);
 
+/**
+ * The No. 6 (structured 5-panel canvas cap, plastic snapback; Brayden signed
+ * its model off on 2026-10-24): the front is the flat front face below the
+ * top bend, each side its whole panel, the back anywhere above the snapback
+ * clear of the eyelets, and one inside label, the rectangle. Caps as the
+ * No. 7's. Stage 3480 x 2336 at 200 px/in. Transcribed in hat-no-6.js from
+ * the model build's die_no6.json, levels included.
+ */
+const HAT_NO_6 = deepFreeze(HAT_NO_6_LAYOUT);
+
 /** The hat entries of `DIES` (dies.js spreads them in). */
 export const HAT_DIES = {
   "hat-no-7": {
@@ -246,6 +266,17 @@ export const HAT_DIES = {
     status: HAT_NO_7_V2.status,
     measurements: HAT_NO_7_V2,
     stage: { width: HAT_NO_7_V2.stage.width, height: HAT_NO_7_V2.stage.height },
+    outline: hatOutline,
+  },
+  "hat-no-6": {
+    id: "hat-no-6",
+    kind: "hat",
+    label: "No. 6",
+    blurb: "Structured 5-panel canvas cap, plastic snapback",
+    productHandle: "no-6",
+    status: HAT_NO_6.status,
+    measurements: HAT_NO_6,
+    stage: { width: HAT_NO_6.stage.width, height: HAT_NO_6.stage.height },
     outline: hatOutline,
   },
 };

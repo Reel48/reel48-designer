@@ -60,7 +60,7 @@ describe("the hat-no-7-v2 die", () => {
   });
 
   it("sits beside the first No. 7 die, which is unchanged and still opens", () => {
-    expect(diesOfKind("hat").map((d) => d.id)).toEqual(["hat-no-7", "hat-no-7-v2"]);
+    expect(diesOfKind("hat").map((d) => d.id)).toEqual(["hat-no-7", "hat-no-7-v2", "hat-no-6"]);
     expect(DIES["hat-no-7"].supersededBy).toBe("hat-no-7-v2");
     expect(DIES["hat-no-7"].stage).toEqual({ width: 1560, height: 1296 });
     expect(dieGeometry("hat-no-7").zones.some((z) => z.area)).toBe(false);

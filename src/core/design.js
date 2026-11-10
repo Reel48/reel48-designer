@@ -442,7 +442,10 @@ export function designReducer(state, action) {
       return isZoned(state) ? state : { ...state, color: action.color };
 
     case "SET_PATTERN":
-      return isZoned(state) ? state : { ...state, patternId: action.patternId };
+      // v1.14.0: the same pattern again is a no-op (the same object back), so
+      // tapping the chosen swatch adds no undo step.
+      if (isZoned(state) || state.patternId === (action.patternId ?? null)) return state;
+      return { ...state, patternId: action.patternId ?? null };
 
     case "SET_SIZE": {
       // Positions are stage fractions and both koozie frames put the panels

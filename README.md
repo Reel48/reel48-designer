@@ -613,17 +613,18 @@ every golden file stands.
   square on the front.
 - **The back panel draws it turned.** Every `flipped` zone draws the pattern
   again, turned 180 degrees about the zone and anchored at its far corner,
-  clipped to the zone's rect less the base disc. The back panel folds under
-  and is sewn upside down, so on the finished sleeve it now reads upright,
-  laid out exactly like the front (stars point up on both sides). The base
-  keeps the front's orientation. `exportProof` and `exportArtCanvas` draw the
+  clipped to the zone's rect. The back panel folds under and is sewn upside
+  down, so on the finished sleeve it now reads upright, laid out exactly like
+  the front (stars point up on both sides). The base (the band between the
+  fold lines) keeps the front's orientation; the disc's caps past each fold
+  are panel wall and go with their panel. `exportProof` and `exportArtCanvas` draw the
   art layer, so the proof, the 3D texture and the share picture all show it.
 
 ### `core`
 
 - **`patternPlacements(geom)`** → `[{ x, y, rotation, clip }]`, in native px:
   where the tile starts (first entry, the whole die) and one entry per flipped
-  zone (`rotation: 180`, `clip` its rect with the disc as `exclude`). A die
+  zone (`rotation: 180`, `clip` its rect). A die
   with no zones keeps the old origin and draws nothing turned.
 - **`tracePatternClip(ctx, clip, scale)`**: a placement's clip as a canvas
   path, the disc wound against the rect so the default rule cuts it out.

@@ -33,11 +33,9 @@ describe("patternPlacements (v1.14.0)", () => {
       // top-left once it is folded under and the sleeve stands upright.
       expect(turned.rotation).toBe(180);
       expect([turned.x, turned.y]).toEqual([back.x1, back.y1]);
-      expect(turned.clip).toEqual({
-        kind: "rect",
-        ...back,
-        exclude: { cx: geom.cx, cy: geom.cy, r: geom.r },
-      });
+      // The whole back rect: the disc's cap past the fold is the back wall,
+      // so it turns with the panel (the base is only between the folds).
+      expect(turned.clip).toEqual({ kind: "rect", ...back });
     });
   }
 
@@ -64,7 +62,7 @@ describe("patternPlacements (v1.14.0)", () => {
     expect(patternPlacements(null)).toEqual([{ x: 0, y: 0, rotation: 0, clip: null }]);
   });
 
-  it("the clip is the panel rect with the disc wound against it", () => {
+  it("a clip's excluded disc is wound against its rect", () => {
     const ctx = recorder();
     tracePatternClip(ctx, { x0: 10, y0: 20, x1: 30, y1: 60, exclude: { cx: 20, cy: 20, r: 5 } }, 2);
     expect(ctx.calls).toEqual([

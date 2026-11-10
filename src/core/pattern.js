@@ -12,9 +12,12 @@
 //   back then reads upright, laid out exactly like the front: stars point up,
 //   paisleys and waves face the same way on both sides.
 //
-// The base disc keeps the front's orientation (it is the bottom of the can, so
-// it has no "up"): a flipped zone's copy is clipped to its rect less the disc,
-// which is the part of the cut that belongs to that panel.
+// A flipped zone's copy is clipped to the zone's whole rect. The base is only
+// the band between the two fold lines (the chords where the disc meets each
+// panel, as the 3D model's UVs map it), and it keeps the front's orientation;
+// the disc's caps that reach past a fold into a panel's rect are that panel's
+// wall, so they turn with it (cutting them out left a dome of unturned pattern
+// at the back panel's bottom edge).
 
 /**
  * Where the pattern is drawn, in native stage px: a list of placements, the
@@ -24,9 +27,8 @@
  *
  * `x, y` is where the tile's origin lands and `rotation` is in degrees (0 or
  * 180), as Konva's `fillPatternX/Y/Rotation` take them (times the display
- * scale). `clip` is null for the first placement, otherwise
- * `{ kind: "rect", x0, y0, x1, y1, exclude? }` with `exclude` the base disc
- * `{ cx, cy, r }` to cut out of it.
+ * scale). `clip` is null for the first placement, otherwise the flipped
+ * zone's rect `{ kind: "rect", x0, y0, x1, y1 }`.
  *
  * A die with no zones (or no upright zone) starts the tile at (0, 0), which is
  * what every version before v1.14.0 did.
@@ -37,7 +39,6 @@ export function patternPlacements(geom) {
   const placements = [
     { x: upright ? upright.bounds.x0 : 0, y: upright ? upright.bounds.y0 : 0, rotation: 0, clip: null },
   ];
-  const disc = geom?.r > 0 ? { cx: geom.cx, cy: geom.cy, r: geom.r } : null;
   for (const z of zones) {
     if (!z.flipped || !z.bounds) continue;
     const { x0, y0, x1, y1 } = z.bounds;
@@ -47,15 +48,16 @@ export function patternPlacements(geom) {
       x: x1,
       y: y1,
       rotation: 180,
-      clip: { kind: "rect", x0, y0, x1, y1, ...(disc ? { exclude: disc } : {}) },
+      clip: { kind: "rect", x0, y0, x1, y1 },
     });
   }
   return placements;
 }
 
 /**
- * Add a placement's clip to `ctx`'s path, times `scale`: the rect, with the
- * excluded disc wound the other way so the default (nonzero) rule cuts it out.
+ * Add a placement's clip to `ctx`'s path, times `scale`: the rect, with an
+ * `exclude` disc (if a clip carries one) wound the other way so the default
+ * (nonzero) rule cuts it out.
  */
 export function tracePatternClip(ctx, clip, scale = 1) {
   const s = (v) => v * scale;

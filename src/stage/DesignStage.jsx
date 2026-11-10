@@ -196,6 +196,9 @@ import {
   dieGeometry,
   faceAt,
   faceClipRegion,
+  patternFillScale,
+  patternPlacements,
+  tracePatternClip,
   faceRegions,
   fitScale,
   focusRects,
@@ -601,6 +604,15 @@ function InlineTextEditor({ el, displayW, displayH, camera, viewportWidth, class
  * @param {function} props.dispatch      the history reducer's dispatch
  * @param {object}   props.logoSources   elementId → object URL / https URL
  * @param {string}   [props.patternSrc]  tiled background image
+ * @param {number}   [props.patternPixelRatio=1] v1.14.0: the tile's image px per
+ *                                        native stage px. Supply a dense tile (an
+ *                                        SVG sized at 3x, say) and say so here; it
+ *                                        is drawn at its true size and stays sharp
+ *                                        on a Retina screen and in every export.
+ *                                        The tile starts at the front panel's
+ *                                        top-left, and a flipped zone (the back
+ *                                        panel) draws it turned 180 degrees, so the
+ *                                        sewn sleeve reads upright on both sides.
  * @param {function} [props.onReadyChange] (ready, error|null), current committed artwork
  * @param {number}   [props.fontVersion] bump to re-measure after a font loads
  * @param {string}   [props.dieId]       die id, or a legacy `size`
@@ -680,6 +692,7 @@ const DesignStage = forwardRef(function DesignStage(
     dispatch,
     logoSources,
     patternSrc,
+    patternPixelRatio = 1,
     onReadyChange,
     fontVersion = 0,
     dieId,
@@ -960,6 +973,8 @@ const DesignStage = forwardRef(function DesignStage(
   const magnetBox = useMemo(() => magnetRect(geom), [geom]);
   // The sides artwork is kept on, native px (v1.7.0 `confine`).
   const regions = useMemo(() => faceRegions(geom), [geom]);
+  // v1.14.0: where the tile starts, and the flipped zones drawn turned.
+  const placements = useMemo(() => patternPlacements(geom), [geom]);
 
   // ---- Confinement helpers (v1.7.0) ---------------------------------------
   // Plain functions of this render. The gesture listener reaches them through
@@ -2393,21 +2408,42 @@ const DesignStage = forwardRef(function DesignStage(
         {/* Artwork layer — clipped to the silhouette */}
         <Layer ref={artLayerRef}>
           <Rect ref={colorRectRef} x={0} y={0} width={displayW} height={displayH} fill={state.color} />
-          {patternImg && (
-            <Rect
-              x={0}
-              y={0}
-              width={displayW}
-              height={displayH}
-              ref={(node) => {
-                patternRef.current = node;
-                if (node) reportImage("pattern", patternSrc, "loaded");
-              }}
-              fillPatternImage={patternImg}
-              fillPatternRepeat="repeat"
-              fillPatternScale={{ x: scale, y: scale }}
-            />
-          )}
+          {patternImg &&
+            placements.map((p, i) => {
+              // v1.14.0: anchored at the front panel; each flipped zone again,
+              // turned, clipped to its own part of the cut (see core/pattern.js).
+              const k = patternFillScale(scale, patternPixelRatio);
+              const fill = (
+                <Rect
+                  key={i === 0 ? "pattern" : undefined}
+                  x={0}
+                  y={0}
+                  width={displayW}
+                  height={displayH}
+                  ref={
+                    i === 0
+                      ? (node) => {
+                          patternRef.current = node;
+                          if (node) reportImage("pattern", patternSrc, "loaded");
+                        }
+                      : undefined
+                  }
+                  fillPatternImage={patternImg}
+                  fillPatternRepeat="repeat"
+                  fillPatternScale={{ x: k, y: k }}
+                  fillPatternX={p.x * scale}
+                  fillPatternY={p.y * scale}
+                  fillPatternRotation={p.rotation}
+                />
+              );
+              return p.clip ? (
+                <Group key={`pattern-${i}`} clipFunc={(ctx) => tracePatternClip(ctx, p.clip, scale)}>
+                  {fill}
+                </Group>
+              ) : (
+                fill
+              );
+            })}
 
           {/* v1.11.0: each filled zone's island, under its artwork. */}
           {fills.length > 0 && (

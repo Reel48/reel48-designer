@@ -73,3 +73,6 @@ export {
   nextElementId,
   toDesignDescription,
 } from "./design.js";
+
+// v1.14.0: where a tiled pattern starts, and the back panel drawn upright.
+export { patternFillScale, patternPlacements, tracePatternClip } from "./pattern.js";

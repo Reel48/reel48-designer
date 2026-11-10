@@ -593,3 +593,43 @@ unchanged.
   it.
 - `diesOfKind("hat")` is now `["hat-no-7", "hat-no-7-v2", "hat-no-6"]`, and the
   stage frames test pins all three hat frames.
+
+## v1.14.0: patterns that print the right way up
+
+The storefront is switching on background patterns for the can cooler (camo,
+plaid, a flag and more). Nothing changes for a design without one, and the
+document's shape is unchanged (`patternId` has been in it since schema 3), so
+every golden file stands.
+
+### The stage
+
+- **`patternPixelRatio`** (default `1`): the tile's image px per native stage
+  px. Hand the stage a dense tile (an SVG sized at 3x the native frame's
+  px/in, say) and say `3`: it is drawn at its true physical size and stays
+  sharp on a Retina screen and in every export, where a 1x tile is upscaled
+  and soft.
+- **The tile starts at the front panel's top-left** (the die's first upright
+  zone) instead of the stage frame's (0, 0), so a plaid's lines or a flag sit
+  square on the front.
+- **The back panel draws it turned.** Every `flipped` zone draws the pattern
+  again, turned 180 degrees about the zone and anchored at its far corner,
+  clipped to the zone's rect. The back panel folds under and is sewn upside
+  down, so on the finished sleeve it now reads upright, laid out exactly like
+  the front (stars point up on both sides). The base (the band between the
+  fold lines) keeps the front's orientation; the disc's caps past each fold
+  are panel wall and go with their panel. `exportProof` and `exportArtCanvas` draw the
+  art layer, so the proof, the 3D texture and the share picture all show it.
+
+### `core`
+
+- **`patternPlacements(geom)`** → `[{ x, y, rotation, clip }]`, in native px:
+  where the tile starts (first entry, the whole die) and one entry per flipped
+  zone (`rotation: 180`, `clip` its rect). A die
+  with no zones keeps the old origin and draws nothing turned.
+- **`tracePatternClip(ctx, clip, scale)`**: a placement's clip as a canvas
+  path, the disc wound against the rect so the default rule cuts it out.
+- **`patternFillScale(displayScale, pixelRatio)`**: the `fillPatternScale` a
+  tile at `pixelRatio` needs.
+- **`SET_PATTERN` with the current pattern is a no-op**: the same object
+  back, so tapping the chosen swatch again adds no undo step. A missing
+  `patternId` clears like `null`.

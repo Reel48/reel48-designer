@@ -1,5 +1,5 @@
 // The one door to the 3D dependency, `@google/model-viewer` (on three.js):
-// nothing else in the package names it, and it is only ever import()ed, so a
+// nothing else in the package imports it, and it is only ever import()ed, so a
 // host that bundles this module keeps it out of its first load.
 //
 // Ported from Reel48-Storefront src/components/storefront/coozie/load-3d.js

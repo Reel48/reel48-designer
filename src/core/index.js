@@ -83,6 +83,9 @@ export { patternFillScale, patternPlacements, tracePatternClip } from "./pattern
 // Ported from Reel48-Storefront origin/main d78d90ee; see the README.
 // ---------------------------------------------------------------------------
 
+// What a design is priced from, and what is refused.
+export { HAT_DECORATIONS, InvalidDesignError, pricingFacts } from "./pricing-facts.js";
+
 // The production spec (the storefront's /api/admin/orders `designSpec`).
 export { describeDesign, specToTextLines } from "./coozie-spec.js";
 export { describeHatDesign, hatFixedMarks, hatSpecToTextLines, isHatSpec, partColourText } from "./hat-spec.js";

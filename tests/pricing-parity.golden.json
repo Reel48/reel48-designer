@@ -1,0 +1,285 @@
+{
+ "no7-front-embroidery": {
+  "kind": "hat",
+  "productHandle": "no-7",
+  "dieId": "hat-no-7-v2",
+  "decorationType": "embroidery",
+  "sideSpots": 0,
+  "placements": [
+   {
+    "zone": "front",
+    "method": "embroidery",
+    "primary": true
+   }
+  ]
+ },
+ "no7-front-pvc-left-back": {
+  "kind": "hat",
+  "productHandle": "no-7",
+  "dieId": "hat-no-7-v2",
+  "decorationType": "pvc_patch",
+  "sideSpots": 2,
+  "placements": [
+   {
+    "zone": "front",
+    "method": "pvc_patch",
+    "primary": true
+   },
+   {
+    "zone": "left",
+    "method": "embroidery",
+    "primary": false
+   },
+   {
+    "zone": "back",
+    "method": "embroidery",
+    "primary": false
+   }
+  ]
+ },
+ "no7-back-too-big": {
+  "kind": "hat",
+  "refused": "Your logo on the back is bigger than the back can take. The largest it takes is 2.5 × 0.875 in. Please make it smaller and try again."
+ },
+ "no7-front-silicon-label-ground": {
+  "kind": "hat",
+  "productHandle": "no-7",
+  "dieId": "hat-no-7-v2",
+  "decorationType": "silicon_patch",
+  "sideSpots": 1,
+  "placements": [
+   {
+    "zone": "front",
+    "method": "silicon_patch",
+    "primary": true
+   },
+   {
+    "zone": "label_tall",
+    "method": "woven_label",
+    "primary": false
+   }
+  ]
+ },
+ "no7-front-woven-right-label": {
+  "kind": "hat",
+  "productHandle": "no-7",
+  "dieId": "hat-no-7-v2",
+  "decorationType": "woven_patch",
+  "sideSpots": 2,
+  "placements": [
+   {
+    "zone": "front",
+    "method": "woven_patch",
+    "primary": true
+   },
+   {
+    "zone": "right",
+    "method": "embroidery",
+    "primary": false
+   },
+   {
+    "zone": "label_tall",
+    "method": "woven_label",
+    "primary": false
+   }
+  ]
+ },
+ "no7-left-only": {
+  "kind": "hat",
+  "productHandle": "no-7",
+  "dieId": "hat-no-7-v2",
+  "decorationType": "embroidery",
+  "sideSpots": 0,
+  "placements": [
+   {
+    "zone": "left",
+    "method": "embroidery",
+    "primary": true
+   }
+  ]
+ },
+ "no7-label-only": {
+  "kind": "hat",
+  "refused": "Add your logo to the front, a side or the back of the hat."
+ },
+ "no7-oversize": {
+  "kind": "hat",
+  "refused": "Your logo on the front is bigger than the front can take. The largest it takes is 4.5 × 2.25 in. Please make it smaller and try again."
+ },
+ "no7-left-method-patch": {
+  "kind": "hat",
+  "refused": "PVC Patch isn't offered on the left side. Please choose another method."
+ },
+ "no7-not-pantone": {
+  "kind": "hat",
+  "refused": "One of your hat colours isn't one we offer. Please refresh the page and pick it again."
+ },
+ "no7-unknown-zone": {
+  "kind": "hat",
+  "refused": "Your hat design couldn't be read. Please refresh and try again."
+ },
+ "no7-empty": {
+  "kind": "hat",
+  "refused": "Add your logo to the front, a side or the back of the hat."
+ },
+ "no7-stamped-order": {
+  "kind": "hat",
+  "productHandle": "no-7",
+  "dieId": "hat-no-7-v2",
+  "decorationType": "embroidery",
+  "sideSpots": 2,
+  "placements": [
+   {
+    "zone": "front",
+    "method": "embroidery",
+    "primary": true
+   },
+   {
+    "zone": "right",
+    "method": "embroidery",
+    "primary": false
+   },
+   {
+    "zone": "label_tall",
+    "method": "woven_label",
+    "primary": false
+   }
+  ]
+ },
+ "no7-schema-3": {
+  "kind": "hat",
+  "productHandle": "no-7",
+  "dieId": "hat-no-7-v2",
+  "decorationType": "embroidery",
+  "sideSpots": 0,
+  "placements": [
+   {
+    "zone": "front",
+    "method": "embroidery",
+    "primary": true
+   }
+  ]
+ },
+ "no6-every-spot": {
+  "kind": "hat",
+  "productHandle": "no-6",
+  "dieId": "hat-no-6",
+  "decorationType": "embroidery",
+  "sideSpots": 4,
+  "placements": [
+   {
+    "zone": "front",
+    "method": "embroidery",
+    "primary": true
+   },
+   {
+    "zone": "left",
+    "method": "embroidery",
+    "primary": false
+   },
+   {
+    "zone": "right",
+    "method": "embroidery",
+    "primary": false
+   },
+   {
+    "zone": "back",
+    "method": "embroidery",
+    "primary": false
+   },
+   {
+    "zone": "label_tall",
+    "method": "woven_label",
+    "primary": false
+   }
+  ]
+ },
+ "no6-front-pvc": {
+  "kind": "hat",
+  "productHandle": "no-6",
+  "dieId": "hat-no-6",
+  "decorationType": "pvc_patch",
+  "sideSpots": 0,
+  "placements": [
+   {
+    "zone": "front",
+    "method": "pvc_patch",
+    "primary": true
+   }
+  ]
+ },
+ "no6-back-only": {
+  "kind": "hat",
+  "productHandle": "no-6",
+  "dieId": "hat-no-6",
+  "decorationType": "embroidery",
+  "sideSpots": 0,
+  "placements": [
+   {
+    "zone": "back",
+    "method": "embroidery",
+    "primary": true
+   }
+  ]
+ },
+ "no6-stray": {
+  "kind": "hat",
+  "refused": "Some of your artwork isn't on a spot we can print. Please move it onto the hat and try again."
+ },
+ "no7v1-front-side": {
+  "kind": "hat",
+  "productHandle": "no-7",
+  "dieId": "hat-no-7",
+  "decorationType": "embroidery",
+  "sideSpots": 1,
+  "placements": [
+   {
+    "zone": "front",
+    "method": "embroidery",
+    "primary": true
+   },
+   {
+    "zone": "left",
+    "method": "embroidery",
+    "primary": false
+   }
+  ]
+ },
+ "no7v1-square-label": {
+  "kind": "hat",
+  "refused": "Inside labels are a rectangle only now. Please refresh the page to move your label onto it."
+ },
+ "hat-unknown-die": {
+  "kind": "hat",
+  "refused": "This hat isn't one we can make from the designer yet."
+ },
+ "can-standard": {
+  "kind": "koozie",
+  "productHandle": "custom-coozie",
+  "size": "standard"
+ },
+ "can-slim-pattern": {
+  "kind": "koozie",
+  "productHandle": "custom-coozie-slim",
+  "size": "slim"
+ },
+ "can-slim-stored-print": {
+  "kind": "koozie",
+  "productHandle": "custom-coozie-slim",
+  "size": "slim"
+ },
+ "can-legacy-no-size": {
+  "kind": "koozie",
+  "productHandle": "custom-coozie",
+  "size": "standard"
+ },
+ "can-unknown-size": {
+  "kind": "koozie",
+  "productHandle": "custom-coozie",
+  "size": "standard"
+ },
+ "other-kind": {
+  "kind": "other",
+  "refused": "This design is not a can cooler design. Please open it in its own designer and try again."
+ }
+}

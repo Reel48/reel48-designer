@@ -1,0 +1,401 @@
+{
+ "_doc": "Written by tag_measure.py (python3 -I tag_measure.py [STATE]). Frame F1 mm (+x forward, +y wearer's left, +z up). tag.* is the scanned snapback loop tag at the strap's wearer's-left end; its outer face's vertices and a planar (u across, v up) mm parameterisation centred on the face are in tag.outer_npz (u = (p - centre) . across, v = (p - centre) . up; across = up x normal points right as seen from behind). logo.rotate_deg is counter-clockwise positive as seen from behind (-90 = clockwise: the logo's top faces +u, its long side runs along v). logo.size_mm is the logo's tight bounding box on the face after the turn.",
+ "note": "Brayden 2026-10-20: \"add our Reel48 logo onto the existing snapback tag ... on the left side of the velcro strap, there is already a little loop tag there ... put the attached logo vertically onto it. Should be a 90 degree turn for the logo to stack horizontally and look correct.\" Lead's decisions: turn clockwise as the No. 7 sample's REEL48 text (R48926-47.jpg), the tag follows the strap colour, the mark's colour contrasts automatically, the mark is fixed (not customer-editable), long side ~70 % of the face height with >= 1 mm to the side edges. Brayden 2026-10-21: \"Can you please make the Reel48 logo on the snapback tag slightly bigger? It should take up about 90% of the length of the tag and be centered on the rectangle.\" logo.size_rule frac_of_tag_length: long side 0.90 x the tag's height, short side long / aspect; 07_parts centres it on the production tag and gates side_margin_mm and centre_tol_mm there (the scanned face here is too narrow: logo.size_mm.side_clearance_mm).",
+ "tag": {
+  "state": "smooth_k60",
+  "centre_mm": [
+   -132.64,
+   36.318,
+   -1.41
+  ],
+  "normal": [
+   -0.91696,
+   0.39588,
+   -0.04963
+  ],
+  "up": [
+   -0.05527,
+   -0.00284,
+   0.99847
+  ],
+  "across": [
+   -0.39513,
+   -0.9183,
+   -0.02449
+  ],
+  "lean_deg_from_vertical": -1.4,
+  "outer_face": {
+   "width_mm": 4.96,
+   "width_range_mm": [
+    4.39,
+    5.68
+   ],
+   "height_mm": 21.54,
+   "height_median_over_central_u_mm": 21.25,
+   "u_range_mm": [
+    -3.58,
+    3.03
+   ],
+   "v_range_mm": [
+    -10.77,
+    10.77
+   ],
+   "plane_rms_mm": 0.258,
+   "plane_from": "the flat middle (face.core_angle_deg / core_tol_mm); the face's extent adds the roll toward +y",
+   "relief_p2_p98_mm": [
+    -1.246,
+    0.598
+   ],
+   "verts": 1719,
+   "faces": 3226,
+   "width_profile_mm": [
+    [
+     -11.0,
+     -0.64,
+     1.79
+    ],
+    [
+     -10.0,
+     -3.26,
+     1.65
+    ],
+    [
+     -9.0,
+     -3.58,
+     1.65
+    ],
+    [
+     -8.0,
+     -3.32,
+     1.8
+    ],
+    [
+     -7.0,
+     -3.22,
+     1.95
+    ],
+    [
+     -6.0,
+     -2.97,
+     1.94
+    ],
+    [
+     -5.0,
+     -2.79,
+     2.03
+    ],
+    [
+     -4.0,
+     -2.28,
+     2.11
+    ],
+    [
+     -3.0,
+     -2.35,
+     2.22
+    ],
+    [
+     -2.0,
+     -2.3,
+     2.3
+    ],
+    [
+     -1.0,
+     -2.48,
+     2.31
+    ],
+    [
+     -0.0,
+     -2.47,
+     2.48
+    ],
+    [
+     1.0,
+     -2.39,
+     2.69
+    ],
+    [
+     2.0,
+     -2.43,
+     2.73
+    ],
+    [
+     3.0,
+     -2.65,
+     2.77
+    ],
+    [
+     4.0,
+     -2.75,
+     2.71
+    ],
+    [
+     5.0,
+     -2.8,
+     2.81
+    ],
+    [
+     6.0,
+     -2.83,
+     2.85
+    ],
+    [
+     7.0,
+     -2.44,
+     2.88
+    ],
+    [
+     8.0,
+     -2.62,
+     2.97
+    ],
+    [
+     9.0,
+     -2.95,
+     3.03
+    ],
+    [
+     10.0,
+     -3.5,
+     2.76
+    ],
+    [
+     11.0,
+     -3.5,
+     0.23
+    ]
+   ],
+   "_width_profile": "[v, u_min, u_max] per 1 mm of v, centred on the face"
+  },
+  "loop": {
+   "u_range_mm": [
+    -4.32,
+    3.28
+   ],
+   "v_range_mm": [
+    -11.07,
+    10.89
+   ],
+   "z_range_mm": [
+    -12.51,
+    9.55
+   ],
+   "proud_of_strap_mm": 4.25,
+   "thickness_ray_mm": {
+    "p10": 1.51,
+    "p50": 3.41,
+    "p90": 11.93,
+    "hit_regions": {
+     "other": 307,
+     "crown_LB": 20,
+     "sweatband": 510,
+     "strap": 663
+    }
+   },
+   "hang_below_strap_mm": -0.04,
+   "hang_above_strap_mm": -1.0,
+   "region_labels": {
+    "other": 665,
+    "crown_LB": 2655,
+    "sweatband": 125,
+    "strap": 708
+   },
+   "fastlane_parts": {
+    "loop": {
+     "strap": 7974
+    },
+    "outer_face": {
+     "strap": 3226
+    }
+   }
+  },
+  "strap": {
+   "outer_plane": {
+    "x": "a + b y + c z",
+    "a": -133.7334,
+    "b": 0.14476,
+    "c": -0.11133,
+    "normal": [
+     -0.98373,
+     0.1424,
+     -0.10952
+    ],
+    "rms_mm": 0.155
+   },
+   "z_range_at_y24_32_mm": [
+    -12.55,
+    10.56
+   ]
+  },
+  "outer_npz": "/Users/brayden/Reel48-Assets/3d/hats/no-7/state/tag_outer.npz",
+  "sample_photo_tab_mm": {
+   "width_mm": 8.4,
+   "height_mm": 21.9,
+   "scale": "strap height beside the tab = the scan's",
+   "strap_mm_scan": 23.11,
+   "camera_scale_px_per_mm": 8.278,
+   "width_mm_camera_scale": 7.7,
+   "height_mm_camera_scale": 20.1,
+   "strap_mm_camera_scale": 21.3,
+   "fitted_camera_offset_uv_mm": [
+    11.47,
+    -6.25
+   ]
+  }
+ },
+ "_outer_npz": "vidx (full-res vertex ids of the outer face), u, v (mm, planar, centred), h (mm above the face plane), fidx (full-res faces wholly on the face), outline_vidx (its boundary loop, ordered), loop_vidx / loop_fidx (the whole scanned loop: what must take the strap colour), centre, normal, up, across, state",
+ "logo": {
+  "svg_white": "/Users/brayden/Reel48-Assets/3d/hats/no-7/source/brand/reel48-logo-rounded-white.svg",
+  "svg_dark": "/Users/brayden/Reel48-Assets/3d/hats/no-7/source/brand/reel48-logo-rounded-dark.svg",
+  "svg_black": "/Users/brayden/Reel48-Assets/3d/hats/no-7/source/brand/reel48-logo-rounded-black.svg",
+  "png_white": "/Users/brayden/Reel48-Assets/3d/hats/no-7/source/brand/reel48-logo-rounded-white-1024.png",
+  "png_dark": "/Users/brayden/Reel48-Assets/3d/hats/no-7/source/brand/reel48-logo-rounded-dark-1024.png",
+  "sha256": {
+   "white_svg": "660335f63ceb08b08e0397327f4bd05586525759bf1beaa430d22e0326dc6b0f",
+   "white_png": "31ddb5a262b0b99a58d3cd7c83829f29d8242ca111ea955c759e00fdd0a58cdc",
+   "dark_svg": "a1e79381c39cffc22485647f9b2a17f428041f072f920990d9a4054faad1774d",
+   "dark_png": "1e31c5f17cf9691e632027059fab08501026bbccf03070e7ef748f1e79547149",
+   "black_svg": "210e331b1474ef6f76bac16d054cdd201c119ac9b7d42beb535aec2a35024d39"
+  },
+  "source_dir": "/Users/brayden/Desktop/Reel48 Brand Identity/Rounded Version/Logo/SVG",
+  "viewbox": [
+   0.0,
+   0.0,
+   468.221,
+   92.317
+  ],
+  "path_bbox": [
+   0.0001,
+   0.0002,
+   468.221,
+   92.317
+  ],
+  "aspect_w_over_h": 5.07189,
+  "png_px": [
+   1024,
+   202
+  ],
+  "rotate_deg": -90,
+  "size_rule": "frac_of_tag_length",
+  "long_side_frac_of_height": 0.9,
+  "side_margin_mm": 0.5,
+  "centre_tol_mm": 0.1,
+  "contrast": {
+   "light_threshold": 0.4,
+   "on_dark": "#FFFFFF",
+   "on_light": "#263151"
+  },
+  "contrast_rule": "WCAG relative luminance of the strap colour >= light_threshold -> on_light, else on_dark",
+  "contrast_presets": {
+   "navy": {
+    "hex": "#1F2A44",
+    "luminance": 0.0236,
+    "logo": "#FFFFFF"
+   },
+   "black": {
+    "hex": "#1C1C1E",
+    "luminance": 0.0117,
+    "logo": "#FFFFFF"
+   },
+   "white": {
+    "hex": "#F1F0EB",
+    "luminance": 0.8702,
+    "logo": "#263151"
+   },
+   "stone": {
+    "hex": "#CBBE9E",
+    "luminance": 0.5199,
+    "logo": "#263151"
+   },
+   "charcoal": {
+    "hex": "#43474D",
+    "luminance": 0.0624,
+    "logo": "#FFFFFF"
+   },
+   "red": {
+    "hex": "#A42A2E",
+    "luminance": 0.0975,
+    "logo": "#FFFFFF"
+   },
+   "royal": {
+    "hex": "#2A4BA0",
+    "luminance": 0.0806,
+    "logo": "#FFFFFF"
+   },
+   "forest": {
+    "hex": "#25473A",
+    "luminance": 0.0521,
+    "logo": "#FFFFFF"
+   }
+  },
+  "size_mm": {
+   "long": 19.39,
+   "short": 3.82,
+   "along_v": 19.39,
+   "along_u": 3.82,
+   "bound_by": "tag_length",
+   "side_clearance_mm": [
+    0.37,
+    -0.26
+   ],
+   "side_clearance_on": "the scanned face",
+   "long_frac_of_height": 0.9,
+   "wanted_at_90pct": {
+    "long": 19.39,
+    "short": 3.82
+   },
+   "alternatives": {
+    "scan_face_margin_0.5mm_at_70pct": {
+     "long": 14.62,
+     "short": 2.88
+    },
+    "scan_face_margin_0.5mm_at_90pct": {
+     "long": 14.62,
+     "short": 2.88
+    },
+    "face_7.4mm_wide_margin_0.5mm": {
+     "long": 19.39,
+     "short": 3.82
+    },
+    "face_8.4mm_wide_margin_0.5mm": {
+     "long": 19.39,
+     "short": 3.82
+    },
+    "face_width_needed_for_90pct_mm": 4.82
+   },
+   "_alternatives": "sizes (short x long, mm) under other choices: a 0.5 mm margin on the scanned face (the 2026-10-20 rule, at 70 % and at this fraction), or a face as wide as the No. 7 sample's woven tab (7.4 mm sage face, 8.4 mm with its shaded fold edge, photo 47 scaled by strap height)"
+  },
+  "centre_uv_mm": [
+   0.0,
+   0.0
+  ],
+  "_centre_uv_mm": "the mark's centre on the SCANNED face (10f's L1 tag); the production tag's centre is 07's (state/tab_card.json face.centre_*: the logo centred on the tag as seen square-on)",
+  "customer_editable": false
+ },
+ "review": {
+  "closeup": "/Users/brayden/Reel48-Assets/3d/hats/no-7/review/tag/tag_closeup.png",
+  "preview": "/Users/brayden/Reel48-Assets/3d/hats/no-7/review/tag/tag_logo_preview.png",
+  "photo_tab": {
+   "width_mm": 8.4,
+   "height_mm": 21.9,
+   "scale": "strap height beside the tab = the scan's",
+   "strap_mm_scan": 23.11,
+   "camera_scale_px_per_mm": 8.278,
+   "width_mm_camera_scale": 7.7,
+   "height_mm_camera_scale": 20.1,
+   "strap_mm_camera_scale": 21.3,
+   "fitted_camera_offset_uv_mm": [
+    11.47,
+    -6.25
+   ]
+  },
+  "renders": [
+   "/Users/brayden/Reel48-Assets/3d/hats/no-7/review/tag/tag_straight_rake_top.png",
+   "/Users/brayden/Reel48-Assets/3d/hats/no-7/review/tag/tag_straight_rake_left.png",
+   "/Users/brayden/Reel48-Assets/3d/hats/no-7/review/tag/tag_oblique_outside.png",
+   "/Users/brayden/Reel48-Assets/3d/hats/no-7/review/tag/tag_oblique_inside.png",
+   "/Users/brayden/Reel48-Assets/3d/hats/no-7/review/tag/tag_preview_navy.png",
+   "/Users/brayden/Reel48-Assets/3d/hats/no-7/review/tag/tag_preview_white.png"
+  ]
+ }
+}

@@ -1,0 +1,1102 @@
+{
+ "no7-front-embroidery": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "parts": {
+   "crown_FL": "#1F2A44",
+   "crown_FR": "#1F2A44",
+   "crown_LS": "#1F2A44",
+   "crown_RS": "#1F2A44",
+   "crown_LB": "#1F2A44",
+   "crown_RB": "#1F2A44",
+   "bill_top": "#1F2A44",
+   "bill_under": "#1F2A44",
+   "button": "#1F2A44",
+   "eyelet": "#1F2A44",
+   "strap": "#1F2A44"
+  },
+  "zones": {
+   "front": {
+    "method": "embroidery"
+   }
+  },
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.235224115843414,
+    "y": 0.5180163898299226,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.16129032258064516
+   }
+  ]
+ },
+ "no7-front-pvc-left-back": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "parts": {
+   "crown_FL": "#A92A2F",
+   "crown_FR": "#A92A2F",
+   "crown_LS": "#1F2A44",
+   "crown_RS": "#1F2A44",
+   "crown_LB": "#1F2A44",
+   "crown_RB": "#1F2A44",
+   "bill_top": "#1F2A44",
+   "bill_under": "#1F2A44",
+   "button": "#1F2A44",
+   "eyelet": "#1F2A44",
+   "strap": "#1F2A44"
+  },
+  "zones": {
+   "front": {
+    "method": "pvc_patch"
+   }
+  },
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.235224115843414,
+    "y": 0.5180163898299226,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.1881720430107527
+   },
+   {
+    "id": "b",
+    "type": "text",
+    "x": 0.5830184450867354,
+    "y": 0.5455951481371855,
+    "rotation": -7,
+    "opacity": 1,
+    "text": "EST 1999",
+    "fontFamily": "Arial, sans-serif",
+    "fontStyle": "bold",
+    "fill": "#FFFFFF",
+    "align": "center",
+    "fontScale": 0.021505376344086023
+   },
+   {
+    "id": "c",
+    "type": "logo",
+    "x": 0.09650537634408603,
+    "y": 0.8570243362831859,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "c.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.08602150537634409
+   }
+  ]
+ },
+ "no7-back-too-big": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "parts": {
+   "crown_FL": "#1F2A44",
+   "crown_FR": "#1F2A44",
+   "crown_LS": "#1F2A44",
+   "crown_RS": "#1F2A44",
+   "crown_LB": "#1F2A44",
+   "crown_RB": "#1F2A44",
+   "bill_top": "#1F2A44",
+   "bill_under": "#1F2A44",
+   "button": "#1F2A44",
+   "eyelet": "#1F2A44",
+   "strap": "#1F2A44"
+  },
+  "zones": {
+   "front": {
+    "method": "embroidery"
+   }
+  },
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.235224115843414,
+    "y": 0.5180163898299226,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.16129032258064516
+   },
+   {
+    "id": "b",
+    "type": "logo",
+    "x": 0.09650537634408603,
+    "y": 0.8570243362831859,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "b.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.10752688172043011
+   }
+  ]
+ },
+ "no7-front-silicon-label-ground": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "parts": {
+   "crown_FL": "#EFEAE5",
+   "crown_FR": "#EFEAE5",
+   "crown_LS": "#EFEAE5",
+   "crown_RS": "#EFEAE5",
+   "crown_LB": "#EFEAE5",
+   "crown_RB": "#EFEAE5",
+   "bill_top": "#EFEAE5",
+   "bill_under": "#EFEAE5",
+   "button": "#EFEAE5",
+   "eyelet": "#EFEAE5",
+   "strap": "#EFEAE5"
+  },
+  "zones": {
+   "front": {
+    "method": "silicon_patch"
+   },
+   "label_tall": {
+    "ground": "#F1F0EB",
+    "shape": "tall"
+   }
+  },
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.235224115843414,
+    "y": 0.5180163898299226,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.21505376344086022
+   },
+   {
+    "id": "b",
+    "type": "text",
+    "x": 0.2508064516129032,
+    "y": 0.8362831858407079,
+    "rotation": 0,
+    "opacity": 1,
+    "text": "EST 1999",
+    "fontFamily": "Arial, sans-serif",
+    "fontStyle": "bold",
+    "fill": "#1C1C1E",
+    "align": "center",
+    "fontScale": 0.016129032258064516
+   }
+  ]
+ },
+ "no7-front-woven-right-label": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "parts": {
+   "crown_FL": "#B1B4B3",
+   "crown_FR": "#B1B4B3",
+   "crown_LS": "#B1B4B3",
+   "crown_RS": "#B1B4B3",
+   "crown_LB": "#B1B4B3",
+   "crown_RB": "#B1B4B3",
+   "bill_top": "#B1B4B3",
+   "bill_under": "#B1B4B3",
+   "button": "#B1B4B3",
+   "eyelet": "#B1B4B3",
+   "strap": "#B1B4B3"
+  },
+  "zones": {
+   "front": {
+    "method": "woven_patch",
+    "threads": [
+     "#FFFFFF",
+     "#1C1C1E"
+    ]
+   }
+  },
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.235224115843414,
+    "y": 0.5180163898299226,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.13440860215053763
+   },
+   {
+    "id": "b",
+    "type": "logo",
+    "x": 0.8865334354523693,
+    "y": 0.5345443671572523,
+    "rotation": 12,
+    "opacity": 1,
+    "fileName": "b.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.08064516129032258
+   },
+   {
+    "id": "c",
+    "type": "logo",
+    "x": 0.2508064516129032,
+    "y": 0.8362831858407079,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "c.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.06451612903225806
+   }
+  ]
+ },
+ "no7-left-only": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "parts": {
+   "crown_FL": "#C8BDA4",
+   "crown_FR": "#C8BDA4",
+   "crown_LS": "#C8BDA4",
+   "crown_RS": "#C8BDA4",
+   "crown_LB": "#C8BDA4",
+   "crown_RB": "#C8BDA4",
+   "bill_top": "#C8BDA4",
+   "bill_under": "#C8BDA4",
+   "button": "#C8BDA4",
+   "eyelet": "#C8BDA4",
+   "strap": "#C8BDA4"
+  },
+  "zones": {},
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.5830184450867354,
+    "y": 0.5455951481371855,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.0967741935483871
+   }
+  ]
+ },
+ "no7-label-only": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "parts": {
+   "crown_FL": "#1F2A44",
+   "crown_FR": "#1F2A44",
+   "crown_LS": "#1F2A44",
+   "crown_RS": "#1F2A44",
+   "crown_LB": "#1F2A44",
+   "crown_RB": "#1F2A44",
+   "bill_top": "#1F2A44",
+   "bill_under": "#1F2A44",
+   "button": "#1F2A44",
+   "eyelet": "#1F2A44",
+   "strap": "#1F2A44"
+  },
+  "zones": {},
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.2508064516129032,
+    "y": 0.8362831858407079,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.053763440860215055
+   }
+  ]
+ },
+ "no7-oversize": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "parts": {
+   "crown_FL": "#1F2A44",
+   "crown_FR": "#1F2A44",
+   "crown_LS": "#1F2A44",
+   "crown_RS": "#1F2A44",
+   "crown_LB": "#1F2A44",
+   "crown_RB": "#1F2A44",
+   "bill_top": "#1F2A44",
+   "bill_under": "#1F2A44",
+   "button": "#1F2A44",
+   "eyelet": "#1F2A44",
+   "strap": "#1F2A44"
+  },
+  "zones": {
+   "front": {
+    "method": "embroidery"
+   }
+  },
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.235224115843414,
+    "y": 0.5180163898299226,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.27956989247311825
+   }
+  ]
+ },
+ "no7-left-method-patch": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "parts": {
+   "crown_FL": "#1F2A44",
+   "crown_FR": "#1F2A44",
+   "crown_LS": "#1F2A44",
+   "crown_RS": "#1F2A44",
+   "crown_LB": "#1F2A44",
+   "crown_RB": "#1F2A44",
+   "bill_top": "#1F2A44",
+   "bill_under": "#1F2A44",
+   "button": "#1F2A44",
+   "eyelet": "#1F2A44",
+   "strap": "#1F2A44"
+  },
+  "zones": {
+   "left": {
+    "method": "pvc_patch"
+   }
+  },
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.5830184450867354,
+    "y": 0.5455951481371855,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.08064516129032258
+   }
+  ]
+ },
+ "no7-not-pantone": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "parts": {
+   "crown_FL": "#123456",
+   "crown_FR": "#1F2A44",
+   "crown_LS": "#1F2A44",
+   "crown_RS": "#1F2A44",
+   "crown_LB": "#1F2A44",
+   "crown_RB": "#1F2A44",
+   "bill_top": "#1F2A44",
+   "bill_under": "#1F2A44",
+   "button": "#1F2A44",
+   "eyelet": "#1F2A44",
+   "strap": "#1F2A44"
+  },
+  "zones": {},
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.235224115843414,
+    "y": 0.5180163898299226,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.16129032258064516
+   }
+  ]
+ },
+ "no7-unknown-zone": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "parts": {
+   "crown_FL": "#1F2A44",
+   "crown_FR": "#1F2A44",
+   "crown_LS": "#1F2A44",
+   "crown_RS": "#1F2A44",
+   "crown_LB": "#1F2A44",
+   "crown_RB": "#1F2A44",
+   "bill_top": "#1F2A44",
+   "bill_under": "#1F2A44",
+   "button": "#1F2A44",
+   "eyelet": "#1F2A44",
+   "strap": "#1F2A44"
+  },
+  "zones": {
+   "visor": {
+    "method": "embroidery"
+   }
+  },
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.235224115843414,
+    "y": 0.5180163898299226,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.16129032258064516
+   }
+  ]
+ },
+ "no7-empty": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "parts": {
+   "crown_FL": "#1F2A44",
+   "crown_FR": "#1F2A44",
+   "crown_LS": "#1F2A44",
+   "crown_RS": "#1F2A44",
+   "crown_LB": "#1F2A44",
+   "crown_RB": "#1F2A44",
+   "bill_top": "#1F2A44",
+   "bill_under": "#1F2A44",
+   "button": "#1F2A44",
+   "eyelet": "#1F2A44",
+   "strap": "#1F2A44"
+  },
+  "zones": {
+   "front": {
+    "method": "embroidery"
+   }
+  },
+  "elements": []
+ },
+ "no7-stamped-order": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "parts": {
+   "crown_FL": "#1F2A44",
+   "crown_FR": "#1F2A44",
+   "crown_LS": "#A92A2F",
+   "crown_RS": "#A92A2F",
+   "crown_LB": "#A92A2F",
+   "crown_RB": "#A92A2F",
+   "bill_top": "#A92A2F",
+   "bill_under": "#A92A2F",
+   "button": "#A92A2F",
+   "eyelet": "#A92A2F",
+   "strap": "#A92A2F",
+   "sweatband": "#1C1C1E"
+  },
+  "zones": {
+   "front": {
+    "method": "embroidery",
+    "threads": [
+     "#FFFFFF"
+    ]
+   },
+   "label_tall": {
+    "method": "woven_label",
+    "shape": "tall",
+    "ground": "#1C1C1E"
+   }
+  },
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.235224115843414,
+    "y": 0.5180163898299226,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.16129032258064516,
+    "clip": "front"
+   },
+   {
+    "id": "b",
+    "type": "text",
+    "x": 0.8865334354523693,
+    "y": 0.5345443671572523,
+    "rotation": 8,
+    "opacity": 1,
+    "text": "EST 1999",
+    "fontFamily": "Arial, sans-serif",
+    "fontStyle": "bold",
+    "fill": "#FFFFFF",
+    "align": "center",
+    "fontScale": 0.026881720430107527
+   },
+   {
+    "id": "c",
+    "type": "logo",
+    "x": 0.2508064516129032,
+    "y": 0.8362831858407079,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "c.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.053763440860215055
+   }
+  ],
+  "placements": [
+   {
+    "zone": "front",
+    "method": "embroidery",
+    "primary": true
+   }
+  ],
+  "extraSpots": 2,
+  "pantone": {
+   "crown_FL": "PMS 533 C"
+  },
+  "jsonUrl": "https://abc123xyz.public.blob.vercel-storage.com/coozie/2f6c1f2e-6b3a-4a5f-9d7e-0c1b2a3d4e5f/design.json",
+  "fontUrls": [
+   "https://abc123xyz.public.blob.vercel-storage.com/coozie/2f6c1f2e-6b3a-4a5f-9d7e-0c1b2a3d4e5f/font-0-brand.ttf"
+  ],
+  "pictureUrl": "https://abc123xyz.public.blob.vercel-storage.com/coozie/2f6c1f2e-6b3a-4a5f-9d7e-0c1b2a3d4e5f/picture-3d.png",
+  "artworkFiles": [
+   {
+    "elId": "a",
+    "url": "https://abc123xyz.public.blob.vercel-storage.com/coozie/2f6c1f2e-6b3a-4a5f-9d7e-0c1b2a3d4e5f/artwork-0-logo.ai",
+    "fileName": "logo.ai"
+   }
+  ]
+ },
+ "no7-schema-3": {
+  "schemaVersion": 3,
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "parts": {
+   "crown_FL": "#1F2A44",
+   "crown_FR": "#1F2A44",
+   "crown_LS": "#1F2A44",
+   "crown_RS": "#1F2A44",
+   "crown_LB": "#1F2A44",
+   "crown_RB": "#1F2A44",
+   "bill_top": "#1F2A44",
+   "bill_under": "#1F2A44",
+   "button": "#1F2A44",
+   "eyelet": "#1F2A44",
+   "strap": "#1F2A44"
+  },
+  "zones": {
+   "front": {
+    "method": "embroidery"
+   }
+  },
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.235224115843414,
+    "y": 0.5180163898299226,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.16129032258064516
+   }
+  ]
+ },
+ "no6-every-spot": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-6",
+  "parts": {
+   "crown_F": "#1F2A44",
+   "crown_LS": "#EFEAE5",
+   "crown_RS": "#EFEAE5",
+   "crown_LB": "#EFEAE5",
+   "crown_RB": "#EFEAE5",
+   "bill_top": "#EFEAE5",
+   "bill_under": "#EFEAE5",
+   "button": "#EFEAE5",
+   "eyelet": "#EFEAE5"
+  },
+  "zones": {
+   "front": {
+    "method": "embroidery"
+   }
+  },
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.18525354986081177,
+    "y": 0.20252104040694566,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.22988505747126436
+   },
+   {
+    "id": "b",
+    "type": "logo",
+    "x": 0.5901297186489763,
+    "y": 0.392616290784862,
+    "rotation": -6,
+    "opacity": 1,
+    "fileName": "b.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.08620689655172414
+   },
+   {
+    "id": "c",
+    "type": "text",
+    "x": 0.8623972925646551,
+    "y": 0.3873754213934075,
+    "rotation": 6,
+    "opacity": 1,
+    "text": "EST 1999",
+    "fontFamily": "Arial, sans-serif",
+    "fontStyle": "bold",
+    "fill": "#FFFFFF",
+    "align": "center",
+    "fontScale": 0.022988505747126436
+   },
+   {
+    "id": "d",
+    "type": "logo",
+    "x": 0.210794119297773,
+    "y": 0.7312174005377782,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "d.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.09195402298850575
+   },
+   {
+    "id": "e",
+    "type": "logo",
+    "x": 0.48879310344827587,
+    "y": 0.6305650684931506,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "e.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.06896551724137931
+   }
+  ]
+ },
+ "no6-front-pvc": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-6",
+  "parts": {
+   "crown_F": "#A92A2F",
+   "crown_LS": "#A92A2F",
+   "crown_RS": "#A92A2F",
+   "crown_LB": "#A92A2F",
+   "crown_RB": "#A92A2F",
+   "bill_top": "#A92A2F",
+   "bill_under": "#A92A2F",
+   "button": "#A92A2F",
+   "eyelet": "#A92A2F"
+  },
+  "zones": {
+   "front": {
+    "method": "pvc_patch"
+   }
+  },
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.18525354986081177,
+    "y": 0.20252104040694566,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.1724137931034483
+   }
+  ]
+ },
+ "no6-back-only": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-6",
+  "parts": {
+   "crown_F": "#B1B4B3",
+   "crown_LS": "#B1B4B3",
+   "crown_RS": "#B1B4B3",
+   "crown_LB": "#B1B4B3",
+   "crown_RB": "#B1B4B3",
+   "bill_top": "#B1B4B3",
+   "bill_under": "#B1B4B3",
+   "button": "#B1B4B3",
+   "eyelet": "#B1B4B3"
+  },
+  "zones": {},
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.210794119297773,
+    "y": 0.7312174005377782,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.09195402298850575
+   }
+  ]
+ },
+ "no6-stray": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-6",
+  "parts": {
+   "crown_F": "#B1B4B3",
+   "crown_LS": "#B1B4B3",
+   "crown_RS": "#B1B4B3",
+   "crown_LB": "#B1B4B3",
+   "crown_RB": "#B1B4B3",
+   "bill_top": "#B1B4B3",
+   "bill_under": "#B1B4B3",
+   "button": "#B1B4B3",
+   "eyelet": "#B1B4B3"
+  },
+  "zones": {
+   "front": {
+    "method": "embroidery"
+   }
+  },
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.18525354986081177,
+    "y": 0.20252104040694566,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.1724137931034483
+   },
+   {
+    "id": "b",
+    "type": "logo",
+    "x": 0.97,
+    "y": 0.97,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "b.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.028735632183908046
+   }
+  ]
+ },
+ "no7v1-front-side": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-7",
+  "parts": {
+   "crown_FL": "#1F2A44",
+   "crown_FR": "#1F2A44",
+   "crown_LS": "#1F2A44",
+   "crown_RS": "#1F2A44",
+   "crown_LB": "#1F2A44",
+   "crown_RB": "#1F2A44",
+   "bill_top": "#1F2A44",
+   "bill_under": "#1F2A44",
+   "button": "#1F2A44",
+   "eyelet": "#1F2A44",
+   "strap": "#1F2A44"
+  },
+  "zones": {
+   "front": {
+    "method": "embroidery"
+   }
+  },
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.3141025641025641,
+    "y": 0.2044753086419753,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.38461538461538464
+   },
+   {
+    "id": "b",
+    "type": "text",
+    "x": 0.782051282051282,
+    "y": 0.14660493827160495,
+    "rotation": 0,
+    "opacity": 1,
+    "text": "EST 1999",
+    "fontFamily": "Arial, sans-serif",
+    "fontStyle": "bold",
+    "fill": "#FFFFFF",
+    "align": "center",
+    "fontScale": 0.05128205128205128
+   }
+  ]
+ },
+ "no7v1-square-label": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-7",
+  "parts": {
+   "crown_FL": "#1F2A44",
+   "crown_FR": "#1F2A44",
+   "crown_LS": "#1F2A44",
+   "crown_RS": "#1F2A44",
+   "crown_LB": "#1F2A44",
+   "crown_RB": "#1F2A44",
+   "bill_top": "#1F2A44",
+   "bill_under": "#1F2A44",
+   "button": "#1F2A44",
+   "eyelet": "#1F2A44",
+   "strap": "#1F2A44"
+  },
+  "zones": {
+   "front": {
+    "method": "embroidery"
+   },
+   "label_square": {
+    "shape": "square"
+   }
+  },
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.3141025641025641,
+    "y": 0.2044753086419753,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.38461538461538464
+   },
+   {
+    "id": "b",
+    "type": "logo",
+    "x": 0.5256410256410257,
+    "y": 0.8487654320987654,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "b.png",
+    "mimeType": "image/png",
+    "naturalWidth": 1200,
+    "naturalHeight": 600,
+    "scale": 0.10256410256410256
+   }
+  ]
+ },
+ "hat-unknown-die": {
+  "schemaVersion": 4,
+  "kind": "hat",
+  "dieId": "hat-no-9",
+  "parts": {
+   "crown_FL": "#1F2A44",
+   "crown_FR": "#1F2A44",
+   "crown_LS": "#1F2A44",
+   "crown_RS": "#1F2A44",
+   "crown_LB": "#1F2A44",
+   "crown_RB": "#1F2A44",
+   "bill_top": "#1F2A44",
+   "bill_under": "#1F2A44",
+   "button": "#1F2A44",
+   "eyelet": "#1F2A44",
+   "strap": "#1F2A44"
+  },
+  "zones": {},
+  "elements": [
+   {
+    "id": "a",
+    "type": "logo",
+    "x": 0.2,
+    "y": 0.3,
+    "rotation": 0,
+    "opacity": 1,
+    "fileName": "a.png",
+    "mimeType": "image/png",
+    "naturalWidth": 100,
+    "naturalHeight": 100,
+    "scale": 0.1
+   }
+  ]
+ },
+ "can-standard": {
+  "schemaVersion": 3,
+  "size": "standard",
+  "color": "#1C2E4A",
+  "patternId": null,
+  "elements": [
+   {
+    "id": "t1",
+    "type": "text",
+    "x": 0.5,
+    "y": 0.25,
+    "rotation": 0,
+    "opacity": 1,
+    "text": "CLASS OF 2026",
+    "fontFamily": "Impact, Charcoal, sans-serif",
+    "fontStyle": "normal",
+    "fill": "#FFFFFF",
+    "align": "center",
+    "fontScale": 0.07
+   },
+   {
+    "id": "l1",
+    "type": "logo",
+    "x": 0.5,
+    "y": 0.75,
+    "rotation": 180,
+    "opacity": 1,
+    "fileName": "mark.svg",
+    "mimeType": "image/svg+xml",
+    "naturalWidth": 800,
+    "naturalHeight": 400,
+    "scale": 0.4,
+    "clip": "back"
+   }
+  ]
+ },
+ "can-slim-pattern": {
+  "schemaVersion": 3,
+  "size": "slim",
+  "color": "#B2AEA6",
+  "patternId": "duck-camo-slate",
+  "elements": [
+   {
+    "id": "t1",
+    "type": "text",
+    "x": 0.5,
+    "y": 0.3,
+    "rotation": 3,
+    "opacity": 0.9,
+    "text": "Lake Days",
+    "fontFamily": "custom-1",
+    "fontStyle": "italic",
+    "fill": "#000000",
+    "align": "left",
+    "fontScale": 0.05
+   }
+  ],
+  "jsonUrl": "https://abc123xyz.public.blob.vercel-storage.com/coozie/id/design.json",
+  "fontUrls": [
+   "https://abc123xyz.public.blob.vercel-storage.com/coozie/id/font-0-lake.otf",
+   7
+  ]
+ },
+ "can-slim-stored-print": {
+  "schemaVersion": 3,
+  "size": "slim",
+  "color": "#C8AF7C",
+  "patternId": "duck-camo-classic",
+  "patternPrint": "/patterns/duck-camo-classic.v0.print.svg",
+  "patternRepeatIn": [
+   5,
+   3
+  ],
+  "elements": []
+ },
+ "can-legacy-no-size": {
+  "color": "#C13232",
+  "elements": [
+   {
+    "id": "t1",
+    "type": "text",
+    "x": 0.5,
+    "y": 0.5,
+    "text": "Hi",
+    "fontScale": 0.06
+   }
+  ]
+ },
+ "can-unknown-size": {
+  "schemaVersion": 3,
+  "size": "tallboy",
+  "color": "#111111",
+  "elements": []
+ },
+ "other-kind": {
+  "schemaVersion": 4,
+  "kind": "polo",
+  "dieId": "polo-left-chest",
+  "elements": []
+ }
+}

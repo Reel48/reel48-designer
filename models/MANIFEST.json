@@ -1,0 +1,47 @@
+{
+  "can-cooler-slim.glb": {
+    "sha256": "0f257e8e4a7db58bbf80cff2fe5f797505b5b941d9bb895c999da2cf104058fd",
+    "source": "public/3d/can-coolers/can-cooler-slim.0f257e8e.glb",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "can-cooler-standard.glb": {
+    "sha256": "4592b6cddc5e053ea35d2d824fbee63490270a9db6e7913cf4bb6861a12875cb",
+    "source": "public/3d/can-coolers/can-cooler-standard.4592b6cd.glb",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "hat-no-6-poster.webp": {
+    "sha256": "f84213ad534dc55b4ab9ceaac1782ddd222c9d671bc55188283bf4f0044ccc1c",
+    "source": "public/3d/hats/hat-no6-poster.f84213ad.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "hat-no-6-surface.json": {
+    "sha256": "bf4200961662d8beb8d60e000015dac06ca663353605525240f8226ccf2d6dd5",
+    "source": "public/3d/hats/hat-no6-surface.bf420096.json",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "hat-no-6.glb": {
+    "sha256": "482b4e5f3d0f196605876333cc305e57a79ac8b92d286f840a43f4ba0c489557",
+    "source": "public/3d/hats/hat-no6.482b4e5f.glb",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "hat-no-7-poster.webp": {
+    "sha256": "a570b9af54c9f2a684c8187caf1b1a5147f30d636912514a1f50faff9e60ddee",
+    "source": "public/3d/hats/hat-no7-poster.a570b9af.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "hat-no-7-surface.json": {
+    "sha256": "14936a949cf6257b9c0811d998c7b395c175b4b6c1db20b11e0394c6e43fe1fa",
+    "source": "public/3d/hats/hat-no7-surface.14936a94.json",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "hat-no-7.glb": {
+    "sha256": "dd00635f2c7c03d40e6098126f778131084c6c0e9d689c41aacc5e89d150a0d3",
+    "source": "public/3d/hats/hat-no7.dd00635f.glb",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "studio.hdr": {
+    "sha256": "e47a5020d61dfaf72706ff8cd3e99f70d73d2d741a14af08eb8e6489bef7dc86",
+    "source": "public/3d/can-coolers/studio.e47a5020.hdr",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  }
+}

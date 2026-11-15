@@ -104,7 +104,7 @@ import modelUrl from "@reel48/designer/models/hat-no-7.glb";                    
 import tileUrl from "@reel48/designer/patterns/gingham-red.v1.svg";               // v1.16.0: pattern tiles, served by the host
 ```
 
-### Consumers (v1.16.3)
+### Consumers (v1.16.4)
 
 - **account.reel48.com** (the portal) uses `viewer`, `models`, `patterns` and
   `core` (and `stage` for the flat die): its customizer island runs the hat and
@@ -1053,6 +1053,38 @@ die within a thousandth of a pixel, each pixel the die point a ray hits),
 `tests/can-edit.test.js` (the die, the limits, the rest art, the look's paint
 and live repaint, fits on a fake model-viewer, a whole edit session), and
 `tests/patterns.test.js`; `tests/models.test.js` knows the made surfaces.
+
+## v1.16.4: the can cooler's bottom edge is a small corner, not a 6 mm roll
+
+Brayden, 2026-11-15: undo the rounded bottom "so the bottom looks normal". The can
+models ended in a 6 mm soft roll from the wall onto the base. Its under half took
+only the last ~2 mm of each panel, so under a pattern (the duck camo shows it best)
+the panel's bottom row smeared round the base in streaks, and the base's own design
+stopped 6 mm short of the edge, cut off in a circle.
+
+- **models/can-cooler-standard.glb, models/can-cooler-slim.glb.** Rebuilt from the
+  storefront's `scripts/blender/can-cooler/model.py` (Reel48-Storefront
+  `claude/can-crisp-bottom`, `6507955`): the wall comes straight down to a 1.5 mm
+  corner and the base runs out to it. The 6 mm bottom band keeps its rows, so the
+  side seams' slit, the base piece's lip and the stitching are where they were.
+  Same triangle count; the unchanged script rebuilds the v1.16.3 files byte for
+  byte, so nothing else moved.
+- **The two can surfaces, re-extracted** (`npm run extract:can-surface`). Each side
+  keeps its triangle count on the standard die; the slim has 8 more folded
+  (collapsed) triangles. MANIFEST.json has the four new sha256s.
+- No code changed. The base's design now covers the whole bottom, at about its true
+  width (the roll had shrunk it to about 85%).
+
+Checked in the portal, locally in headless Chrome: the duck camo from below on both
+sizes (the streaked ring is gone; a sliver about 0.4 mm wide is left on the base
+piece's lip under each side slit), and the v1.16.1 to v1.16.3 drags land as before
+(the piece stays where it is let go at a panel's bottom, no sideways slide past it,
+and a push past the base's outline stops at its edge).
+
+### Tests
+
+893, all passing, none changed: `tests/models.test.js` re-hashes the new files and
+`tests/can-surface.test.js` re-runs the extractor against them.
 
 ## v1.16.3: a finger carried past a can panel's bottom no longer slides the piece along it
 

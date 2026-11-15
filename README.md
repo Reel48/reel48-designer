@@ -927,7 +927,8 @@ back, base: { positions, uvs, indices } } }`, the frame the die's stage (1000 x
   panels' rects, `base` the disc. A sleeve print triangle (`print` and
   `print_seam`) joins every side its die triangle touches within 2 die px, so
   the disc's caps past each fold (on the model, the bottom of each panel's
-  wall) are both the base's and that panel's. Only print faces are written:
+  wall) are both the base's and that panel's (v1.16.1: the base keeps only
+  the faces that face down; see below). Only print faces are written:
   the triangles the model collapsed in the die (the folds round the bottom
   edge) map nothing. About 5,560 triangles a panel and 2,400 for the base;
   480 KB a file, 114 KB gzipped.
@@ -1053,3 +1054,66 @@ die within a thousandth of a pixel, each pixel the die point a ray hits),
 `tests/can-edit.test.js` (the die, the limits, the rest art, the look's paint
 and live repaint, fits on a fake model-viewer, a whole edit session), and
 `tests/patterns.test.js`; `tests/models.test.js` knows the made surfaces.
+
+## v1.16.1: a drag on the can's base stops at its edge
+
+On the can cooler's base (the Logo/Text step's Base side, seen from below), a
+logo dragged past the can's outline on screen slid round toward a fold instead
+of stopping at the base's edge. Drags that stayed on the base were right.
+Every golden file stands, and the hats place exactly as before.
+
+- **region.js: a convex area stops a push at the point nearest the finger.**
+  Past the outline the placer carries the finger on along the last true hit's
+  local map, so the pose it asks for runs far outside the base's disc (a
+  96-gon). The polygon sweep met the edge, then slid along it with the rest of
+  the move, and at each next side of the 96-gon slid on with what was left,
+  past the point nearest the finger. The farther out the finger, the farther
+  the slide, so frame after frame the piece swung back and forth round the
+  circle, farther each time, to the folds. Now, **on an outline that is
+  convex with no holes**, no slide goes past the point of its line nearest
+  the asked centre: the piece stops where the rect's clamp would put it, and
+  stays there. Every other polygon (all the hats' areas, which have eyelets
+  or a wavy crease) slides exactly as before: over 160,000 simulated drag
+  frames on every hat area, old and new agree to the bit. (On those, a long
+  push still rides on along a convex stretch; that is a separate change, for
+  the hats' own owner to judge.)
+- **The base's surface keeps only fabric that faces down.** The extractor put
+  every face whose die triangle touches the disc in `base`, the roll and the
+  bottom of each panel's wall included. Seen from below the wall is nearly
+  edge-on, and a drag that left the base there was carried on along its local
+  map, which turns a sideways move into one up or down the die. Now `base`
+  holds a face only when its outward normal is within `BASE_FACING_DEG` (63)
+  of straight down: the bottom, and the roll's rings at about 8, 22, 37, 49 and
+  58 degrees. The rings above (67, 76, 85) and the wall stay the panels' alone,
+  as they always were too; `front` and `back` are byte for byte as before. The
+  cut is in the empty gap between the 58-59 and 67-68 degree rings on both
+  models, and a test keeps that gap empty, so a rebuilt model that puts a ring
+  near the cut fails until it is judged again. The base drops from 2,438 faces
+  to 2,080 (standard) and 2,348 to 2,060 (slim).
+- **What that costs.** The disc's edge lies up the roll and the wall, so the
+  dashed area outline the placer draws on the base shows less of itself from
+  the base's view (on the standard can, 10% of its length instead of 27%). A
+  piece whose centre sits more than about 3 mm up the roll (one under 0.38 in
+  tall, pushed hard onto a fold's middle) is dragged by the part of it on the
+  base: a press on its part up the roll does not move it. And a drag that
+  leaves the base steeply across a fold, through the roll's lower rings,
+  still lands round the edge from where the finger points: about 100 px at
+  the base's own view, up to about 170 px with the camera turned 60 degrees.
+  Cutting at 15 degrees (the bottom only) would bring that under about 60 px,
+  but would draw none of the area outline and leave more of the rim
+  undraggable by its middle.
+- `scripts/extract-can-surface.mjs`: `BASE_FACING_DEG`, `facesDown(A, B, C)`,
+  `sidesOf(t, regions, down, margin)` (its third argument is new: the base
+  only when `down`), and the report's `baseNotDown`.
+
+### Tests
+
+881 before, 886 now: `tests/can-place.test.js` drags a piece from the base's
+centre past the can's outline twelve ways, with the real placer on both real
+surfaces under the base view's camera (solved from hotspot probes), and checks
+it stops at the edge where the finger points and stays (on v1.16.0's
+region.js a drag to the right ended at (614, 1170) on the standard can, not
+(709, 1000), the piece moving 141 px in a frame); `tests/region.test.ts` pushes
+a piece far past a 96-gon and checks it stops at the nearest centre that fits,
+every frame and every way; `tests/can-surface.test.js` checks the base's faces
+face down, the rest are the panels', and the cut's gap is empty.

@@ -1053,3 +1053,53 @@ die within a thousandth of a pixel, each pixel the die point a ray hits),
 `tests/can-edit.test.js` (the die, the limits, the rest art, the look's paint
 and live repaint, fits on a fake model-viewer, a whole edit session), and
 `tests/patterns.test.js`; `tests/models.test.js` knows the made surfaces.
+
+## v1.16.1: a drag on the can's base stops at its edge
+
+On the can cooler's base (the Logo/Text step's Base side, seen from below), a
+logo dragged past the can's outline on screen slid round toward a fold instead
+of stopping at the base's edge. Drags that stayed on the base were right.
+Every golden file stands, and the hats place exactly as before.
+
+- **region.js: a convex area stops a push at the point nearest the finger.**
+  Past the outline the placer carries the finger on along the last true hit's
+  local map, so the pose it asks for runs far outside the base's disc (a
+  96-gon). The polygon sweep met the edge, then slid along it with the rest of
+  the move, and at each next side of the 96-gon slid on with what was left,
+  past the point nearest the finger. The farther out the finger, the farther
+  the slide, so frame after frame the piece swung back and forth round the
+  circle, farther each time, to the folds. Now, **on an outline that is
+  convex with no holes**, no slide goes past the point of its line nearest
+  the asked centre: the piece stops where the rect's clamp would put it, and
+  stays there. Every other polygon (all the hats' areas, which have eyelets
+  or a wavy crease) slides exactly as before: over 160,000 simulated drag
+  frames on every hat area, old and new agree to the bit. (On those, a long
+  push still rides on along a convex stretch; that is a separate change, for
+  the hats' own owner to judge.)
+- **The base's surface is as in v1.16.0.** A base of only the fabric that
+  faces down (its outward normal within 63 degrees of straight down, cutting
+  the roll and the bottom of each panel's wall out of `base`) was tried and
+  left out. With the sweep fixed it moved no drag at the base's own view (a
+  browser walk landed every drag on the same pixels with it and without it),
+  and it hid most of the base's dashed area outline, which runs up the roll
+  and the wall (27% of it shows from the base's view; 10% with the cut).
+- **What is left.** A drag that leaves the base steeply across a fold, through
+  the roll, is carried on along the roll's own local map, which is steep seen
+  from below: it still stops at the edge and stays, but up to about 100 px
+  round the edge from where the finger points at the base's own view (more
+  with the camera turned). Straight out each way, and the diagonals that leave
+  through the side of the bottom, stop where the finger points.
+
+### Tests
+
+881 before, 887 now: `tests/can-place.test.js` drags a piece from the base's
+centre past the can's outline twelve ways, with the real placer on both real
+surfaces under the base view's camera (solved from hotspot probes), and checks
+it stops at the edge where the finger points and stays (on v1.16.0's
+region.js a drag to the right ended at (614, 1170) on the standard can, not
+(709, 1000), the piece moving 141 px in a frame); `tests/region.test.ts` pushes
+a piece far past a 96-gon and checks it stops at the nearest centre that fits,
+every frame and every way, and checks no hat area takes the convex rule: the
+three four-point ones (hat-no-7-v2's back and label_tall, hat-no-6's
+label_tall) are read as rects and clamped as in v1.16.0, every other has a hole
+or turns both ways.

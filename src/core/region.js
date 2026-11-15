@@ -29,7 +29,11 @@
  *   degrees of the asked way (`slide: "step"`, a key's or button's nudge: Left
  *   follows a gently sloping crease, Down onto it stops where it lands, with
  *   no drift sideways), or does not slide at all (`false`). So
- *   a drag never jumps an eyelet or an outline's notch: it goes round;
+ *   a drag never jumps an eyelet or an outline's notch: it goes round. On a
+ *   convex outline with no holes (v1.16.1: the can's base, its disc as a
+ *   96-gon) a slide goes no further than the point on the outline nearest
+ *   the asked centre: what the rect's clamp gives, and where a piece pushed
+ *   far past a circle stops instead of riding round it;
  * - when the piece at its new size or turn no longer fits at `from`'s centre
  *   (a turn, a resize beside an eyelet), it is first pushed off what it now
  *   overlaps by about the least it must (the nearest room on rays from there,
@@ -87,6 +91,10 @@ const ALONG_MARGIN = 1e-6;
 // polyline (the die's outlines are sampled every ~2 mm), so a slide along one
 // meets a new segment every few px; a corner takes two and then converges.
 const SLIDES = 32;
+// On a convex area a slide is cut back to the point nearest the target only
+// when it would pass it by more than this share (a first contact's slide ends
+// on that point, to float noise).
+const CONVEX_SLIDE_EPS = 1e-9;
 // A nudge (`slide: "step"`) keeps its slide along an edge only when that slide
 // still goes within 45 degrees of the way it was asked to.
 const STEP_COS = Math.SQRT1_2;
@@ -198,7 +206,7 @@ function axisRect(ring) {
  * [ax, ay, bx, by, nx, ny] (n the unit normal), its bounds and, once asked
  * for, its pole of inaccessibility and, per box shape, where it fits best.
  *
- * @typedef {{ rings: number[][][], edges: Float64Array, end: number, bbox: Rect, home: number[] | null, best: Map<number, number[]> }} Region
+ * @typedef {{ rings: number[][][], edges: Float64Array, end: number, bbox: Rect, convex: boolean, home: number[] | null, best: Map<number, number[]> }} Region
  */
 
 /** Areas read, by their outline array: a polygon is built once, however often its object is copied. */
@@ -241,7 +249,33 @@ function buildRegion(area) {
       o += 6;
     }
   }
-  return { poly: { rings, edges, end: o, bbox: boundsOf(outline), home: null, best: new Map() } };
+  const convex = !holes.length && isConvex(outline);
+  return { poly: { rings, edges, end: o, bbox: boundsOf(outline), convex, home: null, best: new Map() } };
+}
+
+/** Whether a ring is a convex polygon: every turn the same way (straight runs allowed), once round. */
+function isConvex(ring) {
+  const n = ring.length;
+  let sign = 0;
+  let turned = 0;
+  for (let i = 0; i < n; i++) {
+    const a = ring[i];
+    const b = ring[(i + 1) % n];
+    const c = ring[(i + 2) % n];
+    const ux = b[0] - a[0];
+    const uy = b[1] - a[1];
+    const vx = c[0] - b[0];
+    const vy = c[1] - b[1];
+    const cross = ux * vy - uy * vx;
+    if (Math.abs(cross) > 1e-9 * Math.hypot(ux, uy) * Math.hypot(vx, vy)) {
+      const s = cross > 0 ? 1 : -1;
+      if (sign && s !== sign) return false;
+      sign = s;
+    }
+    turned += Math.atan2(cross, ux * vx + uy * vy);
+  }
+  // a star turns the same way at every point too, but twice round
+  return sign !== 0 && Math.abs(Math.abs(turned) - 2 * Math.PI) < 1e-6;
 }
 
 /** Whether (x, y) is inside the outline and outside every hole (even-odd over all rings). */
@@ -426,6 +460,25 @@ function sweep(P, S, T, hx, hy, slides = SLIDES) {
     const into = rx * ux + ry * uy;
     dx = rx - into * ux;
     dy = ry - into * uy;
+    if (P.convex) {
+      // v1.16.1: never past the point of this slide's line nearest `T`. On a
+      // first contact that is where the slide ends anyway. Round a convex
+      // outline (the can's base, a 96-gon) the rest of an earlier slide
+      // carried the box on past it, away from `T`, and the farther `T` was
+      // outside, the farther it went: a piece pushed well past the edge rode
+      // round the circle, back and forth, frame by frame. On a convex area
+      // with no holes the centres that fit are convex too: the point nearest
+      // `T` is the only place to stop, and there is nothing to go round.
+      const len2 = dx * dx + dy * dy;
+      if (len2 > 0) {
+        const t = ((T[0] - px) * dx + (T[1] - py) * dy) / len2;
+        if (t < 1 - CONVEX_SLIDE_EPS) {
+          const k = t > 0 ? t : 0;
+          dx *= k;
+          dy *= k;
+        }
+      }
+    }
   }
   // no headway but the back-off (pressed straight into an edge): where it was, not a hair off it
   if (met && Math.hypot(px - S[0], py - S[1]) <= 4 * BACKOFF) return [S[0], S[1]];

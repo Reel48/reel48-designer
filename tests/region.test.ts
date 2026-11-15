@@ -24,6 +24,7 @@ import {
   rotatedSize,
   rubberBand,
 } from "../src/core/region.js";
+import { dieGeometry, diesOfKind } from "../src/core/dies.js";
 
 const PPI = 200;
 type Rect = { x: number; y: number; w: number; h: number };
@@ -579,5 +580,116 @@ describe("bandPose and overhang on a polygon", () => {
     expect(poseValid(covering, { area: hole })).toBe(false);
     expect(overhang(covering, { area: hole }).area).toBeGreaterThan(80);
     expect(overhang({ ...covering, cx: 100, cy: 100, w: 100, h: 100 }, { area: hole }).area).toBe(0);
+  });
+});
+
+// ---- A convex outline: the can's base, its disc as a 96-gon (v1.16.1) ---------------------
+describe("confinePose on a convex polygon area", () => {
+  const R = 272.369854578182;
+  const DISC: Poly = { outline: circle(500, 1000, R, 96), holes: [] };
+  const BASE = { area: DISC, cap: { w: 2 * R, h: 2 * R } };
+  const BOX = { w: 120, h: 80, rotation: 0 };
+
+  it("stops a piece pushed far past a circle at the point nearest the finger, and keeps it there frame after frame", () => {
+    // v1.16.0 rode it round the circle with what was left of each long move,
+    // back and forth past the nearest point, farther every frame, to the folds.
+    let from = { ...BOX, cx: 500, cy: 1000 };
+    for (let x = 600; x <= 1400; x += 16) {
+      const fit = confinePose({ ...BOX, cx: x, cy: 1000.5 }, { ...BASE, from });
+      expect(valid(fit, BASE)).toBe(true);
+      expect(Math.abs(fit.cy - 1000), `asked x ${x}`).toBeLessThan(0.6);
+      from = fit;
+    }
+    // against the edge: its right corners on the circle, to the polygon's sag (0.15 px)
+    expect(from.cx).toBeGreaterThan(500 + Math.sqrt(R * R - 40 * 40) - 60 - 0.5);
+    expect(from.cx).toBeLessThan(500 + Math.sqrt(R * R - 40 * 40) - 60 + 1e-6);
+    // and banded as before: the shown pose strains toward the finger, never past the limit
+    const band = bandPose({ ...BOX, cx: 1400, cy: 1000 }, { ...BASE, from }, 24);
+    expect(band.fit.cx).toBeCloseTo(from.cx, 6);
+    expect(band.cx - band.fit.cx).toBeGreaterThan(0);
+    expect(band.cx - band.fit.cx).toBeLessThan(24);
+  });
+
+  it("ends a push far out any way at the centre nearest the finger that fits", () => {
+    const from = { ...BOX, cx: 500, cy: 1000 };
+    /** The farthest centre that fits on the ray from the middle at angle a (radians). */
+    const rim = (a: number) => {
+      let lo = 0, hi = R;
+      for (let i = 0; i < 50; i++) {
+        const m = (lo + hi) / 2;
+        if (valid({ ...BOX, cx: 500 + m * Math.cos(a), cy: 1000 + m * Math.sin(a) }, BASE)) lo = m;
+        else hi = m;
+      }
+      return [500 + lo * Math.cos(a), 1000 + lo * Math.sin(a)];
+    };
+    for (let deg = 0; deg < 360; deg += 7) {
+      const a = (deg * Math.PI) / 180;
+      const want = [500 + 3000 * Math.cos(a), 1000 + 3000 * Math.sin(a)];
+      const fit = confinePose({ ...BOX, cx: want[0], cy: want[1] }, { ...BASE, from });
+      expect(valid(fit, BASE)).toBe(true);
+      const d = Math.hypot(fit.cx - want[0], fit.cy - want[1]);
+      let best = Infinity;
+      for (let k = 0; k < 720; k++) {
+        const q = rim((k * Math.PI) / 360);
+        best = Math.min(best, Math.hypot(q[0] - want[0], q[1] - want[1]));
+      }
+      expect(d, `${deg} degrees`).toBeLessThan(best + 0.5);
+    }
+  });
+});
+
+describe("the convex rule and the hats (v1.16.1)", () => {
+  const turnsBothWays = (ring: number[][]) => {
+    let sign = 0;
+    for (let i = 0; i < ring.length; i++) {
+      const [a, b, c] = [ring[i], ring[(i + 1) % ring.length], ring[(i + 2) % ring.length]];
+      const cross = (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]);
+      if (Math.abs(cross) < 1e-9) continue;
+      if (sign && Math.sign(cross) !== sign) return true;
+      sign = Math.sign(cross);
+    }
+    return false;
+  };
+
+  it("takes no hat area: the four-point ones are read as rects, every other has a hole or turns both ways", () => {
+    let rects = 0;
+    let polys = 0;
+    for (const die of diesOfKind("hat")) {
+      const g = dieGeometry(die.id, { kind: "hat" });
+      for (const z of g.zones) {
+        if (!z.area?.outline) continue;
+        if (areaRect(z.area)) {
+          rects++;
+          continue;
+        }
+        polys++;
+        expect((z.area.holes ?? []).length > 0 || turnsBothWays(z.area.outline), `${die.id} ${z.id}`).toBe(true);
+      }
+    }
+    // hat-no-7-v2's back and label_tall, hat-no-6's label_tall; the other seven are polygons
+    expect(rects).toBe(3);
+    expect(polys).toBe(7);
+  });
+
+  it("pushes a piece past each edge and corner of those rect areas to the clamp, as v1.16.0 did", () => {
+    for (const [id, zid] of [["hat-no-7-v2", "back"], ["hat-no-7-v2", "label_tall"], ["hat-no-6", "label_tall"]]) {
+      const g = dieGeometry(id, { kind: "hat" });
+      const z = g.zones.find((q: { id: string }) => q.id === zid);
+      const rect = areaRect(z.area)!;
+      const cap = { w: z.maxImprint.w * g.pxPerInch, h: z.maxImprint.h * g.pxPerInch };
+      const c = [rect.x + rect.w / 2, rect.y + rect.h / 2];
+      for (const rotation of [0, 15, 90]) {
+        const start = confinePose({ cx: c[0], cy: c[1], w: 120, h: 60, rotation }, { area: z.area, cap });
+        for (let k = 0; k < 16; k++) {
+          const a = (2 * Math.PI * k) / 16;
+          const asked = { ...start, cx: c[0] + Math.cos(a) * 3000, cy: c[1] + Math.sin(a) * 3000 };
+          const fit = confinePose(asked, { area: z.area, cap, from: start });
+          const e = rotatedSize(fit.w, fit.h, rotation);
+          const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
+          expect(fit.cx, `${id} ${zid} ${rotation} deg, way ${k}`).toBe(clamp(asked.cx, rect.x + e.w / 2, rect.x + rect.w - e.w / 2));
+          expect(fit.cy).toBe(clamp(asked.cy, rect.y + e.h / 2, rect.y + rect.h - e.h / 2));
+        }
+      }
+    }
   });
 });

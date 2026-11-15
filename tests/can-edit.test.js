@@ -15,6 +15,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import * as THREE from "three";
 import {
+  CAN_BASE_INSET,
   CAN_BASE_SIDES,
   CAN_EDIT_FILL,
   CAN_EDIT_VIEWS,
@@ -72,19 +73,31 @@ describe("canEditDie", () => {
       expect(regions.front.exclude).toMatchObject(front.area.centreExclude);
       expect(back.rect).toEqual({ x: geom.x0, y: geom.y2, w: geom.x1 - geom.x0, h: geom.y3 - geom.y2 });
       expect(regions.front).toMatchObject({ x0: front.rect.x, y0: front.rect.y });
-      // the base: its disc, as a polygon on the circle, within 0.15 px of it everywhere
+      // the base (v1.16.5): the can's bottom as the model draws it, the ellipse
+      // CAN_BASE_INSET of the disc's radius across and of half the fold gap
+      // front to back, as a polygon on it, within 0.15 px of it everywhere
       const { cx, cy, r } = regions.base;
-      expect(base.rect).toEqual({ x: cx - r, y: cy - r, w: 2 * r, h: 2 * r });
+      const ax = CAN_BASE_INSET * r;
+      const ay = (CAN_BASE_INSET * (geom.y2 - geom.y1)) / 2;
+      expect(base.rect).toEqual({ x: cx - ax, y: cy - ay, w: 2 * ax, h: 2 * ay });
       expect(base.area.outline).toHaveLength(CAN_BASE_SIDES);
       expect(base.area.holes).toEqual([]);
-      for (const [x, y] of base.area.outline) expect(Math.hypot(x - cx, y - cy)).toBeCloseTo(r, 9);
-      expect(r * (1 - Math.cos(Math.PI / CAN_BASE_SIDES))).toBeLessThan(0.15);
+      for (const [x, y] of base.area.outline) expect(((x - cx) / ax) ** 2 + ((y - cy) / ay) ** 2).toBeCloseTo(1, 9);
+      expect(ax * (1 - Math.cos(Math.PI / CAN_BASE_SIDES))).toBeLessThan(0.15);
+      // none of it is on a wall: inside the disc, and between the fold chords
+      // (the disc's caps past them are the front and back walls' bottoms)
+      for (const [x, y] of base.area.outline) {
+        expect(Math.hypot(x - cx, y - cy)).toBeLessThan(r);
+        expect(y).toBeGreaterThan(geom.y1);
+        expect(y).toBeLessThan(geom.y2);
+      }
       const home = areaHome(base.area);
       expect(home[0]).toBeCloseTo(cx, 6);
       expect(home[1]).toBeCloseTo(cy, 0);
       // the bounding box in inches, to the die's own 1e-4
       expect(front.maxImprint).toEqual({ w: resolveDie(id).measurements.panelW, h: resolveDie(id).measurements.panelH });
-      expect(base.maxImprint).toEqual({ w: resolveDie(id).measurements.discD, h: resolveDie(id).measurements.discD });
+      const ppi = geom.pxPerInch;
+      expect(base.maxImprint).toEqual({ w: Math.round(((2 * ax) / ppi) * 1e4) / 1e4, h: Math.round(((2 * ay) / ppi) * 1e4) / 1e4 });
     }
   });
 

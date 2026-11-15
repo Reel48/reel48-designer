@@ -104,7 +104,7 @@ import modelUrl from "@reel48/designer/models/hat-no-7.glb";                    
 import tileUrl from "@reel48/designer/patterns/gingham-red.v1.svg";               // v1.16.0: pattern tiles, served by the host
 ```
 
-### Consumers (v1.16.4)
+### Consumers (v1.16.5)
 
 - **account.reel48.com** (the portal) uses `viewer`, `models`, `patterns` and
   `core` (and `stage` for the flat die): its customizer island runs the hat and
@@ -1053,6 +1053,39 @@ die within a thousandth of a pixel, each pixel the die point a ray hits),
 `tests/can-edit.test.js` (the die, the limits, the rest art, the look's paint
 and live repaint, fits on a fake model-viewer, a whole edit session), and
 `tests/patterns.test.js`; `tests/models.test.js` knows the made surfaces.
+
+## v1.16.5: a logo dragged on the can's base stays on the can's bottom
+
+On the 3D can's Base side, a logo dragged down the screen past the bottom's rim
+vanished: the base's area was the whole die disc, whose caps past the fold chords
+(about 60 px, 0.32 in, each way) are the front and back walls' bottoms. Pushed
+toward the back it stopped on the back wall's, out of the base camera's sight,
+upside down from behind, and it could not be grabbed again from the Base side.
+Pushed toward the front it climbed onto the front wall. Brayden, 2026-11-15:
+stop it at the can's bottom edge.
+
+- **can-edit.js: the base's area is the can's bottom** (`CAN_BASE_INSET`, 0.97):
+  the ellipse the storefront's model.py (`BASE_INSET`, `base_uv`) draws on the
+  bottom, that share of the disc's radius across and of half the fold gap front
+  to back, as a `CAN_BASE_SIDES` polygon on it. It is convex, so v1.16.1's rule
+  still stops a push past it at the point nearest the finger. The zone's `rect`
+  and `maxImprint` are its bounding box: 2.7888 × 2.169 in on the standard die
+  (2.4396 × 1.8974 on the slim), from the disc's 2.875 in square (2.515 on the slim).
+- The dashed area outline traces the bottom's rim, no longer running up the walls.
+- Unchanged: the die, faceRegions (the flat stage, the spec and what prints still
+  take the disc), the panels, the surfaces and the hats. A piece already on a
+  disc cap is left where it is until it is next moved on the 3D can.
+
+### Tests
+
+894, from 893. `tests/can-place.test.js` pushes a piece from the base's centre far
+past the rim every 30 degrees on both dies, under the base side's camera, and checks
+that it ends between the fold chords and that its centre reads back from the screen
+on the base's fabric. On the disc it fails (a corner at die y 1244, up the back
+wall). `tests/can-edit.test.js` pins the new area. The v1.16.1 test's tolerance for
+diagonal drags is 24 die px from 12: on the ellipse, its edge near a diagonal runs
+closer to the finger's way, and the piece lands up to 20 px along it from the
+nearest-point reference (straight out, still to a pixel).
 
 ## v1.16.4: the can cooler's bottom edge is a small corner, not a 6 mm roll
 

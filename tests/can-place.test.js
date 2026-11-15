@@ -2,7 +2,8 @@
 // createPlacer) on the real can surfaces (models/can-cooler-<size>-surface.json)
 // under the base side's own camera (createCanLook view("base"), solved from
 // hotspot probes as the editor solves it), with the base's limits as the editor
-// passes them (canSpotLimits: its disc as a 96-gon), driven by pointer events
+// passes them (canSpotLimits: v1.16.1 to v1.16.4 its disc as a 96-gon, from
+// v1.16.5 the can's bottom, an ellipse as a 96-gon), driven by pointer events
 // on a minimal fake host.
 //
 // The glitch it pins (account.reel48.com, v1.16.0): a logo dragged on the base
@@ -226,9 +227,15 @@ describe("a drag on the can's base past the can's outline (v1.16.1)", () => {
         expect(commits, at).toHaveLength(1);
         const got = commits[0];
         expect(poseValid(got, lim), at).toBe(true);
-        // where a push that way from the centre stops: the edge's point nearest it
+        // where a push that way from the centre stops: the edge's point nearest
+        // it. `way` is the finger's way over its first 100 px, and the local map
+        // turns it a little past the outline; since v1.16.5 the area is the can's
+        // bottom, about 1.3 times as wide as it is deep in the die, so near a
+        // diagonal its edge runs closer to that way and the piece lands up to
+        // about 20 die px along it from this point (straight out, to a pixel:
+        // below). It was 12 on the round disc.
         const far = confinePose({ ...start, cx: start.cx + 5000 * way[0], cy: start.cy + 5000 * way[1] }, { area: lim.area, cap: lim.cap, from: start });
-        expect(Math.hypot(got.cx - far.cx, got.cy - far.cy), `${at}: (${got.cx.toFixed(1)}, ${got.cy.toFixed(1)}) against (${far.cx.toFixed(1)}, ${far.cy.toFixed(1)})`).toBeLessThan(12);
+        expect(Math.hypot(got.cx - far.cx, got.cy - far.cy), `${at}: (${got.cx.toFixed(1)}, ${got.cy.toFixed(1)}) against (${far.cx.toFixed(1)}, ${far.cy.toFixed(1)})`).toBeLessThan(24);
         // at the edge: a step further out does not fit
         expect(poseValid({ ...got, cx: got.cx + 2 * way[0], cy: got.cy + 2 * way[1] }, lim), at).toBe(false);
       }
@@ -264,6 +271,44 @@ describe("a drag on the can's base past the can's outline (v1.16.1)", () => {
           expect(Math.hypot(got.cx - cx, got.cy - y1) > 60 && Math.hypot(got.cx - cx, got.cy - y2) > 60, `${at}: (${got.cx.toFixed(0)}, ${got.cy.toFixed(0)})`).toBe(true);
         }
       }
+    }
+  });
+});
+
+describe("a drag on the can's base past its rim stays on the can's bottom (v1.16.5)", () => {
+  it("never takes the piece up a wall: it stops on the bottom, where the base's camera sees it", () => {
+    // On v1.16.1 to v1.16.4 the base's area was the whole disc, whose caps past
+    // the fold chords are the front and back walls' bottoms. A drag down the
+    // screen (toward the back) ended on the back wall's: out of the base
+    // camera's sight, so the piece vanished and could not be grabbed again.
+    for (const can of CANS) {
+      const { cx, cy, y1, y2 } = can.geom;
+      for (let angle = 0; angle < 360; angle += 30) {
+        const at = `${can.die} ${angle} deg`;
+        const { commits, lim } = dragFromCentre(can, angle);
+        const got = commits[0];
+        expect(poseValid(got, lim), at).toBe(true);
+        // every corner between the fold chords: none of the piece on a wall
+        const t = (got.rotation * Math.PI) / 180;
+        for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+          const y = got.cy + ((sx * got.w) / 2) * Math.sin(t) + ((sy * got.h) / 2) * Math.cos(t);
+          expect(y > y1 && y < y2, `${at}: a corner at die y ${y.toFixed(1)} (${y1.toFixed(1)} to ${y2.toFixed(1)})`).toBe(true);
+        }
+        // and its centre shows on the bottom from the base's camera: the screen
+        // point it is drawn at reads back to it on the base's fabric
+        const surface = can.surface;
+        surface.setCamera(measureProjection(hotspots(sideCamera(can.die, "base")), probePointsFor(surface, "base"), { name: "probe" }).P);
+        const p = surface.dieToScreen("base", got.cx, got.cy);
+        const back = p && surface.screenToDie("base", p[0], p[1], { extrapolate: false });
+        surface.setCamera(null);
+        expect(back, `${at}: (${got.cx.toFixed(1)}, ${got.cy.toFixed(1)}) is not on the screen`).toBeTruthy();
+        expect(Math.hypot(back.x - got.cx, back.y - got.cy), `${at}: (${got.cx.toFixed(1)}, ${got.cy.toFixed(1)}) reads back as (${back.x.toFixed(1)}, ${back.y.toFixed(1)})`).toBeLessThan(2);
+      }
+      // the drag toward the back, as on the walk: stopped at the bottom's back rim
+      const down = dragFromCentre(can, 90).commits[0];
+      expect(Math.abs(down.cx - cx), can.die).toBeLessThan(1);
+      expect(down.cy + down.h / 2, can.die).toBeLessThan(y2);
+      expect(down.cy, can.die).toBeGreaterThan(cy + 100);
     }
   });
 });

@@ -104,7 +104,7 @@ import modelUrl from "@reel48/designer/models/hat-no-7.glb";                    
 import tileUrl from "@reel48/designer/patterns/gingham-red.v1.svg";               // v1.16.0: pattern tiles, served by the host
 ```
 
-### Consumers (v1.16.0)
+### Consumers (v1.16.2)
 
 - **account.reel48.com** (the portal) uses `viewer`, `models`, `patterns` and
   `core` (and `stage` for the flat die): its customizer island runs the hat and
@@ -1053,6 +1053,48 @@ die within a thousandth of a pixel, each pixel the die point a ray hits),
 `tests/can-edit.test.js` (the die, the limits, the rest art, the look's paint
 and live repaint, fits on a fake model-viewer, a whole edit session), and
 `tests/patterns.test.js`; `tests/models.test.js` knows the made surfaces.
+
+## v1.16.2: a small piece dragged to a panel's bottom stays where it is let go
+
+On the can cooler's front or back panel, a small piece (shorter than about 0.6 in)
+dragged on the 3D can to the very bottom of the panel's middle stopped with its
+centre on the base disc, where the disc reaches about 60 px into the panel. The
+flat stage keeps a piece's centre off that disc (confine.js `faceRegions`'
+`exclude`, `confineCenter`), so account.reel48.com's island lifted the piece
+clear of the disc after it was let go: up to about 0.16 in. Every golden file
+stands, and the hats place exactly as before.
+
+- **region.js: a rect area may keep a piece's centre off a disc.** A rect area
+  takes an optional `centreExclude: { cx, cy, r }`. `confinePose` clamps the
+  box to the rect as before, then moves a centre on the disc straight away from
+  it, toward the rect's middle, to just past its edge at that x, with
+  `confineCenter`'s own numbers; `poseValid` calls a centre on it invalid. The
+  box may still overlap the disc, as on the flat stage. An area without one (a
+  hat's, the base's, a polygon) confines exactly as before.
+- **can-edit.js: each panel's area carries the base disc** (`canEditDie`), so
+  the 3D editor stops the piece at the disc while it is dragged (its outline
+  turns to its edge colour, as at any edge), and its commit is one the flat
+  rule leaves where it is.
+
+### Tests
+
+887 before, 891 now. `tests/can-panel.test.js` checks the 3D rule against the
+flat stage's `confineCenter` on both panels of both dies (16,000 generated
+pieces, turned and not, near the fold and anywhere: equal to 1e-9), that a
+centre on the disc is invalid, and that an area without the keep-out confines
+as before. `tests/can-place.test.js` drags a small piece down each panel to the
+fold with the real placer on the real surfaces under each side's own camera
+(the finger kept on the can) and checks it stops with its centre just past the
+disc's edge, never settles on the disc while held, and that the flat rule would
+not move its commit. Without the keep-out, all three fail.
+
+### Known, not changed here
+
+A finger carried well past the can's outline at a panel's bottom, a little off
+the panel's middle, is carried on along the bottom roll's local map, which is
+nearly edge-on from a panel's view: the piece can slide sideways along the
+panel's bottom edge toward its side. It always stays on its panel. (The base's
+own case, a push round its disc, was v1.16.1's.)
 
 ## v1.16.1: a drag on the can's base stops at its edge
 

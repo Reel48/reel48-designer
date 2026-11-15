@@ -16,7 +16,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import * as THREE from "three";
 import { CAN_SURFACES } from "../scripts/extract-can-surface.mjs";
-import { confinePose, dieGeometry, poseValid, resolveDie } from "../src/core/index.js";
+import { confineCenter, confinePose, dieGeometry, faceRegions, poseValid, resolveDie } from "../src/core/index.js";
 import { createSurface, measureProjection, probePointsFor } from "../src/viewer/hat-surface.js";
 import { createPlacer } from "../src/viewer/hat-place.js";
 import { canSpotLimits, createCanLook } from "../src/viewer/can-edit.js";
@@ -107,8 +107,8 @@ class FakeHost extends FakeNode {
 }
 
 // ---- The base side's camera ---------------------------------------------------------
-/** The camera createCanLook's view("base") puts model-viewer at, as a three.js camera. */
-function baseCamera(die) {
+/** The camera createCanLook's view(spot) puts model-viewer at, as a three.js camera. */
+function sideCamera(die, spot = "base") {
   const mv = {
     cameraOrbit: "0deg 80deg auto",
     cameraTarget: "",
@@ -116,7 +116,7 @@ function baseCamera(die) {
     removeEventListener() {},
     getCameraOrbit: () => ({ theta: 0, phi: 80 * RAD, radius: RADIUS }),
   };
-  createCanLook(mv, { stage: resolveDie(die).stage }).view("base");
+  createCanLook(mv, { stage: resolveDie(die).stage }).view(spot);
   const [theta, phi, r] = mv.cameraOrbit.split(/\s+/).map((s) => parseFloat(s));
   const target = mv.cameraTarget.split(/\s+/).map((s) => parseFloat(s));
   const th = theta * RAD;
@@ -149,12 +149,12 @@ function hotspots(camera) {
  * times STEP_PX px along `angle` (degrees, screen, y down), released. Returns
  * the live poses, the commit, and how many steps the finger was off the base.
  */
-function dragFromCentre(can, angle) {
+function dragFromCentre(can, angle, { spot = "base", piece = PIECE, from = null, steps = STEPS, stayOn = false } = {}) {
   const { surface, geom, die } = can;
-  const camera = baseCamera(die);
-  const solved = measureProjection(hotspots(camera), probePointsFor(surface, "base"), { name: "probe" });
+  const camera = sideCamera(die, spot);
+  const solved = measureProjection(hotspots(camera), probePointsFor(surface, spot), { name: "probe" });
   surface.setCamera(solved.P);
-  const lim = canSpotLimits(die, "base");
+  const lim = canSpotLimits(die, spot);
   const doc = { createElementNS: (_ns, tag) => new FakeNode(tag), activeElement: null, defaultView: { getComputedStyle: () => ({ position: "relative" }) } };
   const host = new FakeHost(doc);
   const frames = new Map();
@@ -168,14 +168,14 @@ function dragFromCentre(can, angle) {
   };
   const live = [];
   const commits = [];
-  const start = { ...PIECE, cx: geom.cx, cy: geom.cy };
+  const start = { ...piece, cx: from?.[0] ?? geom.cx, cy: from?.[1] ?? geom.cy };
   const placer = createPlacer(host, {
     surface,
-    zone: "base",
+    zone: spot,
     area: lim.area,
     cap: lim.cap,
     pieces: [start],
-    selectedId: PIECE.id,
+    selectedId: piece.id,
     pxPerInch: lim.pxPerInch,
     snapX: lim.snapX,
     snapCentre: false,
@@ -189,21 +189,23 @@ function dragFromCentre(can, angle) {
     onCommit: (_id, pose) => commits.push(pose),
   });
   const ev = (p) => ({ pointerId: 1, pointerType: "mouse", clientX: p[0], clientY: p[1], button: 0, isPrimary: true });
-  let p = surface.dieToScreen("base", geom.cx, geom.cy);
+  let p = surface.dieToScreen(spot, start.cx, start.cy);
   const dir = [Math.cos(angle * RAD), Math.sin(angle * RAD)];
   // the finger's way in the die: where its first 100 px on the bottom take it
   // (one triangle's own map, at the centre, can be a few degrees off)
-  const reach = surface.screenToDie("base", p[0] + 100 * dir[0], p[1] + 100 * dir[1], { extrapolate: false });
-  const u = [reach.x - geom.cx, reach.y - geom.cy];
+  const reach = surface.screenToDie(spot, p[0] + 100 * dir[0], p[1] + 100 * dir[1], { extrapolate: false });
+  const u = reach ? [reach.x - start.cx, reach.y - start.cy] : [dir[0], dir[1]];
   const un = Math.hypot(u[0], u[1]);
   host.fire("pointerdown", ev(p));
   flush();
   let off = 0;
-  for (let i = 0; i < STEPS; i++) {
-    p = [p[0] + dir[0] * STEP_PX, p[1] + dir[1] * STEP_PX];
+  for (let i = 0; i < steps; i++) {
+    const q = [p[0] + dir[0] * STEP_PX, p[1] + dir[1] * STEP_PX];
+    if (stayOn && !surface.screenToDie(spot, q[0], q[1], { extrapolate: false })) break;
+    p = q;
     host.fire("pointermove", ev(p));
     flush();
-    if (!surface.screenToDie("base", p[0], p[1], { extrapolate: false })) off++;
+    if (!surface.screenToDie(spot, p[0], p[1], { extrapolate: false })) off++;
   }
   host.fire("pointerup", ev(p));
   flush();
@@ -260,6 +262,44 @@ describe("a drag on the can's base past the can's outline (v1.16.1)", () => {
         if (!towardFold) {
           const { cx, y1, y2 } = can.geom;
           expect(Math.hypot(got.cx - cx, got.cy - y1) > 60 && Math.hypot(got.cx - cx, got.cy - y2) > 60, `${at}: (${got.cx.toFixed(0)}, ${got.cy.toFixed(0)})`).toBe(true);
+        }
+      }
+    }
+  });
+});
+
+describe("a small piece dragged down a panel into the base disc (v1.16.2)", () => {
+  it("stops at the disc while it is dragged, so the flat rule leaves its commit where it is", () => {
+    const small = { id: "logo", w: 60, h: 40, rotation: 0 };
+    for (const can of CANS) {
+      const { geom } = can;
+      const regions = faceRegions(geom);
+      for (const [spot, dx] of [["front", 0], ["front", 40], ["front", -70], ["back", 0], ["back", 55]]) {
+        const at = `${can.die} ${spot} dx ${dx}`;
+        const r = regions[spot];
+        // 160 die px from the fold (the front's bottom edge, the back's top in the die)
+        const from = [geom.cx + dx, spot === "front" ? r.y1 - 160 : r.y0 + 160];
+        // toward the fold: down the screen on both, since each side's view shows the can upright
+        const toward = 90;
+        // the finger stays on the can: past its outline the placer carries on
+        // along the last hit's local map, which is the other test's subject
+        const { commits, live, lim, off } = dragFromCentre(can, toward, { spot, piece: small, from, steps: 200, stayOn: true });
+        expect(off, at).toBe(0);
+        expect(commits, at).toHaveLength(1);
+        const got = commits[0];
+        expect(poseValid(got, lim), at).toBe(true);
+        // its centre is off the disc, just past its edge at this x, on its own side
+        const reach = Math.sqrt(Math.max(0, geom.r ** 2 - (got.cx - geom.cx) ** 2));
+        const edge = geom.cy + (spot === "front" ? -reach : reach);
+        expect(Math.hypot(got.cx - geom.cx, got.cy - geom.cy), at).toBeGreaterThan(geom.r);
+        expect(Math.abs(got.cy - edge), `${at}: centre ${got.cy.toFixed(2)} against the disc's edge ${edge.toFixed(2)}`).toBeLessThan(0.5);
+        // the flat stage's rule would not move it: nothing for the island to lift
+        const h = { hx: small.w / 2, hy: small.h / 2 };
+        expect(confineCenter(r, { x: got.cx, y: got.cy }, h).moved, at).toBe(false);
+        // and while it was held, what it would settle at never had its centre on the disc
+        for (const pose of live) {
+          const fit = confinePose(pose, { area: lim.area, cap: lim.cap });
+          expect(Math.hypot(fit.cx - geom.cx, fit.cy - geom.cy) > geom.r, at).toBe(true);
         }
       }
     }

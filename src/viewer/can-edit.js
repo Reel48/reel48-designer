@@ -113,7 +113,8 @@ const inches = (px, ppi) => Math.round((px / ppi) * 1e4) / 1e4;
  * A koozie die (an id, a legacy size or a die) as the hat helpers take a die:
  * `{ id, kind: "koozie", stage, pxPerInch, zones }`, each zone `{ id, rect,
  * area, maxImprint }`. `rect` is the side's bounding box (die px), `area`
- * region.js's: the panels their rects, the base its disc as a CAN_BASE_SIDES
+ * region.js's: the panels their rects, each keeping a piece's centre off the
+ * base disc (`centreExclude`, v1.16.2), the base its disc as a CAN_BASE_SIDES
  * polygon on the circle. `maxImprint` is the bounding box in inches (to 1e-4,
  * as the die's measurements are given): a koozie side has no cap smaller
  * than itself. Frozen, and the same object every time for a die. Throws for
@@ -130,10 +131,17 @@ export function canEditDie(dieOrId) {
   const regions = faceRegions(geom);
   const zone = (id, rect, area) =>
     Object.freeze({ id, rect, area, maxImprint: Object.freeze({ w: inches(rect.w, ppi), h: inches(rect.h, ppi) }) });
+  // v1.16.2: a panel's area keeps a piece's centre off the base disc where
+  // it reaches into the panel (faceRegions' `exclude`), as the flat stage
+  // does, so the 3D editor stops a piece there while it is dragged rather
+  // than the island lifting it clear after it is let go.
   const panel = (id) => {
-    const { x0, y0, x1, y1 } = regions[id];
+    const { x0, y0, x1, y1, exclude } = regions[id];
     const rect = Object.freeze({ x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
-    return zone(id, rect, rect);
+    const area = exclude
+      ? Object.freeze({ ...rect, centreExclude: Object.freeze({ cx: exclude.cx, cy: exclude.cy, r: exclude.r }) })
+      : rect;
+    return zone(id, rect, area);
   };
   const { cx, cy, r } = regions.base;
   const outline = [];

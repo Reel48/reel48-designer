@@ -93,26 +93,30 @@ someone opens a PR in the consumer:
 "@reel48/designer": "https://github.com/Reel48/reel48-designer/archive/refs/tags/v1.2.0.tar.gz"
 ```
 
-Four entry points, split so they can be imported independently:
+Four entry points, split so they can be imported independently, and two
+folders of files:
 
 ```js
 import { dieGeometry, designReducer, pricingFacts } from "@reel48/designer/core"; // zero deps
 import { DesignStage } from "@reel48/designer/stage";                             // needs a DOM; React + Konva
 import { loadViewer, createHatLook } from "@reel48/designer/viewer";              // needs a DOM; model-viewer, lazily
 import modelUrl from "@reel48/designer/models/hat-no-7.glb";                      // files, served by the host
+import tileUrl from "@reel48/designer/patterns/gingham-red.v1.svg";               // v1.16.0: pattern tiles, served by the host
 ```
 
-### Consumers (v1.15.0)
+### Consumers (v1.16.0)
 
-- **account.reel48.com** (the portal) uses `viewer`, `models` and `core`
-  (and `stage` for the flat die): its customizer island runs the hat and can
-  cooler designers natively.
+- **account.reel48.com** (the portal) uses `viewer`, `models`, `patterns` and
+  `core` (and `stage` for the flat die): its customizer island runs the hat and
+  can cooler designers natively, and from v1.16.0 edits on the 3D can cooler
+  (`createCanLook` and the hat's edit session) and draws its patterns.
 - **data.reel48.com** (the hub) uses `core` only: `pricingFacts` to price a
   portal quote line, `describeDesign` to show staff its spec.
-- **www.reel48.com** (the storefront) has **not** adopted v1.15 yet. It is on
-  v1.14.0 and keeps its own copies of everything v1.15 moved here; the copies
-  here were taken from its origin/main `d78d90ee` and are pinned to it by the
-  golden files below. When it bumps, it deletes its copies and imports these.
+- **www.reel48.com** (the storefront) has **not** adopted v1.15 or v1.16. It
+  stays on v1.14.0 and keeps its own copies of everything v1.15 moved here; the
+  copies here were taken from its origin/main `d78d90ee` and are pinned to it
+  by the golden files below. When it bumps, it deletes its copies and imports
+  these.
 
 **`core` must never drag Konva in behind it.** It gets imported by a server
 action pricing a design, by a script building a supplier zip, and by tests —
@@ -143,6 +147,8 @@ src/core/    zero dependencies — dies.js, design.js, and since v1.15.0 pricing
 src/stage/   optional peers: react, react-dom, konva, react-konva — DesignStage.jsx, useImage.js
 src/viewer/  optional peers: @google/model-viewer (three) — the 3D views, no framework
 models/      the 3D files (GLB, HDR, posters, surfaces) and MANIFEST.json
+patterns/    (v1.16.0) the can cooler's pattern tiles and thumbs, and MANIFEST.json
+scripts/     (v1.16.0) extract-can-surface.mjs: the can coolers' surfaces from their GLBs (not shipped)
 tests/       golden files and unit tests; tests/storefront/ holds the storefront's own tests, ported
 ```
 
@@ -887,3 +893,163 @@ React and Konva: only a host that imports `./viewer` installs them. `three`
 (23 files), pointed at the ports. Each file's header says what was dropped
 (React components, server handlers, `pricing.ts`, the storefront's own file
 layout) or adapted to the viewer's host-supplied URLs.
+
+## v1.16.0: editing on the 3D can cooler, and the pattern tiles
+
+A buyer drags, resizes and turns logos and text on the 3D can cooler itself,
+as they have on the hat since v1.12.0 (ported in v1.15.0): the same edit
+session (hat-edit.js `createEditSession`), placer (hat-place.js) and
+screen-to-die map (hat-surface.js), with a can cooler look in place of the
+hat's. Every golden file stands; no die moved. account.reel48.com is the
+consumer; the storefront stays on v1.14.0.
+
+### The can's surfaces
+
+`models/can-cooler-standard-surface.json` and `models/can-cooler-slim-surface.json`,
+read by `createSurface` and fetched by the host with `loadSurfaceJson`
+(same-origin only), in the hats' format: `{ model, frame, zones: { front,
+back, base: { positions, uvs, indices } } }`, the frame the die's stage (1000 x
+2000, 875 x 2600).
+
+- **Made here, from the GLBs beside them**, by `npm run extract:can-surface`
+  (`scripts/extract-can-surface.mjs`, forked from the storefront's hat
+  extractor: the GLB reading, the meshopt decode, the node transforms and the
+  winding check against NORMAL are its). It reads only the two GLBs and writes
+  only the two JSONs, the same bytes every run. Their `models/MANIFEST.json`
+  entries name the script and the GLB as `source`; `tests/can-surface.test.js`
+  re-runs it, so a rebuilt model fails until the surfaces are made again.
+- **The die px are `(u * W, v * H)`**, as the hats' are. The model build
+  writes Blender UVs as `(x / W, 1 - y / H)`; the glTF exporter flips v back.
+  The script checks the wrap on every run (the +z rim is the front panel's top
+  edge, the -z rim the back's, the front's right half +x, the bottom the band
+  between the folds, front fold forward) and fails if it ever changes.
+- **The sides** are core/confine.js `faceRegions`: `front` and `back` the
+  panels' rects, `base` the disc. A sleeve print triangle (`print` and
+  `print_seam`) joins every side its die triangle touches within 2 die px, so
+  the disc's caps past each fold (on the model, the bottom of each panel's
+  wall) are both the base's and that panel's. Only print faces are written:
+  the triangles the model collapsed in the die (the folds round the bottom
+  edge) map nothing. About 5,560 triangles a panel and 2,400 for the base;
+  480 KB a file, 114 KB gzipped.
+- **What the model does not show.** The model's bottom disc is the ellipse
+  inscribed in the band between the fold lines (0.97 of it), so the parts of
+  the die's disc beside that ellipse, inside the band, are printed but not on
+  the 3D can; and the top 1 mm of each panel is the rim's cut edge. The editor
+  still confines art to the whole side (its area is the die's), and a fit
+  measures those points at the edge of what is printed (`areaScreenPoints`).
+
+### `viewer`: can-edit.js
+
+- `createCanLook(mv, { stage, textureScale = 1, onReady })` → `{ paint, view,
+  fill, orbitWindow, buildSprite, beginLive, liveFrame, endLive, dispose,
+  texture }`: the can's texture as a look the edit session takes. On every
+  model load it binds a canvas of `stage` times `textureScale` to `print` and
+  `print_seam` (`attachCanCoolerTexture`) and calls `onReady`.
+  - `paint({ color, art, magnet })` → boolean: `paintCanCooler`'s pixels, art
+    at any scale drawn to the texture's size; false before the model or
+    without art. It is the handover that ends a held live frame. The design is
+    kept by reference to show again on a cancel, so keep the art canvas whole
+    until the next paint.
+  - `view(spot)`, spot `front | back | base | whole` (`CAN_EDIT_VIEWS`): a
+    numeric orbit (front θ 0, back θ 180, both at φ 80; the base from below at
+    φ 150, the viewer's limit; whole the approved front view) at the radius the
+    camera had on the approved view's `auto` goal, and a target on the can's
+    axis (mid-sleeve for a panel, the base's centre for the base).
+  - `fill` (`CAN_EDIT_FILL`: narrow 0.85 x 0.7, wide 0.6 x 0.8 of the editor)
+    and `orbitWindow` (`canOrbitWindow`: a panel ±45° round the can and ±20°
+    up and down, the base ±60° and up to 20° toward the panels, always within
+    the viewer's 35° to 150°).
+  - The live edit is hat-look's contract: `buildSprite(zoneId, art, { scale })`
+    → `{ color: art, w, h, pad: 0 }`; `beginLive(zoneId, { rest })`, `rest` the
+    whole die's art without the piece (`canRestArt`) at any resolution;
+    `liveFrame(zoneId, sprite, m)` paints the colour, the rest, then the piece
+    under `m` clipped to its side (the rect, or the disc), upside down, and
+    uploads; `endLive(zoneId, { now, changed, sprite, m })` draws the resting
+    pose and holds it until the next `paint` or `HOLD_MAX_MS`, or shows the
+    committed paint at once (`now`). A frame is 14 canvas calls on numbers
+    (13 with no rest) and one upload of the whole texture (8 MB at 1x for the
+    standard can, 2.9 MB at a phone's 0.6): pass `rest` at the texture's
+    scale so its blit is 1:1.
+- `canEditDie(dieOrId)` → `{ id, kind: "koozie", stage, pxPerInch, zones:
+  [{ id, rect, area, maxImprint }] }` for `front`, `back`, `base`, frozen and
+  the same object every time. The hat helpers take it unchanged as their die
+  (`pieceOf`, `piecesOf`, `commitPatch`, `createPieceArtCache`,
+  `adjustAction`). A panel's area is its rect; the base's is its disc as a
+  96-sided polygon on the circle (within 0.15 px). `maxImprint` is the side's
+  box in inches: a koozie side has no smaller cap. Throws for a die that is
+  not a koozie.
+- `canSpotLimits(die, zoneId)` → `{ zone, area, cap, maxImprint, pxPerInch,
+  level, labels: { spot }, snapX? }` (`spotLimits`' shape): level 0 for the
+  front and the base, 180 for the back (it prints upside down in the die, so
+  art upright on the can reads 0°); names "front panel", "back panel", "base".
+- `canRestArt(stage, exceptId, { scale })`: `exportArtCanvas({ color: false,
+  exclude: [exceptId], scale })`, the whole die without one piece, pattern and
+  every side included.
+- Also exported: `CAN_EDIT_ZONES`, `CAN_SPOT_NAMES`, `CAN_SPOT_LEVELS`,
+  `CAN_BASE_SIDES`, `CAN_ORBIT_WINDOW`.
+
+A can host's order of work: `createModelViewer` with `CAN_COOLER_VIEW` and a
+probe hotspot (`<div slot="hotspot-probe" data-position="0m 0m 0m" hidden>`),
+`createCanLook`, `paint` on `onReady` and on every design change,
+`createSurface(await loadSurfaceJson(url))`, then for an edit
+`createEditSession({ mv, host, look, surface, edit })` with `edit` built from
+`canSpotLimits`, `piecesOf(…, canEditDie(id), …)`, a `createPieceArtCache`
+for `pieceArt`, `canRestArt` for `restArt`, and `commitPatch` on `onCommit`.
+
+### Changed, compatibly
+
+- **hat-edit.js.** `createEditSession` and `fitSpot` use a look's own `fill`
+  and `orbitWindow` when it has them (`fillFor(width, fill?)`,
+  `fitRadius({ …, fill? })`); a view whose radius is `auto` is fitted from the
+  radius the camera has once it has jumped there instead of giving up; and a
+  fit measures its area with the new `areaScreenPoints(surface, zone, area)`,
+  which measures a point off the zone's print faces at their extent. Every
+  point of the hats' areas is on their print faces, so a hat fits exactly as
+  before (a test says so).
+- **can-cooler.js.** `CAN_COOLER_VIEW`'s `min-camera-orbit` is
+  `auto 35deg 0.2m` (`CAN_COOLER_MIN_RADIUS`), so a fit can come in close on
+  a side (the nearest, the slim base on a laptop, is about 0.3 m). The buyer
+  still cannot zoom: `disable-zoom` stands.
+- **DesignStage.** `exportArtCanvas({ only })` leaves the pattern out too, as
+  "that element alone" says: before, a patterned can cooler's piece art carried
+  a square of the pattern, which a drag on the 3D can would have moved with
+  the piece. `exclude` and `color` are as before, and a hat has no pattern.
+  The pattern's placements are drawn inside one `Group` for this.
+
+### `patterns/`
+
+`@reel48/designer/patterns/<file>`: every tile the designer **draws** (each
+registry entry's `file`, or both of a flag's `files`) and every `thumb`, 66
+files (2.0 MB), copied byte for byte from the storefront's `public/patterns/`
+at `d78d90ee` (the commit the registry was ported from; origin/main has the
+same bytes). `patterns/MANIFEST.json` maps each to `{ sha256, source,
+storefrontCommit }`, and `tests/patterns.test.js` re-hashes them, checks they
+are exactly what the registry draws, and checks each SVG is a plain picture
+(no script, no handler, nothing from another origin).
+
+- **No print masters.** `printFile` / `printFiles` (the inch-sized SVGs and
+  lossless PNGs, about 12 MB) are not here: production keeps reading them from
+  www.reel48.com (`coozie-spec`'s absolute URL).
+- **A redrawn tile is a new file name** (`.v2.svg`) under the same pattern
+  id, which orders store forever. So a host may cache these by name for good.
+- **`PATTERN_BASE` is `/patterns/`**: a host serves this folder there, or maps
+  `PATTERN_BASE` to wherever it does serve it (`patternTile(p, size).src` is
+  `PATTERN_BASE + file`).
+
+### Still true
+
+Nothing in `viewer` injects a `<style>` element, writes a `style` attribute
+from markup, evaluates code, or fetches from another origin. The can's look
+draws on the canvas model-viewer gives it; the surface comes through
+`loadSurfaceJson`, which refuses any URL off the page's origin; pattern tiles
+and models are the host's own files.
+
+### Tests
+
+841 before, 881 now: `tests/can-surface.test.js` (the files, the sides, and
+the map at the can's 13° field of view against a three.js camera and
+raycaster: the camera solved from hotspot probes to 1e-12 px, die to screen to
+die within a thousandth of a pixel, each pixel the die point a ray hits),
+`tests/can-edit.test.js` (the die, the limits, the rest art, the look's paint
+and live repaint, fits on a fake model-viewer, a whole edit session), and
+`tests/patterns.test.js`; `tests/models.test.js` knows the made surfaces.

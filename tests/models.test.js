@@ -2,19 +2,23 @@
 // public/3d/** (origin/main), renamed to stable names. MANIFEST.json records
 // each file's sha256, its storefront path and commit; this re-hashes every
 // file against it, so a file that changes (or one added without an entry)
-// fails here, not in a customer's browser.
+// fails here, not in a customer's browser. v1.16.0: the can coolers' surfaces
+// are made here, from the GLBs beside them, so their entry's `source` is the
+// script and the model (tests/can-surface.test.js re-runs it).
 import { describe, expect, it } from "vitest";
 import { createHash } from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
 import { createSurface, HAT_3D_STYLES } from "../src/viewer/index.js";
-import { hatDie } from "../src/core/index.js";
+import { dieGeometry, hatDie, resolveDie } from "../src/core/index.js";
 
 const dir = new URL("../models/", import.meta.url);
 const manifest = JSON.parse(readFileSync(new URL("MANIFEST.json", dir), "utf8"));
 const sha256 = (name) => createHash("sha256").update(readFileSync(new URL(name, dir))).digest("hex");
 
 const EXPECTED = [
+  "can-cooler-slim-surface.json",
   "can-cooler-slim.glb",
+  "can-cooler-standard-surface.json",
   "can-cooler-standard.glb",
   "hat-no-6-poster.webp",
   "hat-no-6-surface.json",
@@ -31,10 +35,19 @@ describe("models/", () => {
     expect(readdirSync(dir).sort()).toEqual([...EXPECTED, "MANIFEST.json"].sort());
   });
 
+  /** The files made here (v1.16.0), by the model each is made from. */
+  const MADE = { "can-cooler-standard-surface.json": "can-cooler-standard.glb", "can-cooler-slim-surface.json": "can-cooler-slim.glb" };
+
   for (const name of EXPECTED) {
     it(`${name} is the file the manifest names`, () => {
       const entry = manifest[name];
       expect(sha256(name)).toBe(entry.sha256);
+      if (MADE[name]) {
+        expect(entry.source).toBe(`scripts/extract-can-surface.mjs models/${MADE[name]}`);
+        expect(manifest[MADE[name]]).toBeDefined();
+        expect(entry.storefrontCommit).toBeUndefined();
+        return;
+      }
       // The storefront names each file by the first 8 hex of its SHA-256.
       expect(entry.source).toMatch(/^public\/3d\/(hats|can-coolers)\//);
       expect(entry.source).toContain(`.${entry.sha256.slice(0, 8)}.`);
@@ -74,6 +87,16 @@ describe("models/", () => {
       expect(json.frame).toEqual(HAT_3D_STYLES[style].frame);
       const surface = createSurface(json);
       expect(surface.zoneIds).toEqual(expect.arrayContaining(["front", "left", "right", "back", "label_tall"]));
+    }
+    for (const [size, dieId] of [
+      ["standard", "koozie-standard"],
+      ["slim", "koozie-slim"],
+    ]) {
+      const json = JSON.parse(readFileSync(new URL(`can-cooler-${size}-surface.json`, dir), "utf8"));
+      expect(json.model).toBe(`can-cooler-${size}.glb`);
+      expect(json.frame).toEqual(resolveDie(dieId).stage);
+      expect(dieGeometry(dieId).pxPerInch).toBeGreaterThan(0);
+      expect(createSurface(json).zoneIds).toEqual(["front", "back", "base"]);
     }
   });
 });

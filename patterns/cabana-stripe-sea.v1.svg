@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="341" height="379" preserveAspectRatio="none" viewBox="0 0 90 100">
+<!-- Reel48 pattern cabana-stripe-sea -->
+<rect data-slot="ground" fill="#F7F3EA" width="90" height="100"/>
+<rect data-slot="stripe" fill="#2E8B7A" x="0" y="0" width="45" height="100"/>
+</svg>

@@ -1,21 +1,21 @@
 {
   "can-cooler-slim-surface.json": {
-    "sha256": "6a9779d07df1380872f0fc5ca30bd5540d9b1b831c2e6e1fde03533d7d4861df",
+    "sha256": "7891844bef9d59ad956075383db0f3395d3639a148d7de7013bfefc00bc06102",
     "source": "scripts/extract-can-surface.mjs models/can-cooler-slim.glb"
   },
   "can-cooler-slim.glb": {
-    "sha256": "0f257e8e4a7db58bbf80cff2fe5f797505b5b941d9bb895c999da2cf104058fd",
-    "source": "public/3d/can-coolers/can-cooler-slim.0f257e8e.glb",
-    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+    "sha256": "c79a0cf733d28c4b78e33fe9cde5539806d87d6f157c5badaa0c7e2dfb8dd756",
+    "source": "public/3d/can-coolers/can-cooler-slim.c79a0cf7.glb",
+    "storefrontCommit": "650795558b11ff022f2a1be20db3e6d951820e14"
   },
   "can-cooler-standard-surface.json": {
-    "sha256": "9d065ab9dad2e40a716d8f242fc435ca1752a589f7113e7b9e6538ca6a5132fb",
+    "sha256": "a411a909e971d2b4325d0d5fce0de26044623142af00499b8f4ae28ea8acb5c0",
     "source": "scripts/extract-can-surface.mjs models/can-cooler-standard.glb"
   },
   "can-cooler-standard.glb": {
-    "sha256": "4592b6cddc5e053ea35d2d824fbee63490270a9db6e7913cf4bb6861a12875cb",
-    "source": "public/3d/can-coolers/can-cooler-standard.4592b6cd.glb",
-    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+    "sha256": "026989d58f7099f3d04ea28db42da623d6433e836412cecf863d20a2cd24934f",
+    "source": "public/3d/can-coolers/can-cooler-standard.026989d5.glb",
+    "storefrontCommit": "650795558b11ff022f2a1be20db3e6d951820e14"
   },
   "hat-no-6-poster.webp": {
     "sha256": "f84213ad534dc55b4ab9ceaac1782ddd222c9d671bc55188283bf4f0044ccc1c",

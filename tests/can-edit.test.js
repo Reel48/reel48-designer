@@ -8,8 +8,8 @@
 // order of a frame's draws, the flip, the hold until the next paint, the
 // HOLD_MAX_MS release, a cancel); the views; and fitSpot and an edit session
 // on a fake model-viewer that orbits a real three.js camera round the can's
-// own surface, at its 13 degree field of view: an "auto" radius fitted
-// rather than given up on, each side filling CAN_EDIT_FILL, the camera never
+// own surface, at its 13 degree field of view: an "auto" radius left
+// unfitted as before (a hat's fallback view), each side filling CAN_EDIT_FILL, the camera never
 // clamped by CAN_COOLER_VIEW's radius floor, and the window the can's own.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
@@ -641,18 +641,22 @@ describe("fitSpot, with the can's look", () => {
     }
   });
 
-  it("fits a view whose radius is auto, where it used to give up; only angles that aren't numbers still give up", () => {
+  it("leaves a view whose radius is auto unfitted, as before (the can's look never sets one); a numeric one is fitted with the hat's fill", () => {
     const die = canEditDie("koozie-standard");
     const area = canSpotLimits(die, "front").area;
     const f = frames();
     const mv = fakeViewer(LAPTOP);
     const surface = createSurface(SURFACES["koozie-standard"]);
-    // a look that leaves the radius to the viewer, and no fill or window of its own: the hat's are used
-    const look = { view: () => { mv.cameraTarget = "0m 0.05m 0m"; mv.cameraOrbit = "0deg 80deg auto"; } };
-    const onFitted = vi.fn();
+    // a look with no fill or window of its own: the hat's are used
+    const auto = vi.fn();
     const onWindow = vi.fn();
-    fitSpot({ mv, look, surface, zone: "front", area, host: hostOf(mv), requestFrame: f.request, cancelFrame: f.cancel, onWindow, onFitted });
+    fitSpot({ mv, look: { view: () => { mv.cameraOrbit = "0deg 80deg auto"; } }, surface, zone: "front", area, host: hostOf(mv), requestFrame: f.request, cancelFrame: f.cancel, onWindow, onFitted: auto });
     expect(onWindow).toHaveBeenCalledWith(orbitWindow("front", 0, 80));
+    expect(auto).toHaveBeenCalledWith(null);
+
+    const onFitted = vi.fn();
+    const look = { view: () => { mv.cameraTarget = "0m 0.05m 0m"; mv.cameraOrbit = "0deg 80deg 0.62m"; } };
+    fitSpot({ mv, look, surface, zone: "front", area, host: hostOf(mv), requestFrame: f.request, cancelFrame: f.cancel, onFitted });
     for (let i = 0; i < 3; i++) f.run(mv);
     const fit = onFitted.mock.calls[0][0];
     expect(fit.had).toBeCloseTo(0.62, 9);
@@ -660,10 +664,6 @@ describe("fitSpot, with the can's look", () => {
     const k = ratio(mv, surface, "front", area, SPOT_FILL);
     expect(k).toBeGreaterThan(0.9);
     expect(k).toBeLessThan(1.1);
-
-    const lost = vi.fn();
-    fitSpot({ mv, look: { view: () => { mv.cameraOrbit = "auto auto auto"; } }, surface, zone: "front", area, host: hostOf(mv), requestFrame: f.request, cancelFrame: f.cancel, onFitted: lost });
-    expect(lost).toHaveBeenCalledWith(null);
   });
 });
 

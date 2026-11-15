@@ -1000,12 +1000,12 @@ for `pieceArt`, `canRestArt` for `restArt`, and `commitPatch` on `onCommit`.
 
 - **hat-edit.js.** `createEditSession` and `fitSpot` use a look's own `fill`
   and `orbitWindow` when it has them (`fillFor(width, fill?)`,
-  `fitRadius({ …, fill? })`); a view whose radius is `auto` is fitted from the
-  radius the camera has once it has jumped there instead of giving up; and a
+  `fitRadius({ …, fill? })`); and a
   fit measures its area with the new `areaScreenPoints(surface, zone, area)`,
   which measures a point off the zone's print faces at their extent. Every
   point of the hats' areas is on their print faces, so a hat fits exactly as
-  before (a test says so).
+  before (a test says so). A view must still set a numeric radius to be
+  fitted, as before; the can's look always does.
 - **can-cooler.js.** `CAN_COOLER_VIEW`'s `min-camera-orbit` is
   `auto 35deg 0.2m` (`CAN_COOLER_MIN_RADIUS`), so a fit can come in close on
   a side (the nearest, the slim base on a laptop, is about 0.3 m). The buyer

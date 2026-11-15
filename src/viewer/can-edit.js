@@ -83,8 +83,8 @@ export const CAN_EDIT_FILL = Object.freeze({
 /**
  * How far a drag on bare sleeve turns the can from a side's view, degrees
  * either way. Wider than a hat's (30 by 15): a panel goes half way round the
- * can, so it takes a wider turn to see its edge. The base turns freely round
- * the axis and tilts up toward the panels.
+ * can, so it takes a wider turn to see its edge. The base turns 60 degrees
+ * either way round the axis and tilts up toward the panels.
  */
 export const CAN_ORBIT_WINDOW = Object.freeze({
   panel: Object.freeze({ theta: 45, phi: 20 }),

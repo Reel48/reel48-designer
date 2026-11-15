@@ -1,8 +1,8 @@
 // Ported to @reel48/designer v1.15.0 from Reel48-Storefront src/components/storefront/hat/hat-edit.js (origin/main d78d90ee), its surface fetch held to the page's origin. Comments are the storefront's; imports point into this package.
 // v1.16.0: a look may bring its own `fill` and `orbitWindow` (the can cooler's, can-edit.js),
-// fitSpot fits a view whose radius is "auto" from the radius the camera has once there, and an area
-// point off its zone's print faces is measured at their extent (areaScreenPoints). A hat look has no
-// fill or window of its own and every hat area point is on its print faces, so a hat fits as before.
+// and an area point off its zone's print faces is measured at their extent (areaScreenPoints). A hat
+// look has no fill or window of its own and every hat area point is on its print faces, so a hat fits
+// as before. A view must still set a numeric radius to be fitted (the can's look always does).
 //
 /**
  * The on-hat editor's glue (round E1, 2026-10-21): what Hat3D does while a
@@ -277,11 +277,10 @@ export function createCameraAdapter(mv, getWindow) {
  *
  * Package v1.16.0, for the can cooler's look (can-edit.js createCanLook): a
  * look's own `fill` (SPOT_FILL's shape) and `orbitWindow` (orbitWindow's
- * signature) are used in place of the hat's; a view whose radius is "auto"
- * (or not a number) is fitted from the radius the camera has once it has
- * jumped there, where it used to give up (only angles that are not numbers
- * still give up, onFitted(null)); and the area is measured by
- * areaScreenPoints, which a hat's measures as before.
+ * signature) are used in place of the hat's, and the area is measured by
+ * areaScreenPoints, which a hat's measures as before. A view whose orbit is
+ * not three numbers is not fitted (onFitted(null)), as before: the can's look
+ * always sets a numeric radius.
  *
  * @param {{ mv: any, look: { view: (spot: string) => void, fill?: typeof SPOT_FILL,
  *   orbitWindow?: (spot: string, theta: number, phi: number) => { theta: number[], phi: number[] } },
@@ -299,11 +298,10 @@ export function fitSpot({ mv, look, surface, zone, area, host, reducedMotion = f
   const fill = look.fill ?? SPOT_FILL;
   const windowOf = look.orbitWindow ? (s, t, p) => look.orbitWindow(s, t, p) : orbitWindow;
   look.view(spot);
-  // the goal the view set, as numbers: "<theta>deg <phi>deg <r>m"; an "auto"
-  // radius is read off the camera once it has jumped there (`had`, below)
-  const { theta, phi } = parseOrbit(mv.cameraOrbit);
+  // the goal the view set, as numbers: "<theta>deg <phi>deg <r>m"
+  const { theta, phi, radius } = parseOrbit(mv.cameraOrbit);
   if (Number.isFinite(theta) && Number.isFinite(phi)) onWindow?.(windowOf(spot, theta, phi));
-  if (!Number.isFinite(theta) || !Number.isFinite(phi)) {
+  if (!Number.isFinite(theta) || !Number.isFinite(phi) || !Number.isFinite(radius)) {
     onFitted?.(null);
     return () => {};
   }

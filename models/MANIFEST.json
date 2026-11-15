@@ -1,6 +1,6 @@
 {
   "can-cooler-slim-surface.json": {
-    "sha256": "8ce36c0e4efe750816ab14447eb5795c91e4b524c3eb9638d04c1c534474652a",
+    "sha256": "6a9779d07df1380872f0fc5ca30bd5540d9b1b831c2e6e1fde03533d7d4861df",
     "source": "scripts/extract-can-surface.mjs models/can-cooler-slim.glb"
   },
   "can-cooler-slim.glb": {
@@ -9,7 +9,7 @@
     "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
   },
   "can-cooler-standard-surface.json": {
-    "sha256": "51c08038385207749042285ff89a2d1b74fdf8368cb99e4b467cd56fa72b3a86",
+    "sha256": "9d065ab9dad2e40a716d8f242fc435ca1752a589f7113e7b9e6538ca6a5132fb",
     "source": "scripts/extract-can-surface.mjs models/can-cooler-standard.glb"
   },
   "can-cooler-standard.glb": {

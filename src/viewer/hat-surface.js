@@ -231,6 +231,19 @@ export function createSurface(json) {
 
   return {
     model: json.model ?? null,
+    /**
+     * v1.16.3: how a placer carries a finger off a zone's fabric: "border" by
+     * this surface's own screenToDie, from the nearest point of the zone's
+     * edge on its average map (the can cooler's panels: an off-centre point's
+     * own map on a cylinder seen in perspective has a small sideways term,
+     * which slid a piece pinned at a panel's bottom along it); "local", along
+     * the last true hit's own local map (every hat zone, the can's base, and
+     * any zone the file's `carry` does not name as "border").
+     * @param {string} zoneId
+     */
+    carryFor(zoneId) {
+      return json.carry && typeof json.carry === "object" && json.carry[zoneId] === "border" ? "border" : "local";
+    },
     frame: { width: json.frame.width, height: json.frame.height },
     zoneIds: Object.freeze([...zones.keys()]),
 

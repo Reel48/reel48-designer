@@ -305,3 +305,42 @@ describe("a small piece dragged down a panel into the base disc (v1.16.2)", () =
     }
   });
 });
+
+describe("a finger carried far past a panel's bottom, off its middle (v1.16.3)", () => {
+  it("leaves the piece about under the finger instead of sliding it along the edge", () => {
+    // v1.16.2 and before: past the can's outline the placer carried the finger
+    // on along the last hit's own local map, whose small sideways term (an
+    // off-centre point on a cylinder seen in perspective) kept adding up once
+    // the piece was pinned at the bottom: 250 to 330 die px along the edge.
+    // Now a panel's surface carries it from the edge's nearest point.
+    const small = { id: "logo", w: 60, h: 40, rotation: 0 };
+    for (const can of CANS) {
+      const { geom } = can;
+      const regions = faceRegions(geom);
+      for (const [spot, dx] of [["front", 40], ["front", -70], ["front", 120], ["back", 55], ["back", -100]]) {
+        const at = `${can.die} ${spot} dx ${dx}`;
+        const r = regions[spot];
+        const from = [geom.cx + dx, spot === "front" ? r.y1 - 160 : r.y0 + 160];
+        const { commits, off, lim, start } = dragFromCentre(can, 90, { spot, piece: small, from, steps: 120 });
+        expect(off, `${at}: the finger goes well past the can's bottom`).toBeGreaterThan(60);
+        const got = commits[0];
+        expect(poseValid(got, lim), at).toBe(true);
+        // at the fold (or the disc that reaches into it), not slid round toward a side
+        expect(Math.abs(got.cx - start.cx), `${at}: (${got.cx.toFixed(1)}, ${got.cy.toFixed(1)}) from x ${start.cx}`).toBeLessThan(60);
+        expect(Math.abs(got.cx - start.cx) < Math.abs(r.x1 - start.cx) - 100 && Math.abs(got.cx - start.cx) < Math.abs(start.cx - r.x0) - 100, at).toBe(true);
+      }
+    }
+  });
+
+  it("carries from the edge on the can's panels only: its base and every hat zone keep their own local map", () => {
+    for (const can of CANS) {
+      expect(can.surface.carryFor("front")).toBe("border");
+      expect(can.surface.carryFor("back")).toBe("border");
+      expect(can.surface.carryFor("base")).toBe("local");
+    }
+    for (const hat of ["hat-no-7", "hat-no-6"]) {
+      const s = createSurface(JSON.parse(readFileSync(new URL(`../models/${hat}-surface.json`, import.meta.url), "utf8")));
+      for (const id of s.zoneIds) expect(s.carryFor(id), `${hat} ${id}`).toBe("local");
+    }
+  });
+});

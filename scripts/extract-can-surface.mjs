@@ -68,6 +68,12 @@ export const CAN_SURFACES = Object.freeze([
 export const PRINT_MATERIALS = Object.freeze(["print", "print_seam"]);
 /** The sides, in the order they are written. */
 export const SIDES = Object.freeze(["front", "back", "base"]);
+/**
+ * How a placer carries a finger off each side's fabric (hat-surface.js
+ * `carryFor`, v1.16.3): the panels from their edge, on their average map; the
+ * base, which v1.16.1 settled on its own local map, is left out (local).
+ */
+export const CARRY = Object.freeze({ front: "border", back: "border" });
 /** Die px round a side within which a triangle still joins it. */
 export const MARGIN_PX = 2;
 /** A die triangle this small (twice its area, px^2) is collapsed: hat-surface.js's own DIE_EPS. */
@@ -332,7 +338,9 @@ export async function extractCanSurface(bytes, { dieId, model }) {
   }
 
   // Each side: the triangles that touch it, their vertices numbered by first use.
-  const out = { model, frame: { width: W, height: H }, zones: {} };
+  // v1.16.3: a placer carries a finger off a panel's fabric from the nearest
+  // point of its edge, on the panel's average map (CARRY)
+  const out = { model, frame: { width: W, height: H }, carry: CARRY, zones: {} };
   const report = { triangles: tris.length, collapsed, mirrored, normalsAgree: agree, normalsDisagree: disagree, sides: {} };
   const zones = Object.fromEntries(SIDES.map((id) => [id, { positions: [], uvs: [], indices: [], keys: new Map() }]));
   let orphans = 0;
@@ -430,7 +438,7 @@ export function formatSurface(json) {
     const lines = Object.entries(z).map(([k, v]) => `      ${JSON.stringify(k)}: ${JSON.stringify(v)}`);
     return `    ${JSON.stringify(id)}: {\n${lines.join(",\n")}\n    }`;
   });
-  return `{\n  "model": ${JSON.stringify(json.model)},\n  "frame": ${JSON.stringify(json.frame)},\n  "zones": {\n${zones.join(",\n")}\n  }\n}\n`;
+  return `{\n  "model": ${JSON.stringify(json.model)},\n  "frame": ${JSON.stringify(json.frame)},\n  "carry": ${JSON.stringify(json.carry)},\n  "zones": {\n${zones.join(",\n")}\n  }\n}\n`;
 }
 
 async function main() {

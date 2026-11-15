@@ -479,6 +479,14 @@ export function createPlacer(host, opts = {}) {
         return (last = hit);
       }
       if (!anchor) return last;
+      if (surface?.carryFor?.(zone) === "border") {
+        // v1.16.3 (the can cooler): the edge's nearest point and the zone's
+        // average map, so a finger past the can's bottom, a little off a
+        // panel's middle, does not slide the piece along the edge by the
+        // small sideways term of an off-centre point's own map
+        const off = surface.screenToDie(zone, p[0], p[1]);
+        if (off && Number.isFinite(off.x) && Number.isFinite(off.y)) return (last = [off.x, off.y]);
+      }
       if (anchor.inv === undefined) anchor.inv = inverseAt(anchor.d[0], anchor.d[1]);
       if (!anchor.inv) return last;
       const [a, b, c2, d] = anchor.inv;

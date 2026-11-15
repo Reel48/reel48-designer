@@ -1,0 +1,332 @@
+{
+  "arctic-camo.v1.svg": {
+    "sha256": "036bebe6c0c595e3bb37688dfb53c6685c6f95f5027442c776a9f91813703f7c",
+    "source": "public/patterns/arctic-camo.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "bandana-black.v1.svg": {
+    "sha256": "4ece5b8e0288f05b6ffc0815ca7eb282d719c96536ebb5ba03e507779f3a5857",
+    "source": "public/patterns/bandana-black.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "bandana-navy.v1.svg": {
+    "sha256": "418ee588efce1ce0230d2b74469f5a89307aed4aa61e4093f8b14763b1e67970",
+    "source": "public/patterns/bandana-navy.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "bandana-red.v1.svg": {
+    "sha256": "8f5bfe272af4af453a34ca9ef8c618007dbc918e5717162f45aead5bebf49608",
+    "source": "public/patterns/bandana-red.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "buffalo-plaid-black-white.v1.svg": {
+    "sha256": "dfd7e3707b63a47264fc88877e8eba0ab4b5a65e7292d791a20b9629d497361d",
+    "source": "public/patterns/buffalo-plaid-black-white.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "buffalo-plaid-green.v1.svg": {
+    "sha256": "e6962cd289e7425dc49ab874ff6bdbddb41aae3a34ba4464272c6d7f1491bfdb",
+    "source": "public/patterns/buffalo-plaid-green.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "buffalo-plaid-red.v1.svg": {
+    "sha256": "968f2e7be2279b41efcaa7e82eb9ea7eb73045bf3a680174a27fbf3a7fe285a3",
+    "source": "public/patterns/buffalo-plaid-red.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "cabana-stripe-coral.v1.svg": {
+    "sha256": "4804583753ecf2a3d6623f3dde1c3a27bbf056fcc38b7d9c5a3df7de4e8890fb",
+    "source": "public/patterns/cabana-stripe-coral.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "cabana-stripe-navy.v1.svg": {
+    "sha256": "170c842bab63a86cb0857371be82a5e74bb6ca665681fdb63240394a35ac0848",
+    "source": "public/patterns/cabana-stripe-navy.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "cabana-stripe-sea.v1.svg": {
+    "sha256": "8ea4da07ce32b85567360c1c9727f6ea510669b6e6012db63845c9709439af46",
+    "source": "public/patterns/cabana-stripe-sea.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "duck-camo-classic.v1.svg": {
+    "sha256": "50b9a636504956c929e175ba0ce624bd6514ac5fc929412b023aa78ba9431cf8",
+    "source": "public/patterns/duck-camo-classic.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "duck-camo-marsh.v1.svg": {
+    "sha256": "1b65c0feb8eb98761a89ab37ec77ffcc41c7047ed4e64591ac2a52f3852565f6",
+    "source": "public/patterns/duck-camo-marsh.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "duck-camo-mud.v1.svg": {
+    "sha256": "a70d947e5efcb8be1ee555b1d2e46a3f8f74b1bc5bdc475367b36a90e0be3752",
+    "source": "public/patterns/duck-camo-mud.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "duck-camo-slate.v1.svg": {
+    "sha256": "d526cdec5e74af98ab86a49df77c856d363ea82049d5f54a5a225eaf9a02c4f4",
+    "source": "public/patterns/duck-camo-slate.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "flag-classic.slim.v1.svg": {
+    "sha256": "1566b3477fd0095d1ad53f16aab43fe802f2b1d2a6af3118c462c2553b0585e6",
+    "source": "public/patterns/flag-classic.slim.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "flag-classic.standard.v1.svg": {
+    "sha256": "3f62caa45f0585e3fd13524a37f818adadd643cb0d58c834c93beed5b131c8af",
+    "source": "public/patterns/flag-classic.standard.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "flag-vintage.slim.v1.svg": {
+    "sha256": "64676b358106293a61f4f17af229c435d035022aec933a3aad70061685457cb2",
+    "source": "public/patterns/flag-vintage.slim.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "flag-vintage.standard.v1.svg": {
+    "sha256": "feb19e01461ef2e20831909bf99ce03375f29e3ae5f428879d672f6c6307cb04",
+    "source": "public/patterns/flag-vintage.standard.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "gingham-black.v1.svg": {
+    "sha256": "e9bf32fb9a35024d0be89a8883934abc6e87c7266b9675cc0e307dda05eda232",
+    "source": "public/patterns/gingham-black.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "gingham-navy.v1.svg": {
+    "sha256": "4c523583ab9165b9bbbe7506b2ef8f41cd5e7d0a224f1e5b4cfed6b6f726cd95",
+    "source": "public/patterns/gingham-navy.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "gingham-red.v1.svg": {
+    "sha256": "be4ffce30e81ea0a0c04dfbc3dc9909da90eb8ebf6b3ac1fe115ab57bf385038",
+    "source": "public/patterns/gingham-red.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "seventies-waves-berry.v1.svg": {
+    "sha256": "44c0d8e9806aae437a085b4bba10c6c0256dcfa092b19099bea853880aec57dd",
+    "source": "public/patterns/seventies-waves-berry.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "seventies-waves-ocean.v1.svg": {
+    "sha256": "5adab326865005f70d5cb7d6c3e437d2a073e2737a20645ab1468e44872849fb",
+    "source": "public/patterns/seventies-waves-ocean.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "seventies-waves-sunset.v1.svg": {
+    "sha256": "6a066525d5fac78522172bafa48340c7c1328561ebbf249f8f621c79e8b48420",
+    "source": "public/patterns/seventies-waves-sunset.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "star-field-navy.v1.svg": {
+    "sha256": "a6ed96c13fd62087c68eafd12c6c7b74c2323a74f20232743ff3558e286d1d8f",
+    "source": "public/patterns/star-field-navy.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "star-field-red-white-blue.v1.svg": {
+    "sha256": "928d0813e9c096ccb74a5ce18560569fa56e6f60d0d1d8a2bd9ba3d3565818bc",
+    "source": "public/patterns/star-field-red-white-blue.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/arctic-camo.v1.webp": {
+    "sha256": "abc0bf9eab1ef9c391a08eb5d510b111a99b81019ca23648b6455bad6d651723",
+    "source": "public/patterns/thumbs/arctic-camo.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/bandana-black.v1.webp": {
+    "sha256": "ef66b239cf2678c44795c8cf98e8812257ea7b4973041ecfbe2196ba3c166d12",
+    "source": "public/patterns/thumbs/bandana-black.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/bandana-navy.v1.webp": {
+    "sha256": "093439f3a56efc3525ca5e452a06f2536db9ff7e34098914e5372c80e875b0ec",
+    "source": "public/patterns/thumbs/bandana-navy.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/bandana-red.v1.webp": {
+    "sha256": "a4c040789726606bc697ec1eac4f9584807d2c0708a22558d4b1cb470337d4d8",
+    "source": "public/patterns/thumbs/bandana-red.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/buffalo-plaid-black-white.v1.webp": {
+    "sha256": "25252817ab9dd3c4138fe37694f6d8d72e328c326c676cbdd62cf4afff544e7d",
+    "source": "public/patterns/thumbs/buffalo-plaid-black-white.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/buffalo-plaid-green.v1.webp": {
+    "sha256": "45f58b3d7abbb30ad48a5bd3b88f2a4447de496ab532cfe2c2109b050f379bc5",
+    "source": "public/patterns/thumbs/buffalo-plaid-green.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/buffalo-plaid-red.v1.webp": {
+    "sha256": "30ab06213bb5b3fba993cd90446f60eb659ef4a2c180090bc60137cb1f6c8ce6",
+    "source": "public/patterns/thumbs/buffalo-plaid-red.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/cabana-stripe-coral.v1.webp": {
+    "sha256": "6bf00a3b576ea7b3ea0d7a253fc5f67dbb14da72a2b4aecb03cf9ea655561db0",
+    "source": "public/patterns/thumbs/cabana-stripe-coral.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/cabana-stripe-navy.v1.webp": {
+    "sha256": "5a2374fe028ce8c785cccfc3b43b73fef619668af6b63db2c6215a930bee3e13",
+    "source": "public/patterns/thumbs/cabana-stripe-navy.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/cabana-stripe-sea.v1.webp": {
+    "sha256": "802a1d18f664945092dec7d7c7d76e107be9aa5f54c43f4a52ae949ed639d85f",
+    "source": "public/patterns/thumbs/cabana-stripe-sea.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/duck-camo-classic.v1.webp": {
+    "sha256": "0c5911778e8fa8f163d10ae5146d1d9b5cff34d40ea3d23a0a9d888dad66bcb3",
+    "source": "public/patterns/thumbs/duck-camo-classic.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/duck-camo-marsh.v1.webp": {
+    "sha256": "0b65b63f229b34831674a04058c3efffd875d96e078a14c25259fe840d1c8f77",
+    "source": "public/patterns/thumbs/duck-camo-marsh.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/duck-camo-mud.v1.webp": {
+    "sha256": "836028726380efaaad73087adddf5554bfb479918a8aa9a93ba46c380a1c7781",
+    "source": "public/patterns/thumbs/duck-camo-mud.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/duck-camo-slate.v1.webp": {
+    "sha256": "446f037b612335b6dd1133bc626be44340b9f0510029c89168538240debd150d",
+    "source": "public/patterns/thumbs/duck-camo-slate.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/flag-classic.v1.webp": {
+    "sha256": "a8e10656f8181716124370df223f4c1a36772bfcc795abb0758f0d5917e2d768",
+    "source": "public/patterns/thumbs/flag-classic.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/flag-vintage.v1.webp": {
+    "sha256": "2f5fc8f71d1e0c45db54c8df8701865adb13b5c094557fc6fa01d45a69dec431",
+    "source": "public/patterns/thumbs/flag-vintage.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/gingham-black.v1.webp": {
+    "sha256": "203a6335872eb2229c2e5a0536f7f890ab0710a768bc434757911fbbbe9dc6c3",
+    "source": "public/patterns/thumbs/gingham-black.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/gingham-navy.v1.webp": {
+    "sha256": "75babf831f2bba6a28eaffa381bd81ed98afa8d3cdd72824b16865ab8deff56e",
+    "source": "public/patterns/thumbs/gingham-navy.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/gingham-red.v1.webp": {
+    "sha256": "0592a0f7ce2f39b491619b15811be8e8b894d9d2ee166f4eba07e284bba56b59",
+    "source": "public/patterns/thumbs/gingham-red.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/seventies-waves-berry.v1.webp": {
+    "sha256": "2b48bb0f63f942c9964952f7172c8b9b32606325754080320c2820167393734f",
+    "source": "public/patterns/thumbs/seventies-waves-berry.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/seventies-waves-ocean.v1.webp": {
+    "sha256": "4a92e13ee5d19041c4d652da7379595a65cc21e1a314b87bace024f7f9004264",
+    "source": "public/patterns/thumbs/seventies-waves-ocean.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/seventies-waves-sunset.v1.webp": {
+    "sha256": "66d8631207143db40b1c6b6e94657bb5e22349b94eae0ad4e9a2908c22cf9a3d",
+    "source": "public/patterns/thumbs/seventies-waves-sunset.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/star-field-navy.v1.webp": {
+    "sha256": "490ff52e6b941d5b0dfece35bfe621cd6b0d8c95155816b1f009f814cb190ba6",
+    "source": "public/patterns/thumbs/star-field-navy.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/star-field-red-white-blue.v1.webp": {
+    "sha256": "7bca6e66646c3ad0e56b2ab997e7d22091d0e924baafdbca2825709e25a6121d",
+    "source": "public/patterns/thumbs/star-field-red-white-blue.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/tie-dye-blue.v1.webp": {
+    "sha256": "754d82feaddb3f8323d6de24f8261580c0a658ebb57678b25c01cfe1f398b297",
+    "source": "public/patterns/thumbs/tie-dye-blue.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/tie-dye-pastel.v1.webp": {
+    "sha256": "9a0839aaeece3d12f1d4bb4f0a4e65bac8ebd6dc1bb2bebbb895718bd128fb39",
+    "source": "public/patterns/thumbs/tie-dye-pastel.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/tie-dye-rainbow.v1.webp": {
+    "sha256": "c2eecc6646c573a680df0974f5f4ec019065c6223a69d7ca2591fa00950bc331",
+    "source": "public/patterns/thumbs/tie-dye-rainbow.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/tree-camo.v1.webp": {
+    "sha256": "e7c497b944e1f915fae8506c41a941fcc16137118ab0672a5c8ef14daa84430a",
+    "source": "public/patterns/thumbs/tree-camo.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/wavy-check-black-white.v1.webp": {
+    "sha256": "61f4d0878d6cdd2f1f09c6e1772e9b8ee034bdea2a0fc9633c720d06ce593b15",
+    "source": "public/patterns/thumbs/wavy-check-black-white.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/wavy-check-pink-orange.v1.webp": {
+    "sha256": "f9287c0bd2fbf398c5903a0c4dd09df3253858f6add9089f951ea2eced0024c8",
+    "source": "public/patterns/thumbs/wavy-check-pink-orange.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/wavy-check-sage.v1.webp": {
+    "sha256": "7e64e60bbcc2a28785071de9f9b27b37075aeb4feefdacf131f59bda44c289ad",
+    "source": "public/patterns/thumbs/wavy-check-sage.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "thumbs/woodland-camo.v1.webp": {
+    "sha256": "3fc20d1af1d1edfd94d105da01100534a26aeaeb0792c2ed15bbaaf5ddf05a50",
+    "source": "public/patterns/thumbs/woodland-camo.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "tie-dye-blue.v1.webp": {
+    "sha256": "c7adbc0b8f9d5d4f0f90a40bbecaa7397682755a41e2f2be041552f27c715c93",
+    "source": "public/patterns/tie-dye-blue.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "tie-dye-pastel.v1.webp": {
+    "sha256": "173cc542793a3319279bd7de53f1539d5b761ecb9e813cbddfe7fa2397b22d4f",
+    "source": "public/patterns/tie-dye-pastel.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "tie-dye-rainbow.v1.webp": {
+    "sha256": "140d14ff8ad9f74c221298ba2450f8fc879007acdcc0bcd6d29c85804e8197ab",
+    "source": "public/patterns/tie-dye-rainbow.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "tree-camo.v1.webp": {
+    "sha256": "1789c5e1cdb02ea6201d702c501083ea15cce99764af431573ffe1c6dd97e576",
+    "source": "public/patterns/tree-camo.v1.webp",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "wavy-check-black-white.v1.svg": {
+    "sha256": "cf56893a9a24bf3db229c196a503ad219b0322e80ee555873e13dacf92a966d7",
+    "source": "public/patterns/wavy-check-black-white.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "wavy-check-pink-orange.v1.svg": {
+    "sha256": "5eacdcd8ff3c4d7291566224e64106967d58ef8e58ae06aa5b9d93a6931e6c22",
+    "source": "public/patterns/wavy-check-pink-orange.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "wavy-check-sage.v1.svg": {
+    "sha256": "e01a1cf194d40c9c4d4211d820a0bce17f0e9f8d3c00bdeba92f7c74f6fa5aa0",
+    "source": "public/patterns/wavy-check-sage.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  },
+  "woodland-camo.v1.svg": {
+    "sha256": "c9ffc10f4c8842352af497ec41d8e97e92b4b221fa2fa8015955107bbdb8977a",
+    "source": "public/patterns/woodland-camo.v1.svg",
+    "storefrontCommit": "d78d90ee150af309e37f3ebbd4fc30aa227f406e"
+  }
+}

@@ -156,6 +156,13 @@
 //     known only here (font metrics), so a host re-reads it after a font
 //     loads (`fontVersion`).
 // ---------------------------------------------------------------------------
+// v1.16.0: editing on the 3D can cooler (viewer/can-edit.js).
+//
+// 25. `exportArtCanvas({ only })` draws that element alone, the pattern left
+//     out too (it was drawn under it), so a piece's art on a patterned can
+//     cooler is the piece. Nothing else changes: `exclude`, `color` and a
+//     hat (which has no pattern) export exactly as before.
+// ---------------------------------------------------------------------------
 
 import {
   forwardRef,
@@ -743,6 +750,9 @@ const DesignStage = forwardRef(function DesignStage(
   const magnetRef = useRef(null);
   const uiLayerRef = useRef(null);
   const patternRef = useRef(null);
+  // v1.16.0: every placement of the pattern, which exportArtCanvas({ only })
+  // leaves out with the other elements.
+  const patternGroupRef = useRef(null);
   const exportingRef = useRef(false);
   const readiness = useMemo(() => createImageReadiness(), []);
   const reportImage = useMemo(() => (id, src, status) => readiness.report(id, src, status), [readiness]);
@@ -2224,6 +2234,9 @@ const DesignStage = forwardRef(function DesignStage(
     // leaves those out. The elements left out are held invisible for this one
     // draw, as a sway is held. `only` and `exclude` leave the ground to
     // `color`: pass `color: false` for the piece alone, on transparent.
+    // v1.16.0: `only` leaves the pattern out too ("that element alone"), so a
+    // can cooler's piece dragged on the 3D can carries no square of pattern
+    // with it. A hat has no pattern; `exclude` still keeps it.
     exportArtCanvas({ color = true, rect: part, only, exclude, scale: outScale } = {}) {
       const art = artLayerRef.current;
       // The layout as it is now, as exportProof reads it.
@@ -2260,6 +2273,7 @@ const DesignStage = forwardRef(function DesignStage(
         if (!color) hold(colorRectRef.current, { visible: false });
         if (!color) hold(zoneFillRef.current, { visible: false });
         const left = Array.isArray(exclude) ? new Set(exclude) : null;
+        if (only != null) hold(patternGroupRef.current, { visible: false });
         if (only != null || left) {
           for (const [id, node] of nodesRef.current) {
             if ((only != null && id !== only) || left?.has(id)) hold(node, { visible: false });
@@ -2408,42 +2422,45 @@ const DesignStage = forwardRef(function DesignStage(
         {/* Artwork layer — clipped to the silhouette */}
         <Layer ref={artLayerRef}>
           <Rect ref={colorRectRef} x={0} y={0} width={displayW} height={displayH} fill={state.color} />
-          {patternImg &&
-            placements.map((p, i) => {
-              // v1.14.0: anchored at the front panel; each flipped zone again,
-              // turned, clipped to its own part of the cut (see core/pattern.js).
-              const k = patternFillScale(scale, patternPixelRatio);
-              const fill = (
-                <Rect
-                  key={i === 0 ? "pattern" : undefined}
-                  x={0}
-                  y={0}
-                  width={displayW}
-                  height={displayH}
-                  ref={
-                    i === 0
-                      ? (node) => {
-                          patternRef.current = node;
-                          if (node) reportImage("pattern", patternSrc, "loaded");
-                        }
-                      : undefined
-                  }
-                  fillPatternImage={patternImg}
-                  fillPatternRepeat="repeat"
-                  fillPatternScale={{ x: k, y: k }}
-                  fillPatternX={p.x * scale}
-                  fillPatternY={p.y * scale}
-                  fillPatternRotation={p.rotation}
-                />
-              );
-              return p.clip ? (
-                <Group key={`pattern-${i}`} clipFunc={(ctx) => tracePatternClip(ctx, p.clip, scale)}>
-                  {fill}
-                </Group>
-              ) : (
-                fill
-              );
-            })}
+          {patternImg && (
+            <Group ref={patternGroupRef}>
+              {placements.map((p, i) => {
+                // v1.14.0: anchored at the front panel; each flipped zone again,
+                // turned, clipped to its own part of the cut (see core/pattern.js).
+                const k = patternFillScale(scale, patternPixelRatio);
+                const fill = (
+                  <Rect
+                    key={i === 0 ? "pattern" : undefined}
+                    x={0}
+                    y={0}
+                    width={displayW}
+                    height={displayH}
+                    ref={
+                      i === 0
+                        ? (node) => {
+                            patternRef.current = node;
+                            if (node) reportImage("pattern", patternSrc, "loaded");
+                          }
+                        : undefined
+                    }
+                    fillPatternImage={patternImg}
+                    fillPatternRepeat="repeat"
+                    fillPatternScale={{ x: k, y: k }}
+                    fillPatternX={p.x * scale}
+                    fillPatternY={p.y * scale}
+                    fillPatternRotation={p.rotation}
+                  />
+                );
+                return p.clip ? (
+                  <Group key={`pattern-${i}`} clipFunc={(ctx) => tracePatternClip(ctx, p.clip, scale)}>
+                    {fill}
+                  </Group>
+                ) : (
+                  fill
+                );
+              })}
+            </Group>
+          )}
 
           {/* v1.11.0: each filled zone's island, under its artwork. */}
           {fills.length > 0 && (

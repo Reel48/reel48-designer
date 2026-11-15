@@ -13,8 +13,9 @@
 // Loading model-viewer, WebGL 2, warming the files.
 export { loadViewer, sameOrigin, warm3D, webglAvailable } from "./load-3d.js";
 
-// The can cooler.
+// The can cooler, and (v1.16.0) editing on it.
 export * from "./can-cooler.js";
+export * from "./can-edit.js";
 
 // The hat: the host's side, the files, and the storefront's modules as they are.
 export * from "./hat-view.js";

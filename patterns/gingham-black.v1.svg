@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="189" height="189" preserveAspectRatio="none" viewBox="0 0 50 50">
+<!-- Reel48 pattern gingham-black -->
+<rect data-slot="a" fill="#FFFFFF" width="50" height="50"/>
+<rect data-slot="mix" fill="#8C8C8C" x="0" y="0" width="25" height="50"/>
+<rect data-slot="mix" fill="#8C8C8C" x="0" y="0" width="50" height="25"/>
+<rect data-slot="b" fill="#1A1A1A" x="0" y="0" width="25" height="25"/>
+</svg>

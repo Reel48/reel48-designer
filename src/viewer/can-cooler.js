@@ -23,14 +23,26 @@ import { PICTURE, composePicture, coverView, nextFrame } from "./picture.js";
 export const CAN_COOLER_ORBITS = Object.freeze({ front: "0deg 80deg auto", back: "180deg 80deg auto" });
 
 /**
+ * The closest the camera comes, metres (v1.16.0): below every side's fit
+ * when editing on the can (can-edit.js; the nearest, the slim can's base on a
+ * laptop-sized editor, is about 0.3 m), so no fit is held back by it.
+ */
+export const CAN_COOLER_MIN_RADIUS = 0.2;
+
+/**
  * The <model-viewer> attributes the can cooler is shown with. Linear tone
  * mapping at CAN_COOLER_EXPOSURE is what keeps the print's colours true under
  * the studio (the default neutral mapper pushed saturated colours 8 to 12 ΔE
  * off).
+ *
+ * v1.16.0: `min-camera-orbit`'s radius is CAN_COOLER_MIN_RADIUS rather than
+ * the viewer's own "auto", so an edit can fit a side close in. A buyer still
+ * cannot zoom (MODEL_VIEWER_ATTRIBUTES has disable-zoom): only the editor's
+ * fits come nearer than the approved view.
  */
 export const CAN_COOLER_VIEW = Object.freeze({
   "camera-orbit": CAN_COOLER_ORBITS.front,
-  "min-camera-orbit": "auto 35deg auto",
+  "min-camera-orbit": `auto 35deg ${CAN_COOLER_MIN_RADIUS}m`,
   "max-camera-orbit": "auto 150deg auto",
   "field-of-view": "13deg",
   "tone-mapping": "linear",

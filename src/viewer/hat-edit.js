@@ -1,4 +1,8 @@
 // Ported to @reel48/designer v1.15.0 from Reel48-Storefront src/components/storefront/hat/hat-edit.js (origin/main d78d90ee), its surface fetch held to the page's origin. Comments are the storefront's; imports point into this package.
+// v1.16.0: a look may bring its own `fill` and `orbitWindow` (the can cooler's, can-edit.js),
+// and an area point off its zone's print faces is measured at their extent (areaScreenPoints). A hat
+// look has no fill or window of its own and every hat area point is on its print faces, so a hat fits
+// as before. A view must still set a numeric radius to be fitted (the can's look always does).
 //
 /**
  * The on-hat editor's glue (round E1, 2026-10-21): what Hat3D does while a
@@ -75,27 +79,29 @@ export function orbitWindow(spot, theta, phi) {
   return { theta: [(theta - w.theta) * RAD, (theta + w.theta) * RAD], phi: [(phi - w.phi) * RAD, (phi + w.phi) * RAD] };
 }
 
-/** What a spot's area should fill of an editor this wide. */
-export function fillFor(width) {
-  return width < NARROW_PX ? SPOT_FILL.narrow : SPOT_FILL.wide;
+/** What a spot's area should fill of an editor this wide; `fill` is a look's own (package v1.16.0: the can's), SPOT_FILL's shape. */
+export function fillFor(width, fill = SPOT_FILL) {
+  return width < NARROW_PX ? fill.narrow : fill.wide;
 }
 
 /**
  * The radius that makes `points` (an area's outline and home, on screen at
- * the radius the camera `had`) fill the editor as SPOT_FILL says: apparent
- * size goes as one over distance, so the radius scales by how far the area
- * overflows (or underfills) its share in the tighter direction.
+ * the radius the camera `had`) fill the editor as `fill` (SPOT_FILL unless a
+ * look has its own) says: apparent size goes as one over distance, so the
+ * radius scales by how far the area overflows (or underfills) its share in
+ * the tighter direction.
  *
- * @param {{ had: number, points: number[][], width: number, height: number }} o
+ * @param {{ had: number, points: number[][], width: number, height: number,
+ *   fill?: { narrow: { w: number, h: number }, wide: { w: number, h: number } } }} o
  */
-export function fitRadius({ had, points, width, height }) {
+export function fitRadius({ had, points, width, height, fill: fills = SPOT_FILL }) {
   let k = 1;
   if (points.length >= 4 && width > 0 && height > 0) {
     const xs = points.map((p) => p[0]);
     const ys = points.map((p) => p[1]);
     const pw = Math.max(...xs) - Math.min(...xs);
     const ph = Math.max(...ys) - Math.min(...ys);
-    const fill = fillFor(width);
+    const fill = fillFor(width, fills);
     const need = Math.max(pw / (fill.w * width), ph / (fill.h * height));
     if (need > 0 && Number.isFinite(need)) k = need;
   }
@@ -105,6 +111,34 @@ export function fitRadius({ had, points, width, height }) {
 /** An area's outline and home point, die px: what a spot fit measures on screen. */
 export function areaFitPoints(area) {
   return [...(areaRings(area)[0] ?? []), areaHome(area)].filter(Boolean);
+}
+
+/**
+ * An area's fit points (areaFitPoints) on screen under the surface's camera,
+ * as fitSpot measures them. A point off the zone's print faces is measured
+ * where it is nearest their extent (surface.bounds), or left out if that is
+ * off them too (package v1.16.0: the can's panels end about 1 mm below their
+ * die rect, at the rim's cut edge, and its base's disc is printed on the
+ * band between the folds only; every point of the hats' areas is on their
+ * print faces, so a hat measures what it always did).
+ *
+ * @param {{ dieToScreen: Function, bounds: Function }} surface
+ * @param {string} zone
+ * @param {object} area
+ * @returns {number[][]}
+ */
+export function areaScreenPoints(surface, zone, area) {
+  let b = null;
+  const out = [];
+  for (const [x, y] of areaFitPoints(area)) {
+    let s = surface.dieToScreen(zone, x, y);
+    if (!s) {
+      b ??= surface.bounds?.(zone) ?? null;
+      if (b) s = surface.dieToScreen(zone, Math.min(b.x + b.w, Math.max(b.x, x)), Math.min(b.y + b.h, Math.max(b.y, y)));
+    }
+    if (s) out.push(s);
+  }
+  return out;
 }
 
 const frames = () => ({
@@ -241,7 +275,16 @@ export function createCameraAdapter(mv, getWindow) {
  * had (the viewer clamps the goal's) is scaled to fill SPOT_FILL. Then it
  * flies there, or jumps under reduced motion. Returns a cancel.
  *
- * @param {{ mv: any, look: { view: (spot: string) => void }, surface: any, zone: string,
+ * Package v1.16.0, for the can cooler's look (can-edit.js createCanLook): a
+ * look's own `fill` (SPOT_FILL's shape) and `orbitWindow` (orbitWindow's
+ * signature) are used in place of the hat's, and the area is measured by
+ * areaScreenPoints, which a hat's measures as before. A view whose orbit is
+ * not three numbers is not fitted (onFitted(null)), as before: the can's look
+ * always sets a numeric radius.
+ *
+ * @param {{ mv: any, look: { view: (spot: string) => void, fill?: typeof SPOT_FILL,
+ *   orbitWindow?: (spot: string, theta: number, phi: number) => { theta: number[], phi: number[] } },
+ *   surface: any, zone: string,
  *   area: object, host: { getBoundingClientRect: () => { width: number, height: number } },
  *   reducedMotion?: boolean, requestFrame?: (cb: () => void) => any, cancelFrame?: (id: any) => void,
  *   onWindow?: (w: { theta: number[], phi: number[] }) => void,
@@ -252,10 +295,12 @@ export function fitSpot({ mv, look, surface, zone, area, host, reducedMotion = f
   const request = requestFrame ?? f.request;
   const cancel = cancelFrame ?? f.cancel;
   const spot = spotOfZone(zone);
+  const fill = look.fill ?? SPOT_FILL;
+  const windowOf = look.orbitWindow ? (s, t, p) => look.orbitWindow(s, t, p) : orbitWindow;
   look.view(spot);
   // the goal the view set, as numbers: "<theta>deg <phi>deg <r>m"
   const { theta, phi, radius } = parseOrbit(mv.cameraOrbit);
-  if (Number.isFinite(theta) && Number.isFinite(phi)) onWindow?.(orbitWindow(spot, theta, phi));
+  if (Number.isFinite(theta) && Number.isFinite(phi)) onWindow?.(windowOf(spot, theta, phi));
   if (!Number.isFinite(theta) || !Number.isFinite(phi) || !Number.isFinite(radius)) {
     onFitted?.(null);
     return () => {};
@@ -273,11 +318,9 @@ export function fitSpot({ mv, look, surface, zone, area, host, reducedMotion = f
       let points = [];
       if (res && res.residual <= MAX_RESIDUAL_PX) {
         surface.setCamera(res.P);
-        points = areaFitPoints(area)
-          .map(([x, y]) => surface.dieToScreen(zone, x, y))
-          .filter(Boolean);
+        points = areaScreenPoints(surface, zone, area);
       }
-      const r = fitRadius({ had, points, width: rect.width, height: rect.height });
+      const r = fitRadius({ had, points, width: rect.width, height: rect.height, fill });
       mv.cameraOrbit = `${theta}deg ${phi}deg ${r}m`;
       if (reducedMotion) mv.jumpCameraToGoal();
       onFitted?.({ radius: r, had });

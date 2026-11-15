@@ -5,7 +5,9 @@
 // Checked: the files are what the script writes from the shipped models (so a
 // rebuilt model needs a rerun), byte for byte, twice; each side holds exactly
 // the print faces that touch its region of the die (confine.js faceRegions)
-// within the script's margin; and, at the can's own 13 degree field of view,
+// within the script's margin, the base only where it faces down (v1.16.1: the
+// bottom and the roll's lower rings, not the roll's upper rings or the wall,
+// which stay the panels'); and, at the can's own 13 degree field of view,
 // the map round-trips through a three.js camera the way model-viewer projects:
 // the camera solved by DLT from hotspot probes, die to screen to die within a
 // pixel (in fact a millionth), and each screen pixel's die point what a
@@ -13,7 +15,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import * as THREE from "three";
-import { CAN_SURFACES, MARGIN_PX, extractCanSurface, formatSurface, sidesOf } from "../scripts/extract-can-surface.mjs";
+import { BASE_FACING_DEG, CAN_SURFACES, MARGIN_PX, extractCanSurface, facesDown, formatSurface, sidesOf } from "../scripts/extract-can-surface.mjs";
 import { dieGeometry, faceRegions, resolveDie } from "../src/core/index.js";
 import { createSurface, measureProjection, probePointsFor, project, solveProjection } from "../src/viewer/hat-surface.js";
 import { CAN_EDIT_VIEWS, createCanLook } from "../src/viewer/can-edit.js";
@@ -41,6 +43,15 @@ function dieTri(z, t) {
 }
 
 const vertex = (z, i) => [z.positions[3 * i], z.positions[3 * i + 1], z.positions[3 * i + 2]];
+
+/** A side's triangle t's outward face's angle from straight down, degrees. */
+function fromDown(z, t) {
+  const { a, b, c } = dieTri(z, t);
+  const [A, B, C] = [vertex(z, a), vertex(z, b), vertex(z, c)];
+  const e1 = [0, 1, 2].map((k) => B[k] - A[k]), e2 = [0, 1, 2].map((k) => C[k] - A[k]);
+  const n = [e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]];
+  return Math.acos(Math.max(-1, Math.min(1, -n[1] / Math.hypot(...n)))) / RAD;
+}
 
 /** A seeded generator, so a failure reproduces. */
 function rng(seed) {
@@ -89,7 +100,7 @@ describe("the can coolers' surface files", () => {
     }
   });
 
-  it("hold, per side, exactly the print faces that touch its region within the margin, each a print face", () => {
+  it("hold, per side, exactly the print faces that touch its region within the margin (the base's facing down), each a print face", () => {
     for (const can of CANS) {
       const regions = faceRegions(can.geom);
       // Every triangle of the sleeve's print, by its die corners, with the sides it is listed on.
@@ -101,12 +112,13 @@ describe("the can coolers' surface files", () => {
           // A print face: hat-surface.js's PRINT_WINDING (negative, y down) and not a sliver.
           expect(area2).toBeLessThan(-1e-6);
           const key = d.join(",");
-          if (!listed.has(key)) listed.set(key, { d, on: [] });
+          const { a, b, c } = dieTri(z, t);
+          if (!listed.has(key)) listed.set(key, { d, down: facesDown(vertex(z, a), vertex(z, b), vertex(z, c)), on: [] });
           listed.get(key).on.push(id);
         }
       }
-      for (const { d, on } of listed.values()) {
-        expect(on.sort()).toEqual([...sidesOf(d, regions)].sort());
+      for (const { d, down, on } of listed.values()) {
+        expect(on.sort()).toEqual([...sidesOf(d, regions, down)].sort());
         expect(on.length).toBeGreaterThan(0);
       }
       for (const id of SIDES) {
@@ -137,37 +149,81 @@ describe("the can coolers' surface files", () => {
         expect(b.x + b.w).toBeGreaterThan(r.x1 - 1);
         expect(b.h).toBeGreaterThan(r.y1 - r.y0 - 5);
       }
-      // The base: the band between the folds (the model's bottom disc) and the
-      // disc's caps past each fold (the bottom of each panel's wall).
+      // The base: the band between the folds (the model's bottom disc), and
+      // past each fold the roll's lower rings, but not up the wall to the
+      // disc's edge (v1.16.0's base reached it, within 10 px).
       const base = can.surface.bounds("base");
-      expect(base.y).toBeLessThan(can.geom.y1 - (can.geom.r - (can.geom.y2 - can.geom.y1) / 2) + 10);
-      expect(base.y + base.h).toBeGreaterThan(can.geom.y2 + (can.geom.r - (can.geom.y2 - can.geom.y1) / 2) - 10);
+      const { cy, r, y1, y2 } = can.geom;
+      expect(base.y).toBeLessThan(y1 - 15);
+      expect(base.y).toBeGreaterThan(cy - r + 25);
+      expect(base.y + base.h).toBeGreaterThan(y2 + 15);
+      expect(base.y + base.h).toBeLessThan(cy + r - 25);
     }
   });
 
-  it("put the base's caps on the bottom of each panel's wall, and the band on the bottom of the can", () => {
+  it("put the base on fabric that faces down: the bottom, and past each fold the roll's lower rings; the roll's upper rings and the wall are the panels' alone", () => {
     for (const can of CANS) {
       const z = can.json.zones.base;
       const { cy, y1, y2 } = can.geom;
-      let wallFront = 0, wallBack = 0, bottom = 0;
+      let rollFront = 0, rollBack = 0, bottom = 0;
+      for (let t = 0; t < z.indices.length / 3; t++) expect(fromDown(z, t)).toBeLessThanOrEqual(BASE_FACING_DEG);
       for (let i = 0; i < z.positions.length / 3; i++) {
         const [, y, zc] = vertex(z, i);
         const dy = z.uvs[2 * i + 1];
         if (dy < y1 - 3) {
-          wallFront++;
-          expect(zc, "a front cap point is on the front (+z)").toBeGreaterThan(0);
+          rollFront++;
+          expect(zc, "a front roll point is on the front (+z)").toBeGreaterThan(0);
+          expect(y, "and on the roll, a few mm up at most").toBeLessThan(0.004);
         } else if (dy > y2 + 3) {
-          wallBack++;
-          expect(zc, "a back cap point is on the back (-z)").toBeLessThan(0);
+          rollBack++;
+          expect(zc, "a back roll point is on the back (-z)").toBeLessThan(0);
+          expect(y).toBeLessThan(0.004);
         } else if (y < 1e-4) {
           bottom++;
           // the front fold is toward +z
           if (Math.abs(dy - cy) > 50) expect(Math.sign(zc)).toBe(dy < cy ? 1 : -1);
         }
       }
-      expect(wallFront).toBeGreaterThan(20);
-      expect(wallBack).toBeGreaterThan(20);
+      expect(rollFront).toBeGreaterThan(20);
+      expect(rollBack).toBeGreaterThan(20);
       expect(bottom).toBeGreaterThan(100);
+      // What the base no longer holds is still printed: every face of the
+      // disc's caps that does not face down is on its panel, up the wall to
+      // the disc's edge.
+      const regions = faceRegions(can.geom);
+      for (const id of ["front", "back"]) {
+        const p = can.json.zones[id];
+        let left = 0, top = 0;
+        for (let t = 0; t < p.indices.length / 3; t++) {
+          const { a, b, c, d } = dieTri(p, t);
+          if (!sidesOf(d, regions, true).includes("base")) continue;
+          if (fromDown(p, t) > BASE_FACING_DEG) left++;
+          top = Math.max(top, vertex(p, a)[1], vertex(p, b)[1], vertex(p, c)[1]);
+        }
+        expect(left, `${can.die} ${id}`).toBeGreaterThan(100);
+        expect(top, `${can.die} ${id}: the caps reach up the wall`).toBeGreaterThan(0.006);
+      }
+    }
+  });
+
+  it("cut the base in an empty gap of the roll's rings, so a rebuild cannot move a ring across it unnoticed", () => {
+    // The roll is rings of faces about 9 degrees apart; the cut is in the gap
+    // between the rings at 58-59 and 67-68 degrees. Every print face of the
+    // sleeve that touches the disc, on any side, is at least 3 degrees from it.
+    for (const can of CANS) {
+      const regions = faceRegions(can.geom);
+      const angles = [];
+      for (const id of SIDES) {
+        const z = can.json.zones[id];
+        for (let t = 0; t < z.indices.length / 3; t++) {
+          if (sidesOf(dieTri(z, t).d, regions, true).includes("base")) angles.push(fromDown(z, t));
+        }
+      }
+      const near = angles.filter((a) => Math.abs(a - BASE_FACING_DEG) < 3);
+      expect(near, can.die).toEqual([]);
+      // and both sides of the cut are there: the ring below it, and the one above
+      expect(angles.some((a) => a > BASE_FACING_DEG - 6 && a < BASE_FACING_DEG)).toBe(true);
+      expect(angles.some((a) => a > BASE_FACING_DEG && a < BASE_FACING_DEG + 6)).toBe(true);
     }
   });
 });

@@ -41,11 +41,17 @@
  * - indices: triangles, counter-clockwise from the outward face (checked
  *   against the GLB's NORMAL; a mirroring node would have its winding swapped
  *   back, as three does).
- * A triangle joins every side its die triangle touches, within MARGIN_PX: the
- * disc's caps lie inside the panels' rects (on the model, the bottom of each
- * panel's wall), so the triangles there are both the base's and that panel's.
- * Only print faces are written (a negative die winding, y down, which is what
- * hat-surface.js edits): the triangles the model build collapsed in the die
+ * A triangle joins every side its die triangle touches, within MARGIN_PX,
+ * but the base only where it faces down (v1.16.1): its outward normal within
+ * BASE_FACING_DEG of straight down. The disc's caps lie inside the panels'
+ * rects, and on the model they are the bottom roll and the bottom of each
+ * panel's wall, so the caps stay the panels' (as in v1.16.0) and the base is
+ * the bottom and the roll's lower rings. Where a drag leaves the base, the
+ * placer carries the die point on along the last true hit's local map
+ * (hat-place.js), and from the roll's upper rings and the wall, seen from
+ * below nearly edge-on, that map turns a sideways drag into one up or down
+ * the die. Only print faces are written (a negative die winding, y down,
+ * which is what hat-surface.js edits): the triangles the model build collapsed in the die
  * (the folds round the bottom edge, about one in eight) map no die pixel, and
  * hat-surface.js would skip them. Each side's vertices are the ones its
  * triangles use, numbered in the order they are first used.
@@ -70,6 +76,17 @@ export const PRINT_MATERIALS = Object.freeze(["print", "print_seam"]);
 export const SIDES = Object.freeze(["front", "back", "base"]);
 /** Die px round a side within which a triangle still joins it. */
 export const MARGIN_PX = 2;
+/**
+ * The base holds only print faces whose outward normal is within this many
+ * degrees of straight down (v1.16.1). From the data: the bottom is flat (0
+ * degrees), and the roll from it to the wall is rings of faces at about 8, 22,
+ * 37, 49, 58, 67, 76 and 85 degrees, then the wall at 90, on both models, with
+ * nothing between 59 and 67. The cut is in that gap, about 60 degrees as
+ * judged, at its middle so a rebuild's float noise cannot move a ring across
+ * (tests/can-surface.test.js keeps the gap empty).
+ */
+export const BASE_FACING_DEG = 63;
+const BASE_FACING_COS = Math.cos((BASE_FACING_DEG * Math.PI) / 180);
 /** A die triangle this small (twice its area, px^2) is collapsed: hat-surface.js's own DIE_EPS. */
 const DIE_EPS = 1e-6;
 
@@ -251,13 +268,25 @@ function seg2(x, y, ax, ay, bx, by) {
   return qx * qx + qy * qy;
 }
 
-/** The sides a die triangle [ax, ay, bx, by, cx, cy] joins. */
-export function sidesOf(t, regions, margin = MARGIN_PX) {
+/**
+ * The sides a die triangle [ax, ay, bx, by, cx, cy] joins: each side whose
+ * region it touches, the base only when `down` (facesDown) is true.
+ */
+export function sidesOf(t, regions, down, margin = MARGIN_PX) {
   return SIDES.filter((id) => {
     const region = regions[id];
-    if (!region) return false;
+    if (!region || (id === "base" && !down)) return false;
     return region.kind === "circle" ? touchesCircle(t, region, margin) : touchesRect(t, region, margin);
   });
+}
+
+/** Whether a triangle's outward face (counter-clockwise, metres) is within BASE_FACING_DEG of straight down. */
+export function facesDown(A, B, C) {
+  const e1 = [B[0] - A[0], B[1] - A[1], B[2] - A[2]];
+  const e2 = [C[0] - A[0], C[1] - A[1], C[2] - A[2]];
+  const n = [e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]];
+  const len = Math.hypot(n[0], n[1], n[2]);
+  return len > 0 && -n[1] / len >= BASE_FACING_COS;
 }
 
 // ---- Extraction ----------------------------------------------------------------------
@@ -336,8 +365,12 @@ export async function extractCanSurface(bytes, { dieId, model }) {
   const report = { triangles: tris.length, collapsed, mirrored, normalsAgree: agree, normalsDisagree: disagree, sides: {} };
   const zones = Object.fromEntries(SIDES.map((id) => [id, { positions: [], uvs: [], indices: [], keys: new Map() }]));
   let orphans = 0;
+  let notDown = 0;
   for (const { p, d } of tris) {
-    const sides = sidesOf([d[0][0], d[0][1], d[1][0], d[1][1], d[2][0], d[2][1]], regions);
+    const t = [d[0][0], d[0][1], d[1][0], d[1][1], d[2][0], d[2][1]];
+    const down = facesDown(p[0], p[1], p[2]);
+    const sides = sidesOf(t, regions, down);
+    if (!down && sidesOf(t, regions, true).includes("base")) notDown++;
     if (!sides.length) orphans++;
     for (const id of sides) {
       const z = zones[id];
@@ -357,6 +390,8 @@ export async function extractCanSurface(bytes, { dieId, model }) {
     }
   }
   report.orphans = orphans;
+  // the disc's faces left to the panels: the roll's upper rings and the wall
+  report.baseNotDown = notDown;
   for (const id of SIDES) {
     const { positions, uvs, indices } = zones[id];
     out.zones[id] = { positions, uvs, indices };

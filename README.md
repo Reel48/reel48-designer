@@ -104,7 +104,7 @@ import modelUrl from "@reel48/designer/models/hat-no-7.glb";                    
 import tileUrl from "@reel48/designer/patterns/gingham-red.v1.svg";               // v1.16.0: pattern tiles, served by the host
 ```
 
-### Consumers (v1.16.2)
+### Consumers (v1.16.3)
 
 - **account.reel48.com** (the portal) uses `viewer`, `models`, `patterns` and
   `core` (and `stage` for the flat die): its customizer island runs the hat and
@@ -1054,6 +1054,40 @@ die within a thousandth of a pixel, each pixel the die point a ray hits),
 and live repaint, fits on a fake model-viewer, a whole edit session), and
 `tests/patterns.test.js`; `tests/models.test.js` knows the made surfaces.
 
+## v1.16.3: a finger carried past a can panel's bottom no longer slides the piece along it
+
+On the can cooler's front or back panel, a piece dragged on the 3D can past the
+can's bottom on screen, a little off the panel's middle, slid sideways along the
+panel's bottom edge, farther the farther the finger went (250 to 330 die px in
+the tests; about 180 px on screen in a browser walk). It always stayed on its
+panel. Every golden file stands, the hats place exactly as before, and the can's
+base places as in v1.16.1.
+
+- **Why.** Past the outline the placer (hat-place.js) carries the finger on
+  along the last true hit's own local map (its jacobian). On a cylinder seen in
+  perspective, an off-centre point's map has a small sideways term; once the
+  piece is pinned at the panel's bottom, the downward part of the finger's
+  travel does nothing and that sideways part keeps adding up.
+- **hat-surface.js: `surface.carryFor(zoneId)`**, from the surface file's
+  optional `carry` (`{ <zone>: "border" }`): "border" for a zone the file names,
+  else "local". On a "border" zone the placer carries a finger off the fabric
+  by the surface's own `screenToDie`: the die point of the zone's edge nearest
+  the finger, carried on by the zone's average map (which, on a panel seen from
+  its front, has no sideways term). So the piece stays about under the finger.
+- **The can's surface files say `"carry": {"front": "border", "back": "border"}`**
+  (`scripts/extract-can-surface.mjs` `CARRY`; one line each, every triangle as
+  before, re-extracted and their MANIFEST sha256 updated). The base, which v1.16.1
+  settled on its own local map, and every hat surface carry as before.
+
+### Tests
+
+891 before, 893 now. `tests/can-place.test.js` drags a small piece straight down
+past the can's bottom from off the middle of each panel, on both dies, with the
+real placer on the real surfaces under each side's camera, and checks it ends
+within 60 die px of its own x (it slid 250 to 330); and that only the can's
+panels carry from the edge (its base and every hat zone keep their local map).
+Without the change, the first fails.
+
 ## v1.16.2: a small piece dragged to a panel's bottom stays where it is let go
 
 On the can cooler's front or back panel, a small piece (shorter than about 0.6 in)
@@ -1095,6 +1129,8 @@ the panel's middle, is carried on along the bottom roll's local map, which is
 nearly edge-on from a panel's view: the piece can slide sideways along the
 panel's bottom edge toward its side. It always stays on its panel. (The base's
 own case, a push round its disc, was v1.16.1's.)
+
+Fixed in v1.16.3 (above).
 
 ## v1.16.1: a drag on the can's base stops at its edge
 

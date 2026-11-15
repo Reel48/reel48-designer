@@ -581,3 +581,58 @@ describe("bandPose and overhang on a polygon", () => {
     expect(overhang({ ...covering, cx: 100, cy: 100, w: 100, h: 100 }, { area: hole }).area).toBe(0);
   });
 });
+
+// ---- A convex outline: the can's base, its disc as a 96-gon (v1.16.1) ---------------------
+describe("confinePose on a convex polygon area", () => {
+  const R = 272.369854578182;
+  const DISC: Poly = { outline: circle(500, 1000, R, 96), holes: [] };
+  const BASE = { area: DISC, cap: { w: 2 * R, h: 2 * R } };
+  const BOX = { w: 120, h: 80, rotation: 0 };
+
+  it("stops a piece pushed far past a circle at the point nearest the finger, and keeps it there frame after frame", () => {
+    // v1.16.0 rode it round the circle with what was left of each long move,
+    // back and forth past the nearest point, farther every frame, to the folds.
+    let from = { ...BOX, cx: 500, cy: 1000 };
+    for (let x = 600; x <= 1400; x += 16) {
+      const fit = confinePose({ ...BOX, cx: x, cy: 1000.5 }, { ...BASE, from });
+      expect(valid(fit, BASE)).toBe(true);
+      expect(Math.abs(fit.cy - 1000), `asked x ${x}`).toBeLessThan(0.6);
+      from = fit;
+    }
+    // against the edge: its right corners on the circle, to the polygon's sag (0.15 px)
+    expect(from.cx).toBeGreaterThan(500 + Math.sqrt(R * R - 40 * 40) - 60 - 0.5);
+    expect(from.cx).toBeLessThan(500 + Math.sqrt(R * R - 40 * 40) - 60 + 1e-6);
+    // and banded as before: the shown pose strains toward the finger, never past the limit
+    const band = bandPose({ ...BOX, cx: 1400, cy: 1000 }, { ...BASE, from }, 24);
+    expect(band.fit.cx).toBeCloseTo(from.cx, 6);
+    expect(band.cx - band.fit.cx).toBeGreaterThan(0);
+    expect(band.cx - band.fit.cx).toBeLessThan(24);
+  });
+
+  it("ends a push far out any way at the centre nearest the finger that fits", () => {
+    const from = { ...BOX, cx: 500, cy: 1000 };
+    /** The farthest centre that fits on the ray from the middle at angle a (radians). */
+    const rim = (a: number) => {
+      let lo = 0, hi = R;
+      for (let i = 0; i < 50; i++) {
+        const m = (lo + hi) / 2;
+        if (valid({ ...BOX, cx: 500 + m * Math.cos(a), cy: 1000 + m * Math.sin(a) }, BASE)) lo = m;
+        else hi = m;
+      }
+      return [500 + lo * Math.cos(a), 1000 + lo * Math.sin(a)];
+    };
+    for (let deg = 0; deg < 360; deg += 7) {
+      const a = (deg * Math.PI) / 180;
+      const want = [500 + 3000 * Math.cos(a), 1000 + 3000 * Math.sin(a)];
+      const fit = confinePose({ ...BOX, cx: want[0], cy: want[1] }, { ...BASE, from });
+      expect(valid(fit, BASE)).toBe(true);
+      const d = Math.hypot(fit.cx - want[0], fit.cy - want[1]);
+      let best = Infinity;
+      for (let k = 0; k < 720; k++) {
+        const q = rim((k * Math.PI) / 360);
+        best = Math.min(best, Math.hypot(q[0] - want[0], q[1] - want[1]));
+      }
+      expect(d, `${deg} degrees`).toBeLessThan(best + 0.5);
+    }
+  });
+});

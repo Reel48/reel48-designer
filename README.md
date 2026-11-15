@@ -1108,12 +1108,15 @@ Every golden file stands, and the hats place exactly as before.
 
 ### Tests
 
-881 before, 886 now: `tests/can-place.test.js` drags a piece from the base's
+881 before, 888 now: `tests/can-place.test.js` drags a piece from the base's
 centre past the can's outline twelve ways, with the real placer on both real
 surfaces under the base view's camera (solved from hotspot probes), and checks
 it stops at the edge where the finger points and stays (on v1.16.0's
 region.js a drag to the right ended at (614, 1170) on the standard can, not
 (709, 1000), the piece moving 141 px in a frame); `tests/region.test.ts` pushes
 a piece far past a 96-gon and checks it stops at the nearest centre that fits,
-every frame and every way; `tests/can-surface.test.js` checks the base's faces
+every frame and every way, and checks no hat area takes the convex rule: the
+three four-point ones (hat-no-7-v2's back and label_tall, hat-no-6's
+label_tall) are read as rects and clamped as in v1.16.0, every other has a hole
+or turns both ways; `tests/can-surface.test.js` checks the base's faces
 face down, the rest are the panels', and the cut's gap is empty.

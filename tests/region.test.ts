@@ -24,6 +24,7 @@ import {
   rotatedSize,
   rubberBand,
 } from "../src/core/region.js";
+import { dieGeometry, diesOfKind } from "../src/core/dies.js";
 
 const PPI = 200;
 type Rect = { x: number; y: number; w: number; h: number };
@@ -633,6 +634,62 @@ describe("confinePose on a convex polygon area", () => {
         best = Math.min(best, Math.hypot(q[0] - want[0], q[1] - want[1]));
       }
       expect(d, `${deg} degrees`).toBeLessThan(best + 0.5);
+    }
+  });
+});
+
+describe("the convex rule and the hats (v1.16.1)", () => {
+  const turnsBothWays = (ring: number[][]) => {
+    let sign = 0;
+    for (let i = 0; i < ring.length; i++) {
+      const [a, b, c] = [ring[i], ring[(i + 1) % ring.length], ring[(i + 2) % ring.length]];
+      const cross = (b[0] - a[0]) * (c[1] - b[1]) - (b[1] - a[1]) * (c[0] - b[0]);
+      if (Math.abs(cross) < 1e-9) continue;
+      if (sign && Math.sign(cross) !== sign) return true;
+      sign = Math.sign(cross);
+    }
+    return false;
+  };
+
+  it("takes no hat area: the four-point ones are read as rects, every other has a hole or turns both ways", () => {
+    let rects = 0;
+    let polys = 0;
+    for (const die of diesOfKind("hat")) {
+      const g = dieGeometry(die.id, { kind: "hat" });
+      for (const z of g.zones) {
+        if (!z.area?.outline) continue;
+        if (areaRect(z.area)) {
+          rects++;
+          continue;
+        }
+        polys++;
+        expect((z.area.holes ?? []).length > 0 || turnsBothWays(z.area.outline), `${die.id} ${z.id}`).toBe(true);
+      }
+    }
+    // hat-no-7-v2's back and label_tall, hat-no-6's label_tall; the other seven are polygons
+    expect(rects).toBe(3);
+    expect(polys).toBe(7);
+  });
+
+  it("pushes a piece past each edge and corner of those rect areas to the clamp, as v1.16.0 did", () => {
+    for (const [id, zid] of [["hat-no-7-v2", "back"], ["hat-no-7-v2", "label_tall"], ["hat-no-6", "label_tall"]]) {
+      const g = dieGeometry(id, { kind: "hat" });
+      const z = g.zones.find((q: { id: string }) => q.id === zid);
+      const rect = areaRect(z.area)!;
+      const cap = { w: z.maxImprint.w * g.pxPerInch, h: z.maxImprint.h * g.pxPerInch };
+      const c = [rect.x + rect.w / 2, rect.y + rect.h / 2];
+      for (const rotation of [0, 15, 90]) {
+        const start = confinePose({ cx: c[0], cy: c[1], w: 120, h: 60, rotation }, { area: z.area, cap });
+        for (let k = 0; k < 16; k++) {
+          const a = (2 * Math.PI * k) / 16;
+          const asked = { ...start, cx: c[0] + Math.cos(a) * 3000, cy: c[1] + Math.sin(a) * 3000 };
+          const fit = confinePose(asked, { area: z.area, cap, from: start });
+          const e = rotatedSize(fit.w, fit.h, rotation);
+          const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
+          expect(fit.cx, `${id} ${zid} ${rotation} deg, way ${k}`).toBe(clamp(asked.cx, rect.x + e.w / 2, rect.x + rect.w - e.w / 2));
+          expect(fit.cy).toBe(clamp(asked.cy, rect.y + e.h / 2, rect.y + rect.h - e.h / 2));
+        }
+      }
     }
   });
 });

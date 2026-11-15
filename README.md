@@ -93,12 +93,26 @@ someone opens a PR in the consumer:
 "@reel48/designer": "https://github.com/Reel48/reel48-designer/archive/refs/tags/v1.2.0.tar.gz"
 ```
 
-Two entry points, split so they can be imported independently:
+Four entry points, split so they can be imported independently:
 
 ```js
-import { dieGeometry, designReducer } from "@reel48/designer/core";   // zero deps
-import { DesignStage } from "@reel48/designer/stage";                 // needs a DOM
+import { dieGeometry, designReducer, pricingFacts } from "@reel48/designer/core"; // zero deps
+import { DesignStage } from "@reel48/designer/stage";                             // needs a DOM; React + Konva
+import { loadViewer, createHatLook } from "@reel48/designer/viewer";              // needs a DOM; model-viewer, lazily
+import modelUrl from "@reel48/designer/models/hat-no-7.glb";                      // files, served by the host
 ```
+
+### Consumers (v1.15.0)
+
+- **account.reel48.com** (the portal) uses `viewer`, `models` and `core`
+  (and `stage` for the flat die): its customizer island runs the hat and can
+  cooler designers natively.
+- **data.reel48.com** (the hub) uses `core` only: `pricingFacts` to price a
+  portal quote line, `describeDesign` to show staff its spec.
+- **www.reel48.com** (the storefront) has **not** adopted v1.15 yet. It is on
+  v1.14.0 and keeps its own copies of everything v1.15 moved here; the copies
+  here were taken from its origin/main `d78d90ee` and are pinned to it by the
+  golden files below. When it bumps, it deletes its copies and imports these.
 
 **`core` must never drag Konva in behind it.** It gets imported by a server
 action pricing a design, by a script building a supplier zip, and by tests —
@@ -124,9 +138,12 @@ That split is load-bearing for account.reel48.com, whose CSP is
 ## Layout
 
 ```
-src/core/   zero dependencies — dies.js, design.js
-src/stage/  optional peers: react, react-dom, konva, react-konva — DesignStage.jsx, useImage.js
-tests/      golden files and unit tests
+src/core/    zero dependencies — dies.js, design.js, and since v1.15.0 pricing-facts.js,
+             the spec (coozie-spec.js, hat-spec.js), hat-config.js, pms-palette.js, drafts, step machines
+src/stage/   optional peers: react, react-dom, konva, react-konva — DesignStage.jsx, useImage.js
+src/viewer/  optional peers: @google/model-viewer (three) — the 3D views, no framework
+models/      the 3D files (GLB, HDR, posters, surfaces) and MANIFEST.json
+tests/       golden files and unit tests; tests/storefront/ holds the storefront's own tests, ported
 ```
 
 ### Image readiness (v1.4.1)
@@ -633,3 +650,240 @@ every golden file stands.
 - **`SET_PATTERN` with the current pattern is a no-op**: the same object
   back, so tapping the chosen swatch again adds no undo step. A missing
   `patternId` clears like `null`.
+
+## v1.15.0: the customizers in any host — pricing facts, the spec, the 3D views, the models
+
+So account.reel48.com can run the storefront's hat and can cooler
+customizers natively, and data.reel48.com can price and describe what they
+make, the storefront's framework-free code moved here (from Reel48-Storefront
+origin/main `d78d90ee`; the storefront itself is unchanged and still on
+v1.14.0). Nothing that existed in v1.14.0 changed: every earlier golden file
+stands, and `./core` and `./stage` keep every export.
+
+Port rules: TypeScript became JS with its types as JSDoc; `@/` aliases became
+relative imports; the storefront's `SITE_URL` is inlined in coozie-spec.js;
+the two JSON data files (`pms-solid-coated.json`, `coozie-patterns.json`) are
+`.js` modules that `export default` the data, so no consumer needs JSON import
+attributes; the storefront's `hat-confine.js` is `region.js` (verbatim since
+v1.12.0). Each ported file names its source on its first line.
+
+`package.json` declares `"sideEffects": false`: every module here only
+defines things, so a bundler drops what a host does not import (the 213 KB
+Pantone palette stays out of a bundle that never asks for it).
+
+### `core`: what a design is priced from
+
+```js
+pricingFacts(doc) => {
+  product: "hat-no-7" | "hat-no-6" | "can-cooler",
+  dieId: string,                    // "hat-no-7-v2", "hat-no-7", "hat-no-6", "koozie-standard", "koozie-slim"
+  size: "standard" | "slim" | null, // can coolers; null on a hat
+  primaryMethod: "embroidery" | "pvc_patch" | "silicon_patch" | "woven_patch" | null, // hats; null on a can
+  extraSpots: number,               // hats: used spots after the primary one, NOT counting the inside label
+  label: boolean,                   // hats: the inside woven label is used
+}
+```
+
+The facts are the inputs the storefront prices a designed line from today,
+worked out the way its server does:
+
+- **A hat** (hat-submit.ts `parseHatDesignDoc`, then cart.ts `hatLineSpots`).
+  The document is rebuilt field by field (`design-element.js`, the
+  storefront's design-import.js `element`), its spots are worked out again
+  from its **elements** (hat-placements.js `hatPlacements`; a stamped
+  `extraSpots` or `placements` in the document is ignored), and
+  `hatSpotProblem` checks them against the hats' seeded decorations
+  (`HAT_DECORATIONS`). The die names the product. The primary spot is the
+  front, else the first used of left, right, back; its method picks the
+  ladder. The storefront charges one side-embroidery per other used spot,
+  **the label included**: its `sideSpots` is `extraSpots + (label ? 1 : 0)`.
+- **A can cooler** (coozie-quote.ts). `size` picks the die and the product.
+  The magnet is not in the document: it is a line option.
+
+`InvalidDesignError` (an `Error`, `name: "InvalidDesignError"`) is thrown for
+anything it cannot price. `message` is a sentence for the buyer (the
+storefront's own wherever it has one); `reason` is a short code:
+`not_an_object`, `too_large` (over 256 KB serialized, the storefront's
+ceiling), `unknown_kind`, `unknown_schema_version` (a hat must be version 4,
+a can cooler version 3), `unknown_die`, `unknown_product`, `unknown_size`,
+`elements`, `element`, `too_many_logos` (5), `unknown_part`, `not_pantone`,
+`unknown_zone`, `method`, `thread`, `label_shape`, `label_ground`,
+`retired_label`, `label_mismatch`, `spots` (stray artwork, a logo past its
+spot's area or cap, nothing on the outside of the hat, a method a spot does
+not offer, two label shapes), `unreadable`.
+
+It refuses everything the storefront's parsers refuse, and three things they
+take on purpose: a can cooler with no `size` or an unknown one (the
+storefront's `resolveSize` reads both as the standard can, which a pricer
+must not), and a document whose `schemaVersion` is not its kind's.
+
+**Evidence.** `tests/fixtures/design-docs.json` holds 27 documents (every
+method, extra spots with and without the label, both hats and the first No. 7
+die, both can sizes, and refusals). The storefront's own code, extracted from
+origin/main and run unchanged, wrote what it made of each to
+`tests/pricing-parity.golden.json`; `tests/pricing-facts.test.js` holds the
+port to it (same refusal sentence, or the same ladder and side-spot count),
+plus its own cases for each method, extra spots, the label, both can sizes and every refusal.
+
+### `core`: the production spec
+
+`describeDesign(doc) => CoozieSpec | HatSpec | null` is the object the
+storefront's `/api/admin/orders` emits as `designSpec` (its coozie-spec.ts and
+hat/hat-spec.ts, with their closure). Null only without a document; a hat is
+never null-sized. Its output satisfies data.reel48.com's
+`StorefrontDesignSpec` (src/lib/storefront-admin.ts) unchanged: TypeScript
+accepts `ReturnType<typeof describeDesign>` for `StorefrontDesignSpec | null`,
+and `tests/describe-design.test.js` checks every fixture's output with a
+transcription of the type. `tests/describe-design.golden.json` is what the
+storefront's own `describeDesign` returned for each fixture; the port matches
+it key for key. (A hat's sweatband part may carry `band`, which the
+storefront sends and the hub's type does not name.)
+
+Also exported: `specToTextLines(spec, indent?)`, `describeHatDesign(doc)`,
+`hatSpecToTextLines(spec, indent?)`, `isHatSpec(spec)`,
+`partColourText(part, frontName?)`, `hatFixedMarks(spec)`.
+
+### `core`: the rest of the move
+
+- design-lines: `designKindOf(doc) => "koozie" | "hat" | "other"`,
+  `isCanCoolerDesign`, `hasPrintableArtwork(elements)`, `isDesignedLine`,
+  `isBlankLine`, `isUnprintedDesign`, `owesMockup`, `artworkFilesOf`,
+  `fileNameList`.
+- decorations: `DECORATION_LABELS`, `DECORATION_DESCRIPTIONS`,
+  `ALL_DECORATION_SLUGS`, `decorationLabel(slug)`, `decorationDescription(slug)`.
+- coozie-config (the can cooler's vocabulary): `COOZIE_SIZES`,
+  `COOZIE_SIZE_LIST`, `DEFAULT_SIZE_ID`, `resolveSize(sizeOrId)` (falls back to
+  standard, as the storefront's does), `KOOZIE_PRODUCT_HANDLES`,
+  `koozieProductHandle`, `dieInches`, `FONT_OPTIONS`, `COLOR_PRESETS`,
+  `ACCEPTED_MIME`, `ACCEPTED_FONT_MIME`, `ACCEPTED_FONT_ACCEPT_ATTR`,
+  `LOGO_ACCEPT_ATTR`, `MAX_LOGOS`, `MAX_FONTS`, `MAX_FILE_BYTES`,
+  `DESIGN_RELAY_MAX_BYTES`, `SNAP_THRESHOLD`. (Its `dieGeometry`, `traceDie`,
+  `resolveDie`, `DEFAULT_COLOR`, `DEFAULT_TEXT` and `DIE_LINE_*` are core's own
+  under legacy size ids, so they are not exported again.)
+- coozie-patterns: `COOZIE_PATTERNS`, `PATTERN_BASE`, `PATTERN_FAMILIES`,
+  `patternById`, `isPatternId`, `patternName`, `patternTile`,
+  `patternPrintPath`, `patternRepeatIn`, `patternGroups`.
+- hat-config: `HAT_DIES`, `hatDie(id)`, `HAT_NO_7_DIE`, `HAT_NO_7_V1_DIE`,
+  `HAT_NO_6_DIE`, `OUTSIDE_ZONES`, `LABEL_SHAPES`, `LABEL_ZONE`,
+  `RETIRED_ZONES`, `SPOT_NAMES`, `SPOT_AREAS`, `SPOT_LEVELS`, `spotLevel`,
+  `SPOT_HOMES`, `spotHome`, `spotFact`, `HAT_PARTS`, `HAT_PART_GROUPS`,
+  `CHOSEN_PARTS`, `HAT_FABRIC_COLORS`, `HAT_PRESETS`, `DEFAULT_PRESET_ID`,
+  `presetParts`, `wholeHatParts`, `presetOf`, `fabricColourName`,
+  `HAT_THREAD_COLORS`, `LABEL_GROUND_COLORS`, `NATURAL_LABEL_GROUND`,
+  `LABEL_GROUND_SWATCHES`, `MAX_THREADS_PER_SPOT`.
+- hat-style-config: `HAT_DESIGN_STYLES`, `DEFAULT_HAT_STYLE`,
+  `hatStyleOf(handleOrDieId)`, `chosenPartsOf(style)`.
+- sweatband and cielab: `SWEATBANDS`, `SWEATBAND_FOLLOWS`, `sweatbandFor`,
+  `labelGroundFor`, `withSweatband`; `hexToRgb`, `hexToLab`, `labToLch`,
+  `hexToLch`, `deltaE2000`.
+- pms-palette (PANTONE Solid Coated, 3,219 colours): `PMS_COLORS`,
+  `PMS_FAMILIES`, `PMS_FILE_COUNT`, `pmsById`, `pmsByHex`, `pmsByFormerHex`,
+  `nearestPms`, `nearestPmsColors`, `searchPms(query, family?, { nearest })`,
+  `pmsIdOf`, `familyOf`, `buildPmsPalette`.
+- hat-placements: `hatPlacements(doc, dieOf?)`, `hatSpotProblem(spots, decorationTypes)`,
+  `zoneArea`, `zoneCap`, `elementPose`, `placeElement`, `confineElement`,
+  `fitsSpot`, `distanceToArea`, `zoneAtPoint`, `strayElement`, `logoMisfit`,
+  `spotSummary`, `extraAsItem`, `spotLine`, `MISFIT_PX`, `MISFIT_CAP`, and its
+  `zoneOfElement(el, die)` as **`hatZoneOfElement`** (`zoneOfElement` is
+  confine.js's `(geom, stage, el)`, exported since v1.11.0).
+- Namespaces, because the two step machines (and the two drafts) share
+  export names: `coozieDraft` (coozie-draft.js: `serializeDraft`,
+  `parseDraft`, `createDraftStore`, ... ; IndexedDB, guarded, no framework),
+  `hatDraft` (`serializeHatDraft`, `parseHatDraft`, `onCurrentHatDie`, ...),
+  `hatMigrate` (the first No. 7 die onto round E1's), `coozieSteps` and
+  `hatSteps` (each `STEPS`, `nextStep`, `prevStep`, `formatStepHash`,
+  `parseStepHash`, ...), `vectorArtwork` (AI/EPS/PDF stand-ins).
+
+### `viewer`: the 3D views, without a framework
+
+Ported from the storefront's `src/components/storefront/hat/{hat-look,
+hat-surface,hat-edit,hat-place,hat-edit-host,hat-3d-assets}.js` and
+`coozie/load-3d.js`, with the can cooler's painting and both views' settings
+and pictures pulled out of `CanCooler3D.jsx` and `Hat3D.jsx` as plain
+functions. No React, Next, Tailwind or analytics. **Nothing in it injects a
+`<style>` element, writes a `style` attribute from markup, uses `eval` or
+`new Function`, or fetches from another origin** (styles it sets go through
+CSSOM properties, which a strict `style-src` allows). Every asset URL is the
+host's.
+
+Loading:
+
+- `loadViewer({ meshoptDecoderLocation }) => Promise<module>`: imports
+  `@google/model-viewer` (defining `<model-viewer>`) once a page. The location
+  is the URL of the host's **same-origin, empty** script (model-viewer
+  switches its bundled meshopt decoder on once a script loads from there);
+  a `data:` URL, a cross-origin URL or none is refused.
+- `webglAvailable() => boolean`: WebGL 2 (three.js needs it). False off a page.
+- `warm3D(urls, fetchImpl?) => boolean`: fetches same-origin files into the
+  HTTP cache ahead of the viewer. `sameOrigin(url) => boolean`.
+
+The can cooler (can-cooler.js):
+
+- `CAN_COOLER_VIEW` (attributes), `CAN_COOLER_EXPOSURE` (2.15: set as the
+  element's **property**), `CAN_COOLER_ORBITS` `{ front, back }`,
+  `CAN_COOLER_IDEAL_ASPECT` `{ standard, slim }`, `CAN_COOLER_SHADOW_ROOM`,
+  `TURN_MS`, `PAINT_RETRY_MS`, `REDUCED_MOTION`, `MODEL_VIEWER_ATTRIBUTES`.
+- `createModelViewer({ src, environment, alt, view, exposure, className?, document? }) => HTMLElement`:
+  a `<model-viewer>` with its loading bar and pan target slotted out.
+- `attachCanCoolerTexture(mv, { width, height }) => texture`: on `load`, the
+  sleeve's texture at the die's native size, bound to `print` and `print_seam`.
+- `paintCanCooler(mv, texture, { color, art, magnet }) => boolean`: the colour,
+  the art over it (DesignStage `exportArtCanvas({ color: false })`), the
+  thread in the colour, the magnet shown or hidden.
+- `turnCanCoolerOnce(mv, { reducedMotion }) => stop`: the one gentle turn.
+- `canCoolerPicture(mv, { cover? }) => Promise<Blob | null>`: front and back
+  side by side, the order's `picture-3d.png`.
+
+The hat (hat-view.js, hat-3d-assets.js, and the storefront's modules as they are):
+
+- `HAT_VIEW` (attributes), `HAT_EDIT_INTERPOLATION_DECAY`,
+  `labelShapeOf(zones)`, `applyHatDesign(look, { parts, zones, labelShape, style })`,
+  `hatPicture(mv, { session?, cover? }) => Promise<Blob | null>`.
+- `HAT_3D_STYLES` (per style handle: `frame`, `posterSize`, `placements`),
+  `MODEL_FRAME`, `POSTER_SIZE`,
+  `hat3DFilesOf(style, { model, surface?, poster? }) => HatFiles | null`,
+  `dieFitsModel(die, files)`, `warmHat3D({ edit?, style?, urls, environment? })`.
+- hat-look.js: `createHatLook(mv, { die, zones, tagLogo, partFollows, neverOwn,
+  plasticParts, textureScale, onReady })` → `{ setParts, setColors,
+  setStageArt, setSpot, setLabel, view, paintNow, dispose, ... }`, and
+  `EXPOSURE`, `FIELD_OF_VIEW`, `GENERIC_VIEWS`, `METHODS`, `viewFor`,
+  `resolvePartColors`, `tagLogoColor`, `linearRgb`, ...
+- hat-surface.js: `createSurface(json)`, `measureProjection`,
+  `probePointsFor`, `solveProjection`, `project`.
+- hat-edit.js: `createEditSession({ mv, host, look, surface, edit, onFailed })`
+  → `{ update, reproject, setChromeHidden, destroy }`,
+  `loadSurfaceJson(url)` (same-origin only), `PROBE_SLOT`, `NARROW_PX`,
+  `PHONE_TEXTURE_SCALE`, ...
+- hat-place.js: `createPlacer(host, opts)`, `turnFromLevel`, `wrap180`, ...
+- hat-edit-host.js (the host's helpers for an edit): `piecesOf`, `pieceOf`,
+  `commitPatch`, `renderPieceArt`, `restArtFor`, `createPieceArtCache`,
+  `spotLimits`, `adjustAction`, `layerResize`, `layerRotate`, `sizeLabel`,
+  `angleLabel`, `stepView`, ...
+- picture.js: `PICTURE`, `composePicture(shots)`, `coverView(mv, cover)`, `nextFrame()`.
+
+A hat host's order of work, as Hat3D does it, is at the top of
+`src/viewer/hat-view.js`.
+
+### `models`
+
+`@reel48/designer/models/<file>`: `hat-no-7.glb`, `hat-no-7-poster.webp`,
+`hat-no-7-surface.json`, `hat-no-6.glb`, `hat-no-6-poster.webp`,
+`hat-no-6-surface.json`, `can-cooler-standard.glb`, `can-cooler-slim.glb`,
+`studio.hdr`: the storefront's `public/3d/**` files, byte for byte, under
+stable names. A host copies them into its own static output (hashed names are
+its build's business) and passes their URLs to the viewer. `MANIFEST.json`
+maps each to `{ sha256, source, storefrontCommit }`;
+`tests/models.test.js` re-hashes every file against it.
+
+### Peers
+
+`@google/model-viewer` 4.2.0 and `three` 0.182.0 are optional peers beside
+React and Konva: only a host that imports `./viewer` installs them. `three`
+0.182.0 is also a devDependency, for the projection tests.
+
+### Tests
+
+`tests/storefront/` holds the storefront's own tests for every moved module
+(23 files), pointed at the ports. Each file's header says what was dropped
+(React components, server handlers, `pricing.ts`, the storefront's own file
+layout) or adapted to the viewer's host-supplied URLs.

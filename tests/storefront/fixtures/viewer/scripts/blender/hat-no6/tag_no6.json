@@ -1,0 +1,187 @@
+{
+ "_doc": "Written by 07_parts.py (python3 -I 07_parts.py [STATE]; the snapback built on the input state). Frame F1 mm (+x forward, +y wearer's left, +z up). tag.* is the rebuilt FLAT woven tag (part snap_tag) at the snap strap's wearer's-left end: two plies folded once, the fold its visible edge toward the holes. Its colour follows the snap (part_snap), which follows the back panels. logo.rotate_deg is counter-clockwise positive as seen from behind (-90 = clockwise: the mark's top faces +u = across = toward the fold, its long side runs along v = up, reading top to bottom). logo.size_mm is the mark's tight box on the face. The card UV (snap.npz uv) is mm from the logo centre; image coordinates U = (long / 2 - v) / long, V = (u + short / 2) / short.",
+ "note": "Brayden 2026-10-22 (No. 6): the snapback plastic matches the hat colour; the REEL48 logo goes on the snap's woven tag exactly as on the No. 7's loop tag (full rounded logo, 90 % of the tag length, rotated -90, centred as seen square-on, white or #263151 by contrast with the tag colour, which follows the snap).",
+ "state": "detail",
+ "tag": {
+  "card": {
+   "centre_f1": [
+    -81.9892,
+    26.4943,
+    11.0719
+   ],
+   "normal_f1": [
+    -0.98469,
+    0.03735,
+    -0.17024
+   ],
+   "up_f1": [
+    -0.17098,
+    -0.01763,
+    0.98512
+   ],
+   "across_f1": [
+    -0.03379,
+    -0.99915,
+    -0.02375
+   ]
+  },
+  "visible": {
+   "width_mm": 6.739,
+   "height_mm": 22.85
+  },
+  "build": {
+   "s_fold": 26.75,
+   "s_cut": 32.25,
+   "t": [
+    -11.3963,
+    11.4037
+   ],
+   "length_mm": 22.8,
+   "centre_t": 0.0037,
+   "plane_abc": [
+    -0.297888,
+    0.038472,
+    -0.028969
+   ],
+   "relief_lift_mm": 0.5033,
+   "ply": 0.25,
+   "ply_gap": 0.05,
+   "thickness_mm": 0.55,
+   "face_above_strap_face_mm": 1.1422,
+   "overhang_mm": [
+    0.7298,
+    0.7298
+   ],
+   "rise": {
+    "enabled": false,
+    "need_mm": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "start_s": [
+     31.25,
+     31.25
+    ],
+    "level_from_s": [
+     32.25,
+     32.25
+    ],
+    "end_s": [
+     33.25,
+     33.25
+    ],
+    "run_mm": [
+     1.0,
+     1.0
+    ]
+   }
+  },
+  "construction": "flat woven label folded once (2 plies)"
+ },
+ "logo": {
+  "svg_white": "/Users/brayden/Reel48-Assets/3d/hats/no-6/source/brand/reel48-logo-rounded-white.svg",
+  "svg_dark": "/Users/brayden/Reel48-Assets/3d/hats/no-6/source/brand/reel48-logo-rounded-dark.svg",
+  "svg_black": "/Users/brayden/Reel48-Assets/3d/hats/no-6/source/brand/reel48-logo-rounded-black.svg",
+  "png_white": "/Users/brayden/Reel48-Assets/3d/hats/no-6/source/brand/reel48-logo-rounded-white-1024.png",
+  "png_dark": "/Users/brayden/Reel48-Assets/3d/hats/no-6/source/brand/reel48-logo-rounded-dark-1024.png",
+  "sha256": {
+   "white_svg": "660335f63ceb08b08e0397327f4bd05586525759bf1beaa430d22e0326dc6b0f",
+   "white_png": "31ddb5a262b0b99a58d3cd7c83829f29d8242ca111ea955c759e00fdd0a58cdc",
+   "dark_svg": "a1e79381c39cffc22485647f9b2a17f428041f072f920990d9a4054faad1774d",
+   "dark_png": "1e31c5f17cf9691e632027059fab08501026bbccf03070e7ef748f1e79547149",
+   "black_svg": "210e331b1474ef6f76bac16d054cdd201c119ac9b7d42beb535aec2a35024d39"
+  },
+  "source_dir": "/Users/brayden/Desktop/Reel48 Brand Identity/Rounded Version/Logo/SVG",
+  "path_bbox": [
+   0.0001,
+   0.0002,
+   468.221,
+   92.317
+  ],
+  "aspect_w_over_h": 5.07189,
+  "png_px": [
+   1024,
+   202
+  ],
+  "rotate_deg": -90,
+  "size_rule": "frac_of_tag_length",
+  "long_side_frac_of_length": 0.9,
+  "size_mm": {
+   "long": 20.565,
+   "short": 4.055,
+   "along_v": 20.565,
+   "along_u": 4.055,
+   "tag_visible_length_mm": 22.85
+  },
+  "centre_uv_mm": [
+   0.0,
+   0.0
+  ],
+  "side_margin_mm": [
+   1.223,
+   1.223
+  ],
+  "top_bottom_margin_mm": [
+   1.143,
+   1.143
+  ],
+  "side_margin_min_mm": 0.5,
+  "centre_tol_mm": 0.1,
+  "contrast": {
+   "light_threshold": 0.4,
+   "on_dark": "#FFFFFF",
+   "on_light": "#263151"
+  },
+  "contrast_rule": "WCAG relative luminance of the tag (= snap) colour >= light_threshold -> on_light, else on_dark",
+  "contrast_presets": {
+   "navy": {
+    "hex": "#1F2A44",
+    "luminance": 0.0236,
+    "logo": "#FFFFFF"
+   },
+   "black": {
+    "hex": "#1C1C1E",
+    "luminance": 0.0117,
+    "logo": "#FFFFFF"
+   },
+   "white": {
+    "hex": "#F1F0EB",
+    "luminance": 0.8702,
+    "logo": "#263151"
+   },
+   "stone": {
+    "hex": "#CBBE9E",
+    "luminance": 0.5199,
+    "logo": "#263151"
+   },
+   "charcoal": {
+    "hex": "#43474D",
+    "luminance": 0.0624,
+    "logo": "#FFFFFF"
+   },
+   "red": {
+    "hex": "#A42A2E",
+    "luminance": 0.0975,
+    "logo": "#FFFFFF"
+   },
+   "royal": {
+    "hex": "#2A4BA0",
+    "luminance": 0.0806,
+    "logo": "#FFFFFF"
+   },
+   "forest": {
+    "hex": "#25473A",
+    "luminance": 0.0521,
+    "logo": "#FFFFFF"
+   }
+  },
+  "customer_editable": false
+ },
+ "photo41": null,
+ "outputs": {
+  "parts_npz": "/Users/brayden/Reel48-Assets/3d/hats/no-6/state/parts.npz",
+  "card": "/Users/brayden/Reel48-Assets/3d/hats/no-6/state/tag_card.json",
+  "review": "/Users/brayden/Reel48-Assets/3d/hats/no-6/review/07_parts"
+ }
+}

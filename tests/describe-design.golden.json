@@ -1,0 +1,4644 @@
+{
+ "no7-front-embroidery": {
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "size": {
+   "id": "hat-no-7-v2",
+   "label": "Hat No. 7"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Front"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "3.00 in × 1.50 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "on the centre seam, 875px, 937px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "875px, 937px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 3720,
+   "height": 1808,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "front",
+    "label": "Front",
+    "rect": {
+     "x": 40,
+     "y": 40,
+     "w": 1644,
+     "h": 1288
+    },
+    "maxImprint": {
+     "w": 4.5,
+     "h": 2.25
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": true,
+    "threads": []
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_FL",
+    "label": "Front left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_FR",
+    "label": "Front right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "strap",
+    "label": "Strap",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "front",
+    "method": "embroidery",
+    "primary": true
+   }
+  ],
+  "extraSpots": 0,
+  "pictureUrl": null
+ },
+ "no7-front-pvc-left-back": {
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "size": {
+   "id": "hat-no-7-v2",
+   "label": "Hat No. 7"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Front"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "3.50 in × 1.75 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "on the centre seam, 875px, 937px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "875px, 937px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "kind": "text",
+    "title": "Text 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Left side"
+     },
+     {
+      "label": "Copy",
+      "value": "EST 1999"
+     },
+     {
+      "label": "Font",
+      "value": "Arial"
+     },
+     {
+      "label": "Style",
+      "value": "bold"
+     },
+     {
+      "label": "Colour",
+      "value": "#FFFFFF"
+     },
+     {
+      "label": "Align",
+      "value": "center"
+     },
+     {
+      "label": "Cap height",
+      "value": "0.40 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "2169px, 986px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "2169px, 986px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°, parallel to the bottom of the hat"
+     },
+     {
+      "label": "Rotation on die",
+      "value": "-7°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "kind": "logo",
+    "title": "Logo 2",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Back"
+     },
+     {
+      "label": "File",
+      "value": "c.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "1.60 in × 0.80 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "359px, 1550px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "359px, 1550px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 3720,
+   "height": 1808,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "front",
+    "label": "Front",
+    "rect": {
+     "x": 40,
+     "y": 40,
+     "w": 1644,
+     "h": 1288
+    },
+    "maxImprint": {
+     "w": 4.5,
+     "h": 2.25
+    },
+    "method": "pvc_patch",
+    "methodLabel": "PVC Patch",
+    "primary": true,
+    "threads": []
+   },
+   {
+    "id": "left",
+    "label": "Left side",
+    "rect": {
+     "x": 1764,
+     "y": 40,
+     "w": 912,
+     "h": 1292
+    },
+    "maxImprint": {
+     "w": 2,
+     "h": 1.5
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": false,
+    "threads": [],
+    "level": -7
+   },
+   {
+    "id": "back",
+    "label": "Back",
+    "rect": {
+     "x": 80,
+     "y": 1452,
+     "w": 558,
+     "h": 195
+    },
+    "maxImprint": {
+     "w": 2.5,
+     "h": 0.875
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": false,
+    "threads": []
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_FL",
+    "label": "Front left panel",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "crown_FR",
+    "label": "Front right panel",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "strap",
+    "label": "Strap",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "front",
+    "method": "pvc_patch",
+    "primary": true
+   },
+   {
+    "zone": "left",
+    "method": "embroidery",
+    "primary": false
+   },
+   {
+    "zone": "back",
+    "method": "embroidery",
+    "primary": false
+   }
+  ],
+  "extraSpots": 2,
+  "pictureUrl": null
+ },
+ "no7-back-too-big": {
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "size": {
+   "id": "hat-no-7-v2",
+   "label": "Hat No. 7"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Front"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "3.00 in × 1.50 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "on the centre seam, 875px, 937px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "875px, 937px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "kind": "logo",
+    "title": "Logo 2",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Back"
+     },
+     {
+      "label": "File",
+      "value": "b.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "2.00 in × 1.00 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "359px, 1550px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "359px, 1550px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     },
+     {
+      "label": "Check size",
+      "value": "2.00 × 1.00 in is past the back's 2.5 × 0.875 in"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 3720,
+   "height": 1808,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "front",
+    "label": "Front",
+    "rect": {
+     "x": 40,
+     "y": 40,
+     "w": 1644,
+     "h": 1288
+    },
+    "maxImprint": {
+     "w": 4.5,
+     "h": 2.25
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": true,
+    "threads": []
+   },
+   {
+    "id": "back",
+    "label": "Back",
+    "rect": {
+     "x": 80,
+     "y": 1452,
+     "w": 558,
+     "h": 195
+    },
+    "maxImprint": {
+     "w": 2.5,
+     "h": 0.875
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": false,
+    "threads": []
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_FL",
+    "label": "Front left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_FR",
+    "label": "Front right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "strap",
+    "label": "Strap",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "front",
+    "method": "embroidery",
+    "primary": true
+   },
+   {
+    "zone": "back",
+    "method": "embroidery",
+    "primary": false
+   }
+  ],
+  "extraSpots": 1,
+  "pictureUrl": null
+ },
+ "no7-front-silicon-label-ground": {
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "size": {
+   "id": "hat-no-7-v2",
+   "label": "Hat No. 7"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Front"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "4.00 in × 2.00 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "on the centre seam, 875px, 937px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "875px, 937px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "kind": "text",
+    "title": "Text 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Inside label, rectangle"
+     },
+     {
+      "label": "Copy",
+      "value": "EST 1999"
+     },
+     {
+      "label": "Font",
+      "value": "Arial"
+     },
+     {
+      "label": "Style",
+      "value": "bold"
+     },
+     {
+      "label": "Colour",
+      "value": "#1C1C1E"
+     },
+     {
+      "label": "Align",
+      "value": "center"
+     },
+     {
+      "label": "Cap height",
+      "value": "0.30 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "933px, 1512px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "933px, 1512px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 3720,
+   "height": 1808,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "front",
+    "label": "Front",
+    "rect": {
+     "x": 40,
+     "y": 40,
+     "w": 1644,
+     "h": 1288
+    },
+    "maxImprint": {
+     "w": 4.5,
+     "h": 2.25
+    },
+    "method": "silicon_patch",
+    "methodLabel": "Silicone Patch",
+    "primary": true,
+    "threads": []
+   },
+   {
+    "id": "label_tall",
+    "label": "Inside label, rectangle",
+    "rect": {
+     "x": 758,
+     "y": 1412,
+     "w": 350,
+     "h": 200
+    },
+    "maxImprint": {
+     "w": 1.75,
+     "h": 1
+    },
+    "method": "woven_label",
+    "methodLabel": "Woven label",
+    "primary": false,
+    "threads": [],
+    "shape": "tall",
+    "ground": "#F1F0EB"
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_FL",
+    "label": "Front left panel",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   },
+   {
+    "id": "crown_FR",
+    "label": "Front right panel",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   },
+   {
+    "id": "strap",
+    "label": "Strap",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "front",
+    "method": "silicon_patch",
+    "primary": true
+   },
+   {
+    "zone": "label_tall",
+    "method": "woven_label",
+    "primary": false
+   }
+  ],
+  "extraSpots": 1,
+  "pictureUrl": null
+ },
+ "no7-front-woven-right-label": {
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "size": {
+   "id": "hat-no-7-v2",
+   "label": "Hat No. 7"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Front"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "2.50 in × 1.25 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "on the centre seam, 875px, 937px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "875px, 937px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "kind": "logo",
+    "title": "Logo 2",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Right side"
+     },
+     {
+      "label": "File",
+      "value": "b.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "1.50 in × 0.75 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "3298px, 966px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "3298px, 966px"
+     },
+     {
+      "label": "Rotation",
+      "value": "4° clockwise from parallel to the bottom of the hat"
+     },
+     {
+      "label": "Rotation on die",
+      "value": "12°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "kind": "logo",
+    "title": "Logo 3",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Inside label, rectangle"
+     },
+     {
+      "label": "File",
+      "value": "c.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "1.20 in × 0.60 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "933px, 1512px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "933px, 1512px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 3720,
+   "height": 1808,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "front",
+    "label": "Front",
+    "rect": {
+     "x": 40,
+     "y": 40,
+     "w": 1644,
+     "h": 1288
+    },
+    "maxImprint": {
+     "w": 4.5,
+     "h": 2.25
+    },
+    "method": "woven_patch",
+    "methodLabel": "Woven Patch",
+    "primary": true,
+    "threads": [
+     "#FFFFFF",
+     "#1C1C1E"
+    ]
+   },
+   {
+    "id": "right",
+    "label": "Right side",
+    "rect": {
+     "x": 2756,
+     "y": 40,
+     "w": 920,
+     "h": 1290
+    },
+    "maxImprint": {
+     "w": 2,
+     "h": 1.5
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": false,
+    "threads": [],
+    "level": 8
+   },
+   {
+    "id": "label_tall",
+    "label": "Inside label, rectangle",
+    "rect": {
+     "x": 758,
+     "y": 1412,
+     "w": 350,
+     "h": 200
+    },
+    "maxImprint": {
+     "w": 1.75,
+     "h": 1
+    },
+    "method": "woven_label",
+    "methodLabel": "Woven label",
+    "primary": false,
+    "threads": [],
+    "shape": "tall",
+    "ground": "#F1F0EB"
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_FL",
+    "label": "Front left panel",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "crown_FR",
+    "label": "Front right panel",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "strap",
+    "label": "Strap",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "front",
+    "method": "woven_patch",
+    "primary": true
+   },
+   {
+    "zone": "right",
+    "method": "embroidery",
+    "primary": false
+   },
+   {
+    "zone": "label_tall",
+    "method": "woven_label",
+    "primary": false
+   }
+  ],
+  "extraSpots": 2,
+  "pictureUrl": null
+ },
+ "no7-left-only": {
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "size": {
+   "id": "hat-no-7-v2",
+   "label": "Hat No. 7"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Left side"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "1.80 in × 0.90 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "2169px, 986px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "2169px, 986px"
+     },
+     {
+      "label": "Rotation",
+      "value": "7° clockwise from parallel to the bottom of the hat"
+     },
+     {
+      "label": "Rotation on die",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 3720,
+   "height": 1808,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "left",
+    "label": "Left side",
+    "rect": {
+     "x": 1764,
+     "y": 40,
+     "w": 912,
+     "h": 1292
+    },
+    "maxImprint": {
+     "w": 2,
+     "h": 1.5
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": true,
+    "threads": [],
+    "level": -7
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_FL",
+    "label": "Front left panel",
+    "color": "#C8BDA4",
+    "pms": "PMS 4240 C"
+   },
+   {
+    "id": "crown_FR",
+    "label": "Front right panel",
+    "color": "#C8BDA4",
+    "pms": "PMS 4240 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#C8BDA4",
+    "pms": "PMS 4240 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#C8BDA4",
+    "pms": "PMS 4240 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#C8BDA4",
+    "pms": "PMS 4240 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#C8BDA4",
+    "pms": "PMS 4240 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#C8BDA4",
+    "pms": "PMS 4240 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#C8BDA4",
+    "pms": "PMS 4240 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#C8BDA4",
+    "pms": "PMS 4240 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#C8BDA4",
+    "pms": "PMS 4240 C"
+   },
+   {
+    "id": "strap",
+    "label": "Strap",
+    "color": "#C8BDA4",
+    "pms": "PMS 4240 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "left",
+    "method": "embroidery",
+    "primary": true
+   }
+  ],
+  "extraSpots": 0,
+  "pictureUrl": null
+ },
+ "no7-label-only": {
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "size": {
+   "id": "hat-no-7-v2",
+   "label": "Hat No. 7"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Inside label, rectangle"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "1.00 in × 0.50 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "933px, 1512px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "933px, 1512px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 3720,
+   "height": 1808,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "label_tall",
+    "label": "Inside label, rectangle",
+    "rect": {
+     "x": 758,
+     "y": 1412,
+     "w": 350,
+     "h": 200
+    },
+    "maxImprint": {
+     "w": 1.75,
+     "h": 1
+    },
+    "method": "woven_label",
+    "methodLabel": "Woven label",
+    "primary": false,
+    "threads": [],
+    "shape": "tall",
+    "ground": "#F1F0EB"
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_FL",
+    "label": "Front left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_FR",
+    "label": "Front right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "strap",
+    "label": "Strap",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "label_tall",
+    "method": "woven_label",
+    "primary": false
+   }
+  ],
+  "extraSpots": 1,
+  "pictureUrl": null
+ },
+ "no7-oversize": {
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "size": {
+   "id": "hat-no-7-v2",
+   "label": "Hat No. 7"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Front"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "5.20 in × 2.60 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "on the centre seam, 875px, 937px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "875px, 937px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     },
+     {
+      "label": "Check size",
+      "value": "5.20 × 2.60 in is past the front's 4.5 × 2.25 in"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 3720,
+   "height": 1808,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "front",
+    "label": "Front",
+    "rect": {
+     "x": 40,
+     "y": 40,
+     "w": 1644,
+     "h": 1288
+    },
+    "maxImprint": {
+     "w": 4.5,
+     "h": 2.25
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": true,
+    "threads": []
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_FL",
+    "label": "Front left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_FR",
+    "label": "Front right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "strap",
+    "label": "Strap",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "front",
+    "method": "embroidery",
+    "primary": true
+   }
+  ],
+  "extraSpots": 0,
+  "pictureUrl": null
+ },
+ "no7-left-method-patch": {
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "size": {
+   "id": "hat-no-7-v2",
+   "label": "Hat No. 7"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Left side"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "1.50 in × 0.75 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "2169px, 986px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "2169px, 986px"
+     },
+     {
+      "label": "Rotation",
+      "value": "7° clockwise from parallel to the bottom of the hat"
+     },
+     {
+      "label": "Rotation on die",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 3720,
+   "height": 1808,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "left",
+    "label": "Left side",
+    "rect": {
+     "x": 1764,
+     "y": 40,
+     "w": 912,
+     "h": 1292
+    },
+    "maxImprint": {
+     "w": 2,
+     "h": 1.5
+    },
+    "method": "pvc_patch",
+    "methodLabel": "PVC Patch",
+    "primary": true,
+    "threads": [],
+    "level": -7
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_FL",
+    "label": "Front left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_FR",
+    "label": "Front right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "strap",
+    "label": "Strap",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "left",
+    "method": "pvc_patch",
+    "primary": true
+   }
+  ],
+  "extraSpots": 0,
+  "pictureUrl": null
+ },
+ "no7-not-pantone": {
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "size": {
+   "id": "hat-no-7-v2",
+   "label": "Hat No. 7"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Front"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "3.00 in × 1.50 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "on the centre seam, 875px, 937px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "875px, 937px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 3720,
+   "height": 1808,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "front",
+    "label": "Front",
+    "rect": {
+     "x": 40,
+     "y": 40,
+     "w": 1644,
+     "h": 1288
+    },
+    "maxImprint": {
+     "w": 4.5,
+     "h": 2.25
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": true,
+    "threads": []
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_FL",
+    "label": "Front left panel",
+    "color": "#123456"
+   },
+   {
+    "id": "crown_FR",
+    "label": "Front right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "strap",
+    "label": "Strap",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "front",
+    "method": "embroidery",
+    "primary": true
+   }
+  ],
+  "extraSpots": 0,
+  "pictureUrl": null
+ },
+ "no7-unknown-zone": {
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "size": {
+   "id": "hat-no-7-v2",
+   "label": "Hat No. 7"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Front"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "3.00 in × 1.50 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "on the centre seam, 875px, 937px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "875px, 937px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 3720,
+   "height": 1808,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "front",
+    "label": "Front",
+    "rect": {
+     "x": 40,
+     "y": 40,
+     "w": 1644,
+     "h": 1288
+    },
+    "maxImprint": {
+     "w": 4.5,
+     "h": 2.25
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": true,
+    "threads": []
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_FL",
+    "label": "Front left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_FR",
+    "label": "Front right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "strap",
+    "label": "Strap",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "front",
+    "method": "embroidery",
+    "primary": true
+   }
+  ],
+  "extraSpots": 0,
+  "pictureUrl": null
+ },
+ "no7-empty": {
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "size": {
+   "id": "hat-no-7-v2",
+   "label": "Hat No. 7"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 3720,
+   "height": 1808,
+   "pxPerInch": 200
+  },
+  "zones": [],
+  "parts": [
+   {
+    "id": "crown_FL",
+    "label": "Front left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_FR",
+    "label": "Front right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "strap",
+    "label": "Strap",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   }
+  ],
+  "placements": [],
+  "extraSpots": 0,
+  "pictureUrl": null
+ },
+ "no7-stamped-order": {
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "size": {
+   "id": "hat-no-7-v2",
+   "label": "Hat No. 7"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Front"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "3.00 in × 1.50 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "on the centre seam, 875px, 937px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "875px, 937px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "kind": "text",
+    "title": "Text 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Right side"
+     },
+     {
+      "label": "Copy",
+      "value": "EST 1999"
+     },
+     {
+      "label": "Font",
+      "value": "Arial"
+     },
+     {
+      "label": "Style",
+      "value": "bold"
+     },
+     {
+      "label": "Colour",
+      "value": "#FFFFFF"
+     },
+     {
+      "label": "Align",
+      "value": "center"
+     },
+     {
+      "label": "Cap height",
+      "value": "0.50 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "3298px, 966px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "3298px, 966px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°, parallel to the bottom of the hat"
+     },
+     {
+      "label": "Rotation on die",
+      "value": "8°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "kind": "logo",
+    "title": "Logo 2",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Inside label, rectangle"
+     },
+     {
+      "label": "File",
+      "value": "c.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "1.00 in × 0.50 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "933px, 1512px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "933px, 1512px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": "https://abc123xyz.public.blob.vercel-storage.com/coozie/2f6c1f2e-6b3a-4a5f-9d7e-0c1b2a3d4e5f/design.json",
+  "fontUrls": [
+   "https://abc123xyz.public.blob.vercel-storage.com/coozie/2f6c1f2e-6b3a-4a5f-9d7e-0c1b2a3d4e5f/font-0-brand.ttf"
+  ],
+  "artworkFiles": [
+   {
+    "url": "https://abc123xyz.public.blob.vercel-storage.com/coozie/2f6c1f2e-6b3a-4a5f-9d7e-0c1b2a3d4e5f/artwork-0-logo.ai",
+    "fileName": "logo.ai"
+   }
+  ],
+  "frame": {
+   "width": 3720,
+   "height": 1808,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "front",
+    "label": "Front",
+    "rect": {
+     "x": 40,
+     "y": 40,
+     "w": 1644,
+     "h": 1288
+    },
+    "maxImprint": {
+     "w": 4.5,
+     "h": 2.25
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": true,
+    "threads": [
+     "#FFFFFF"
+    ]
+   },
+   {
+    "id": "right",
+    "label": "Right side",
+    "rect": {
+     "x": 2756,
+     "y": 40,
+     "w": 920,
+     "h": 1290
+    },
+    "maxImprint": {
+     "w": 2,
+     "h": 1.5
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": false,
+    "threads": [],
+    "level": 8
+   },
+   {
+    "id": "label_tall",
+    "label": "Inside label, rectangle",
+    "rect": {
+     "x": 758,
+     "y": 1412,
+     "w": 350,
+     "h": 200
+    },
+    "maxImprint": {
+     "w": 1.75,
+     "h": 1
+    },
+    "method": "woven_label",
+    "methodLabel": "Woven label",
+    "primary": false,
+    "threads": [],
+    "shape": "tall",
+    "ground": "#1C1C1E"
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_FL",
+    "label": "Front left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_FR",
+    "label": "Front right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "sweatband",
+    "label": "Sweatband",
+    "color": "#1C1C1E",
+    "band": "black"
+   },
+   {
+    "id": "strap",
+    "label": "Strap",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "front",
+    "method": "embroidery",
+    "primary": true
+   },
+   {
+    "zone": "right",
+    "method": "embroidery",
+    "primary": false
+   },
+   {
+    "zone": "label_tall",
+    "method": "woven_label",
+    "primary": false
+   }
+  ],
+  "extraSpots": 2,
+  "pictureUrl": "https://abc123xyz.public.blob.vercel-storage.com/coozie/2f6c1f2e-6b3a-4a5f-9d7e-0c1b2a3d4e5f/picture-3d.png"
+ },
+ "no7-schema-3": {
+  "kind": "hat",
+  "dieId": "hat-no-7-v2",
+  "size": {
+   "id": "hat-no-7-v2",
+   "label": "Hat No. 7"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Front"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "3.00 in × 1.50 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "on the centre seam, 875px, 937px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "875px, 937px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 3720,
+   "height": 1808,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "front",
+    "label": "Front",
+    "rect": {
+     "x": 40,
+     "y": 40,
+     "w": 1644,
+     "h": 1288
+    },
+    "maxImprint": {
+     "w": 4.5,
+     "h": 2.25
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": true,
+    "threads": []
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_FL",
+    "label": "Front left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_FR",
+    "label": "Front right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "strap",
+    "label": "Strap",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "front",
+    "method": "embroidery",
+    "primary": true
+   }
+  ],
+  "extraSpots": 0,
+  "pictureUrl": null
+ },
+ "no6-every-spot": {
+  "kind": "hat",
+  "dieId": "hat-no-6",
+  "size": {
+   "id": "hat-no-6",
+   "label": "Hat No. 6"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Front"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "4.00 in × 2.00 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "on the centre seam, 645px, 473px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "645px, 473px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "kind": "logo",
+    "title": "Logo 2",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Left side"
+     },
+     {
+      "label": "File",
+      "value": "b.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "1.50 in × 0.75 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "2054px, 917px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "2054px, 917px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°, parallel to the bottom of the hat"
+     },
+     {
+      "label": "Rotation on die",
+      "value": "-6°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "kind": "text",
+    "title": "Text 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Right side"
+     },
+     {
+      "label": "Copy",
+      "value": "EST 1999"
+     },
+     {
+      "label": "Font",
+      "value": "Arial"
+     },
+     {
+      "label": "Style",
+      "value": "bold"
+     },
+     {
+      "label": "Colour",
+      "value": "#FFFFFF"
+     },
+     {
+      "label": "Align",
+      "value": "center"
+     },
+     {
+      "label": "Cap height",
+      "value": "0.40 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "3001px, 905px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "3001px, 905px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°, parallel to the bottom of the hat"
+     },
+     {
+      "label": "Rotation on die",
+      "value": "6°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "kind": "logo",
+    "title": "Logo 3",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Back"
+     },
+     {
+      "label": "File",
+      "value": "d.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "1.60 in × 0.80 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "734px, 1708px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "734px, 1708px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "kind": "logo",
+    "title": "Logo 4",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Inside label, rectangle"
+     },
+     {
+      "label": "File",
+      "value": "e.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "1.20 in × 0.60 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "1701px, 1473px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "1701px, 1473px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 3480,
+   "height": 2336,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "front",
+    "label": "Front",
+    "rect": {
+     "x": 40,
+     "y": 40,
+     "w": 1541,
+     "h": 824
+    },
+    "maxImprint": {
+     "w": 4.5,
+     "h": 2.25
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": true,
+    "threads": []
+   },
+   {
+    "id": "left",
+    "label": "Left side",
+    "rect": {
+     "x": 1661,
+     "y": 40,
+     "w": 845,
+     "h": 1253
+    },
+    "maxImprint": {
+     "w": 2,
+     "h": 1.5
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": false,
+    "threads": [],
+    "level": -6
+   },
+   {
+    "id": "right",
+    "label": "Right side",
+    "rect": {
+     "x": 2586,
+     "y": 40,
+     "w": 822,
+     "h": 1246
+    },
+    "maxImprint": {
+     "w": 2,
+     "h": 1.5
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": false,
+    "threads": [],
+    "level": 6
+   },
+   {
+    "id": "back",
+    "label": "Back",
+    "rect": {
+     "x": 40,
+     "y": 1373,
+     "w": 1406,
+     "h": 921
+    },
+    "maxImprint": {
+     "w": 2.5,
+     "h": 0.875
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": false,
+    "threads": []
+   },
+   {
+    "id": "label_tall",
+    "label": "Inside label, rectangle",
+    "rect": {
+     "x": 1526,
+     "y": 1373,
+     "w": 350,
+     "h": 200
+    },
+    "maxImprint": {
+     "w": 1.75,
+     "h": 1
+    },
+    "method": "woven_label",
+    "methodLabel": "Woven label",
+    "primary": false,
+    "threads": [],
+    "shape": "tall",
+    "ground": "#F1F0EB"
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_F",
+    "label": "Front panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#EFEAE5",
+    "pms": "PMS 9285 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "front",
+    "method": "embroidery",
+    "primary": true
+   },
+   {
+    "zone": "left",
+    "method": "embroidery",
+    "primary": false
+   },
+   {
+    "zone": "right",
+    "method": "embroidery",
+    "primary": false
+   },
+   {
+    "zone": "back",
+    "method": "embroidery",
+    "primary": false
+   },
+   {
+    "zone": "label_tall",
+    "method": "woven_label",
+    "primary": false
+   }
+  ],
+  "extraSpots": 4,
+  "pictureUrl": null
+ },
+ "no6-front-pvc": {
+  "kind": "hat",
+  "dieId": "hat-no-6",
+  "size": {
+   "id": "hat-no-6",
+   "label": "Hat No. 6"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Front"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "3.00 in × 1.50 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "on the centre seam, 645px, 473px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "645px, 473px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 3480,
+   "height": 2336,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "front",
+    "label": "Front",
+    "rect": {
+     "x": 40,
+     "y": 40,
+     "w": 1541,
+     "h": 824
+    },
+    "maxImprint": {
+     "w": 4.5,
+     "h": 2.25
+    },
+    "method": "pvc_patch",
+    "methodLabel": "PVC Patch",
+    "primary": true,
+    "threads": []
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_F",
+    "label": "Front panel",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#A92A2F",
+    "pms": "PMS 10416 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "front",
+    "method": "pvc_patch",
+    "primary": true
+   }
+  ],
+  "extraSpots": 0,
+  "pictureUrl": null
+ },
+ "no6-back-only": {
+  "kind": "hat",
+  "dieId": "hat-no-6",
+  "size": {
+   "id": "hat-no-6",
+   "label": "Hat No. 6"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Back"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "1.60 in × 0.80 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "734px, 1708px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "734px, 1708px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 3480,
+   "height": 2336,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "back",
+    "label": "Back",
+    "rect": {
+     "x": 40,
+     "y": 1373,
+     "w": 1406,
+     "h": 921
+    },
+    "maxImprint": {
+     "w": 2.5,
+     "h": 0.875
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": true,
+    "threads": []
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_F",
+    "label": "Front panel",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "back",
+    "method": "embroidery",
+    "primary": true
+   }
+  ],
+  "extraSpots": 0,
+  "pictureUrl": null
+ },
+ "no6-stray": {
+  "kind": "hat",
+  "dieId": "hat-no-6",
+  "size": {
+   "id": "hat-no-6",
+   "label": "Hat No. 6"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Front"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "3.00 in × 1.50 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.00 in right of and 0.00 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "on the centre seam, 645px, 473px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "645px, 473px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "kind": "logo",
+    "title": "Logo 2",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Right side"
+     },
+     {
+      "label": "File",
+      "value": "b.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "0.50 in × 0.25 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "1.87 in right of and 6.81 in below the spot's middle"
+     },
+     {
+      "label": "Spot's middle",
+      "value": "3001px, 905px on the die"
+     },
+     {
+      "label": "Centre on die",
+      "value": "3376px, 2266px"
+     },
+     {
+      "label": "Rotation",
+      "value": "6° counter-clockwise from parallel to the bottom of the hat"
+     },
+     {
+      "label": "Rotation on die",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 3480,
+   "height": 2336,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "front",
+    "label": "Front",
+    "rect": {
+     "x": 40,
+     "y": 40,
+     "w": 1541,
+     "h": 824
+    },
+    "maxImprint": {
+     "w": 4.5,
+     "h": 2.25
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": true,
+    "threads": []
+   },
+   {
+    "id": "right",
+    "label": "Right side",
+    "rect": {
+     "x": 2586,
+     "y": 40,
+     "w": 822,
+     "h": 1246
+    },
+    "maxImprint": {
+     "w": 2,
+     "h": 1.5
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": false,
+    "threads": [],
+    "level": 6
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_F",
+    "label": "Front panel",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#B1B4B3",
+    "pms": "PMS Cool Gray 5 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "front",
+    "method": "embroidery",
+    "primary": true
+   },
+   {
+    "zone": "right",
+    "method": "embroidery",
+    "primary": false
+   }
+  ],
+  "extraSpots": 1,
+  "pictureUrl": null
+ },
+ "no7v1-front-side": {
+  "kind": "hat",
+  "dieId": "hat-no-7",
+  "size": {
+   "id": "hat-no-7",
+   "label": "Hat No. 7"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Front"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "3.00 in × 1.50 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "2.25 in across, 1.13 in down"
+     },
+     {
+      "label": "Centre on die",
+      "value": "490px, 265px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "kind": "text",
+    "title": "Text 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Left side"
+     },
+     {
+      "label": "Copy",
+      "value": "EST 1999"
+     },
+     {
+      "label": "Font",
+      "value": "Arial"
+     },
+     {
+      "label": "Style",
+      "value": "bold"
+     },
+     {
+      "label": "Colour",
+      "value": "#FFFFFF"
+     },
+     {
+      "label": "Align",
+      "value": "center"
+     },
+     {
+      "label": "Cap height",
+      "value": "0.40 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "1.00 in across, 0.75 in down"
+     },
+     {
+      "label": "Centre on die",
+      "value": "1220px, 190px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 1560,
+   "height": 1296,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "front",
+    "label": "Front",
+    "rect": {
+     "x": 40,
+     "y": 40,
+     "w": 900,
+     "h": 450
+    },
+    "maxImprint": {
+     "w": 4.5,
+     "h": 2.25
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": true,
+    "threads": []
+   },
+   {
+    "id": "left",
+    "label": "Left side",
+    "rect": {
+     "x": 1020,
+     "y": 40,
+     "w": 400,
+     "h": 300
+    },
+    "maxImprint": {
+     "w": 2,
+     "h": 1.5
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": false,
+    "threads": []
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_FL",
+    "label": "Front left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_FR",
+    "label": "Front right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "strap",
+    "label": "Strap",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "front",
+    "method": "embroidery",
+    "primary": true
+   },
+   {
+    "zone": "left",
+    "method": "embroidery",
+    "primary": false
+   }
+  ],
+  "extraSpots": 1,
+  "pictureUrl": null
+ },
+ "no7v1-square-label": {
+  "kind": "hat",
+  "dieId": "hat-no-7",
+  "size": {
+   "id": "hat-no-7",
+   "label": "Hat No. 7"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Front"
+     },
+     {
+      "label": "File",
+      "value": "a.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "3.00 in × 1.50 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "2.25 in across, 1.13 in down"
+     },
+     {
+      "label": "Centre on die",
+      "value": "490px, 265px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "kind": "logo",
+    "title": "Logo 2",
+    "rows": [
+     {
+      "label": "Spot",
+      "value": "Inside label, square"
+     },
+     {
+      "label": "File",
+      "value": "b.png"
+     },
+     {
+      "label": "Type",
+      "value": "image/png"
+     },
+     {
+      "label": "Source size",
+      "value": "1200×600px"
+     },
+     {
+      "label": "Placed size",
+      "value": "0.80 in × 0.40 in"
+     },
+     {
+      "label": "Centre in spot",
+      "value": "0.50 in across, 0.50 in down"
+     },
+     {
+      "label": "Centre on die",
+      "value": "820px, 1100px"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 1560,
+   "height": 1296,
+   "pxPerInch": 200
+  },
+  "zones": [
+   {
+    "id": "front",
+    "label": "Front",
+    "rect": {
+     "x": 40,
+     "y": 40,
+     "w": 900,
+     "h": 450
+    },
+    "maxImprint": {
+     "w": 4.5,
+     "h": 2.25
+    },
+    "method": "embroidery",
+    "methodLabel": "Embroidery",
+    "primary": true,
+    "threads": []
+   },
+   {
+    "id": "label_square",
+    "label": "Inside label, square",
+    "rect": {
+     "x": 720,
+     "y": 1000,
+     "w": 200,
+     "h": 200
+    },
+    "maxImprint": {
+     "w": 1,
+     "h": 1
+    },
+    "method": "woven_label",
+    "methodLabel": "Woven label",
+    "primary": false,
+    "threads": [],
+    "shape": "square",
+    "ground": "#F1F0EB"
+   }
+  ],
+  "parts": [
+   {
+    "id": "crown_FL",
+    "label": "Front left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_FR",
+    "label": "Front right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "strap",
+    "label": "Strap",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   }
+  ],
+  "placements": [
+   {
+    "zone": "front",
+    "method": "embroidery",
+    "primary": true
+   },
+   {
+    "zone": "label_square",
+    "method": "woven_label",
+    "primary": false
+   }
+  ],
+  "extraSpots": 1,
+  "pictureUrl": null
+ },
+ "hat-unknown-die": {
+  "kind": "hat",
+  "dieId": "hat-no-9",
+  "size": {
+   "id": "hat-no-9",
+   "label": "Unknown hat die (hat-no-9)"
+  },
+  "color": null,
+  "pattern": null,
+  "elements": [],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": [],
+  "frame": {
+   "width": 0,
+   "height": 0,
+   "pxPerInch": 0
+  },
+  "zones": [],
+  "parts": [
+   {
+    "id": "crown_FL",
+    "label": "Front left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_FR",
+    "label": "Front right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LS",
+    "label": "Left side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RS",
+    "label": "Right side panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_LB",
+    "label": "Back left panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "crown_RB",
+    "label": "Back right panel",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_top",
+    "label": "Bill, top",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "bill_under",
+    "label": "Bill, underside",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "button",
+    "label": "Button",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "eyelet",
+    "label": "Eyelets",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   },
+   {
+    "id": "strap",
+    "label": "Strap",
+    "color": "#1F2A44",
+    "pms": "PMS 533 C"
+   }
+  ],
+  "placements": [],
+  "extraSpots": 0,
+  "pictureUrl": null
+ },
+ "can-standard": {
+  "size": {
+   "id": "standard",
+   "label": "Standard can"
+  },
+  "color": "#1C2E4A",
+  "pattern": null,
+  "patternFile": null,
+  "patternRepeatIn": null,
+  "elements": [
+   {
+    "kind": "text",
+    "title": "Text 1",
+    "rows": [
+     {
+      "label": "Copy",
+      "value": "CLASS OF 2026"
+     },
+     {
+      "label": "Font",
+      "value": "Impact"
+     },
+     {
+      "label": "Style",
+      "value": "normal"
+     },
+     {
+      "label": "Colour",
+      "value": "#FFFFFF"
+     },
+     {
+      "label": "Align",
+      "value": "center"
+     },
+     {
+      "label": "Cap height",
+      "value": "0.070 of width (70px)"
+     },
+     {
+      "label": "Centre X",
+      "value": "0.500 (500px)"
+     },
+     {
+      "label": "Centre Y",
+      "value": "0.250 (500px)"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "kind": "logo",
+    "title": "Logo 1",
+    "rows": [
+     {
+      "label": "File",
+      "value": "mark.svg"
+     },
+     {
+      "label": "Type",
+      "value": "image/svg+xml"
+     },
+     {
+      "label": "Source size",
+      "value": "800×400px"
+     },
+     {
+      "label": "Placed width",
+      "value": "0.400 of width (400px)"
+     },
+     {
+      "label": "Centre X",
+      "value": "0.500 (500px)"
+     },
+     {
+      "label": "Centre Y",
+      "value": "0.750 (1500px)"
+     },
+     {
+      "label": "Rotation",
+      "value": "180°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     },
+     {
+      "label": "Trimmed to",
+      "value": "Back panel (nothing past its edge prints)"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": []
+ },
+ "can-slim-pattern": {
+  "size": {
+   "id": "slim",
+   "label": "Slim can"
+  },
+  "color": "#B2AEA6",
+  "pattern": "Duck camo, Slate",
+  "patternFile": "https://www.reel48.com/patterns/duck-camo-slate.v1.print.svg",
+  "patternRepeatIn": [
+   5.5,
+   3.09
+  ],
+  "elements": [
+   {
+    "kind": "text",
+    "title": "Text 1",
+    "rows": [
+     {
+      "label": "Copy",
+      "value": "Lake Days"
+     },
+     {
+      "label": "Font",
+      "value": "custom-1 (custom upload)"
+     },
+     {
+      "label": "Style",
+      "value": "italic"
+     },
+     {
+      "label": "Colour",
+      "value": "#000000"
+     },
+     {
+      "label": "Align",
+      "value": "left"
+     },
+     {
+      "label": "Cap height",
+      "value": "0.050 of width (44px)"
+     },
+     {
+      "label": "Centre X",
+      "value": "0.500 (438px)"
+     },
+     {
+      "label": "Centre Y",
+      "value": "0.300 (780px)"
+     },
+     {
+      "label": "Rotation",
+      "value": "3°"
+     },
+     {
+      "label": "Opacity",
+      "value": "0.9"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": "https://abc123xyz.public.blob.vercel-storage.com/coozie/id/design.json",
+  "fontUrls": [
+   "https://abc123xyz.public.blob.vercel-storage.com/coozie/id/font-0-lake.otf"
+  ],
+  "artworkFiles": []
+ },
+ "can-slim-stored-print": {
+  "size": {
+   "id": "slim",
+   "label": "Slim can"
+  },
+  "color": "#C8AF7C",
+  "pattern": "Duck camo, Classic",
+  "patternFile": "https://www.reel48.com/patterns/duck-camo-classic.v0.print.svg",
+  "patternRepeatIn": [
+   5,
+   3
+  ],
+  "elements": [],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": []
+ },
+ "can-legacy-no-size": {
+  "size": {
+   "id": "standard",
+   "label": "Standard can"
+  },
+  "color": "#C13232",
+  "pattern": null,
+  "patternFile": null,
+  "patternRepeatIn": null,
+  "elements": [
+   {
+    "kind": "text",
+    "title": "Text 1",
+    "rows": [
+     {
+      "label": "Copy",
+      "value": "Hi"
+     },
+     {
+      "label": "Font",
+      "value": "—"
+     },
+     {
+      "label": "Style",
+      "value": "normal"
+     },
+     {
+      "label": "Colour",
+      "value": "—"
+     },
+     {
+      "label": "Align",
+      "value": "—"
+     },
+     {
+      "label": "Cap height",
+      "value": "0.060 of width (60px)"
+     },
+     {
+      "label": "Centre X",
+      "value": "0.500 (500px)"
+     },
+     {
+      "label": "Centre Y",
+      "value": "0.500 (1000px)"
+     },
+     {
+      "label": "Rotation",
+      "value": "0°"
+     },
+     {
+      "label": "Opacity",
+      "value": "1"
+     }
+    ]
+   }
+  ],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": []
+ },
+ "can-unknown-size": {
+  "size": {
+   "id": "standard",
+   "label": "Standard can"
+  },
+  "color": "#111111",
+  "pattern": null,
+  "patternFile": null,
+  "patternRepeatIn": null,
+  "elements": [],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": []
+ },
+ "other-kind": {
+  "size": {
+   "id": "standard",
+   "label": "Standard can"
+  },
+  "color": null,
+  "pattern": null,
+  "patternFile": null,
+  "patternRepeatIn": null,
+  "elements": [],
+  "jsonUrl": null,
+  "fontUrls": [],
+  "artworkFiles": []
+ }
+}

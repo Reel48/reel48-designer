@@ -1,30 +1,40 @@
 {
   "name": "@reel48/designer",
-  "version": "1.14.0",
-  "description": "Reel48's product designer: die geometry, design document, and production spec. Shared by www.reel48.com and account.reel48.com.",
+  "version": "1.15.0",
+  "description": "Reel48's product designer: die geometry, the design document, pricing facts, the production spec, and the 3D views. Shared by www.reel48.com, account.reel48.com and data.reel48.com.",
   "type": "module",
   "license": "UNLICENSED",
+  "sideEffects": false,
   "exports": {
     "./core": "./src/core/index.js",
-    "./stage": "./src/stage/index.js"
+    "./stage": "./src/stage/index.js",
+    "./viewer": "./src/viewer/index.js",
+    "./models/*": "./models/*"
   },
   "files": [
     "src",
+    "models",
     "README.md"
   ],
   "scripts": {
     "test": "vitest run"
   },
   "devDependencies": {
+    "three": "0.182.0",
     "vitest": "4.1.9"
   },
   "peerDependencies": {
+    "@google/model-viewer": "4.2.0",
     "konva": ">=9",
     "react": ">=18",
     "react-dom": ">=18",
-    "react-konva": ">=18"
+    "react-konva": ">=18",
+    "three": "0.182.0"
   },
   "peerDependenciesMeta": {
+    "@google/model-viewer": {
+      "optional": true
+    },
     "konva": {
       "optional": true
     },
@@ -35,6 +45,9 @@
       "optional": true
     },
     "react-konva": {
+      "optional": true
+    },
+    "three": {
       "optional": true
     }
   }

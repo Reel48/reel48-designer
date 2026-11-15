@@ -66,7 +66,10 @@ describe("canEditDie", () => {
       for (const z of die.zones) expect(Object.keys(z)).toEqual(["id", "rect", "area", "maxImprint"]);
       const [front, back, base] = die.zones;
       expect(front.rect).toEqual({ x: geom.x0, y: geom.y0, w: geom.x1 - geom.x0, h: geom.y1 - geom.y0 });
-      expect(front.area).toBe(front.rect);
+      // v1.16.2: a panel's area is its rect, keeping a piece's centre off the base disc (faceRegions' exclude)
+      expect(front.area).toEqual({ ...front.rect, centreExclude: { cx: geom.cx, cy: geom.cy, r: geom.r } });
+      expect(back.area).toEqual({ ...back.rect, centreExclude: { cx: geom.cx, cy: geom.cy, r: geom.r } });
+      expect(regions.front.exclude).toMatchObject(front.area.centreExclude);
       expect(back.rect).toEqual({ x: geom.x0, y: geom.y2, w: geom.x1 - geom.x0, h: geom.y3 - geom.y2 });
       expect(regions.front).toMatchObject({ x0: front.rect.x, y0: front.rect.y });
       // the base: its disc, as a polygon on the circle, within 0.15 px of it everywhere

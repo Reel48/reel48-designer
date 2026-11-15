@@ -55,7 +55,12 @@
 /**
  * @typedef {{ cx: number, cy: number, w: number, h: number, rotation: number }} Pose
  *   die px; `w` x `h` the unturned size at the current scale, `rotation` degrees.
- * @typedef {{ x: number, y: number, w: number, h: number }} Rect die px
+ * @typedef {{ x: number, y: number, w: number, h: number, centreExclude?: Disc }} Rect die px.
+ *   v1.16.2: `centreExclude` keeps a piece's CENTRE off a disc while its box
+ *   may overlap it (the can cooler's panels: the base disc reaches into each,
+ *   and a piece centred there would be the base's). confinePose moves the
+ *   centre as core confine.js `confineCenter` does a panel's `exclude`.
+ * @typedef {{ cx: number, cy: number, r: number }} Disc die px
  * @typedef {{ outline: number[][], holes?: number[][][] }} Polygon
  *   die px, y down: one closed simple outline and its keep-outs.
  * @typedef {Rect | Polygon} Area
@@ -161,6 +166,25 @@ function pointOf(v) {
 // ---- Areas -------------------------------------------------------------------------
 
 const isRect = (a) => !!a && [a.x, a.y, a.w, a.h].every(Number.isFinite);
+
+/** A rect area's centre keep-out (v1.16.2), when it is a real disc, else null. */
+function centreExcludeOf(area) {
+  const d = area && !Array.isArray(area.outline) ? area.centreExclude : null;
+  return d && [d.cx, d.cy, d.r].every(Number.isFinite) && d.r > 0 ? d : null;
+}
+
+/**
+ * A centre off a rect's excluded disc, as confine.js `confineCenter` moves it:
+ * straight away from the disc, toward the rect's own middle (up for a panel
+ * above the disc, down for one below), to just past the disc's edge at this x.
+ * The same numbers, so a pose this leaves is one the flat stage leaves too.
+ */
+function offDisc(x, y, d, rect) {
+  if (!(Math.hypot(x - d.cx, y - d.cy) < d.r)) return y;
+  const dir = Math.sign(rect.y + rect.h / 2 - d.cy) || -1;
+  const reach = Math.sqrt(Math.max(0, d.r * d.r - (x - d.cx) ** 2));
+  return d.cy + dir * (reach + 1e-6 * d.r + 1e-9);
+}
 
 /** [x, y] pairs with finite coordinates, consecutive repeats and a closing repeat dropped. */
 function ringOf(points) {
@@ -846,7 +870,8 @@ export function pointInArea(area, x, y) {
  * @param {Limits} [limits]
  *   die px. Either limit may be absent (no limit). `from` (the last valid
  *   pose; its centre counts), `slide` and `home` (default: areaHome) steer a
- *   move on a polygon area, as the header says; a rect ignores them.
+ *   move on a polygon area, as the header says; a rect ignores them. A rect's
+ *   `centreExclude` (v1.16.2) keeps the centre off its disc, after the clamp.
  * @returns {{ cx: number, cy: number, w: number, h: number, rotation: number,
  *   moved: boolean, capped: boolean, shrunk: boolean, scale: number }}
  *   `scale` is the factor the size was shrunk by (1 when it fit); `shrunk`
@@ -872,6 +897,8 @@ export function confinePose(pose, { area = null, cap = null, from = null, home =
     const e = rotatedSize(w, h, p.rotation);
     cx = clamp(cx, rect.x + e.w / 2, rect.x + rect.w - e.w / 2);
     cy = clamp(cy, rect.y + e.h / 2, rect.y + rect.h - e.h / 2);
+    const d = centreExcludeOf(area);
+    if (d) cy = offDisc(cx, cy, d, rect);
   }
   const moved = Math.abs(cx - p.cx) > 1e-9 || Math.abs(cy - p.cy) > 1e-9;
   return { cx, cy, w, h, rotation: p.rotation, moved, capped: shrunk && kCap <= kArea + 1e-12, shrunk, scale: k };
@@ -921,7 +948,8 @@ function confinePolygon(p, P, cap, from, home, slide) {
 
 /**
  * Whether a pose keeps both limits: its turned box within the cap, and inside
- * the area (a polygon's outline, clear of its holes), each to `tol` die px.
+ * the area (a polygon's outline, clear of its holes; a rect's centre off its
+ * `centreExclude`), each to `tol` die px.
  *
  * @param {{ cx: number, cy: number, w: number, h: number, rotation?: number }} pose
  * @param {{ area?: Area | null, cap?: Size | null }} [limits]
@@ -936,6 +964,8 @@ export function poseValid(pose, { area = null, cap = null } = {}, tol = VALID_EP
   if (region?.poly) return clear(region.poly, p.cx, p.cy, e.w / 2, e.h / 2, tol);
   const r = region?.rect;
   if (!r) return true;
+  const d = centreExcludeOf(area);
+  if (d && Math.hypot(p.cx - d.cx, p.cy - d.cy) < d.r - tol) return false;
   return p.cx - e.w / 2 >= r.x - tol && p.cx + e.w / 2 <= r.x + r.w + tol && p.cy - e.h / 2 >= r.y - tol && p.cy + e.h / 2 <= r.y + r.h + tol;
 }
 

@@ -52,20 +52,8 @@ export const CAN_SPOT_NAMES = Object.freeze({ front: "front panel", back: "back 
  */
 export const CAN_SPOT_LEVELS = Object.freeze({ front: 0, back: 180, base: 0 });
 
-/** The base's area is a polygon of this many sides on its outline (an ellipse, CAN_BASE_INSET): within 0.15 px of it on both dies. */
+/** The base's area is its disc as a polygon of this many sides, on the circle: within 0.15 px of it on both dies. */
 export const CAN_BASE_SIDES = 96;
-
-/**
- * The can's bottom, as its model draws it (v1.16.5): the storefront's
- * model.py (`BASE_INSET`, `base_uv`) maps the die between the fold chords onto
- * the bottom, an ellipse this share of the disc's radius across and of half
- * the fold gap front to back, stretched to the circle. The rest of the disc
- * (its caps, past the chords) is on the front and back walls' bottoms. The 3D
- * editor's base area is that ellipse, so a piece on the base stays on the
- * can's bottom, where the base's camera sees it: on the disc, a drag past the
- * rim took it up the back wall, out of sight and upside down there.
- */
-export const CAN_BASE_INSET = 0.97;
 
 /**
  * Each side's camera: the orbit's angles (degrees) and where it aims, as a
@@ -126,11 +114,10 @@ const inches = (px, ppi) => Math.round((px / ppi) * 1e4) / 1e4;
  * `{ id, kind: "koozie", stage, pxPerInch, zones }`, each zone `{ id, rect,
  * area, maxImprint }`. `rect` is the side's bounding box (die px), `area`
  * region.js's: the panels their rects, each keeping a piece's centre off the
- * base disc (`centreExclude`, v1.16.2), the base the can's bottom (v1.16.5:
- * CAN_BASE_INSET's ellipse, as a CAN_BASE_SIDES polygon on it; it was the
- * whole disc, whose caps are on the walls). `maxImprint` is the bounding box
- * in inches (to 1e-4, as the die's measurements are given): a koozie side has
- * no cap smaller than itself. Frozen, and the same object every time for a die. Throws for
+ * base disc (`centreExclude`, v1.16.2), the base its disc as a CAN_BASE_SIDES
+ * polygon on the circle. `maxImprint` is the bounding box in inches (to 1e-4,
+ * as the die's measurements are given): a koozie side has no cap smaller
+ * than itself. Frozen, and the same object every time for a die. Throws for
  * a die that is not a koozie (resolveDie with its kind).
  *
  * @param {string | { id: string }} dieOrId
@@ -156,20 +143,15 @@ export function canEditDie(dieOrId) {
       : rect;
     return zone(id, rect, area);
   };
-  // The base: the can's bottom, the ellipse between the fold chords the model
-  // draws there (CAN_BASE_INSET), centred on the disc (its centre is midway
-  // between the chords).
   const { cx, cy, r } = regions.base;
-  const ax = CAN_BASE_INSET * r;
-  const ay = (CAN_BASE_INSET * (geom.y2 - geom.y1)) / 2;
   const outline = [];
   for (let k = 0; k < CAN_BASE_SIDES; k++) {
     const a = (2 * Math.PI * k) / CAN_BASE_SIDES;
-    outline.push(Object.freeze([cx + ax * Math.cos(a), cy + ay * Math.sin(a)]));
+    outline.push(Object.freeze([cx + r * Math.cos(a), cy + r * Math.sin(a)]));
   }
   const base = zone(
     "base",
-    Object.freeze({ x: cx - ax, y: cy - ay, w: 2 * ax, h: 2 * ay }),
+    Object.freeze({ x: cx - r, y: cy - r, w: 2 * r, h: 2 * r }),
     Object.freeze({ outline: Object.freeze(outline), holes: Object.freeze([]) }),
   );
   const out = Object.freeze({

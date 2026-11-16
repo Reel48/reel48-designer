@@ -41,10 +41,16 @@
  * - indices: triangles, counter-clockwise from the outward face (checked
  *   against the GLB's NORMAL; a mirroring node would have its winding swapped
  *   back, as three does).
- * A triangle joins every side its die triangle touches, within MARGIN_PX: the
- * disc's caps lie inside the panels' rects (on the model, the bottom of each
- * panel's wall), so the triangles there are both the base's and that panel's.
- * Only print faces are written (a negative die winding, y down, which is what
+ * A triangle joins the sides its die triangle touches, within MARGIN_PX, by
+ * which way it faces (v1.17.0): one that faces down (BASE_FACING_DEG) and
+ * touches the disc is the can's bottom, the base's alone; every other one
+ * joins the panels it touches and never the base. The model draws the die's
+ * whole circle on the bottom and keeps each panel straight to its bottom
+ * edge, so the disc's caps past the folds are printed in two places on it:
+ * under the can and along the bottom of each wall's middle. This way each die
+ * point has one place per side: a base piece on the bottom, a panel piece on
+ * its wall. (To v1.16.5 a triangle joined every side its die touched, and the
+ * base's caps were on the walls only.) Only print faces are written (a negative die winding, y down, which is what
  * hat-surface.js edits): the triangles the model build collapsed in the die
  * (the folds round the bottom edge, about one in eight) map no die pixel, and
  * hat-surface.js would skip them. Each side's vertices are the ones its
@@ -76,6 +82,15 @@ export const SIDES = Object.freeze(["front", "back", "base"]);
 export const CARRY = Object.freeze({ front: "border", back: "border" });
 /** Die px round a side within which a triangle still joins it. */
 export const MARGIN_PX = 2;
+/**
+ * How near straight down a face's outward normal must be for the face to be
+ * the can's bottom (v1.17.0). The bottom is flat (0 degrees); the nearest
+ * other faces that touch the disc are about 9 degrees off (slim) and 12
+ * (standard), at the corner and the side slits' lips (the report's
+ * `facing`), so the cut sits about midway, clear of a rebuild's float noise.
+ */
+export const BASE_FACING_DEG = 4;
+const BASE_FACING_COS = Math.cos((BASE_FACING_DEG * Math.PI) / 180);
 /** A die triangle this small (twice its area, px^2) is collapsed: hat-surface.js's own DIE_EPS. */
 const DIE_EPS = 1e-6;
 
@@ -258,12 +273,28 @@ function seg2(x, y, ax, ay, bx, by) {
 }
 
 /** The sides a die triangle [ax, ay, bx, by, cx, cy] joins. */
-export function sidesOf(t, regions, margin = MARGIN_PX) {
-  return SIDES.filter((id) => {
+export function sidesOf(t, regions, down, margin = MARGIN_PX) {
+  const touches = (id) => {
     const region = regions[id];
     if (!region) return false;
     return region.kind === "circle" ? touchesCircle(t, region, margin) : touchesRect(t, region, margin);
-  });
+  };
+  if (down && touches("base")) return ["base"];
+  return SIDES.filter((id) => id !== "base" && touches(id));
+}
+
+/** A triangle's outward face (counter-clockwise, metres): degrees off straight down. */
+export function degreesOffDown(A, B, C) {
+  const e1 = [B[0] - A[0], B[1] - A[1], B[2] - A[2]];
+  const e2 = [C[0] - A[0], C[1] - A[1], C[2] - A[2]];
+  const n = [e1[1] * e2[2] - e1[2] * e2[1], e1[2] * e2[0] - e1[0] * e2[2], e1[0] * e2[1] - e1[1] * e2[0]];
+  const len = Math.hypot(n[0], n[1], n[2]);
+  return len > 0 ? (Math.acos(Math.max(-1, Math.min(1, -n[1] / len))) * 180) / Math.PI : 180;
+}
+
+/** Whether a triangle faces down enough to be the can's bottom (BASE_FACING_DEG). */
+export function facesDown(A, B, C) {
+  return degreesOffDown(A, B, C) <= BASE_FACING_DEG;
 }
 
 // ---- Extraction ----------------------------------------------------------------------
@@ -344,8 +375,14 @@ export async function extractCanSurface(bytes, { dieId, model }) {
   const report = { triangles: tris.length, collapsed, mirrored, normalsAgree: agree, normalsDisagree: disagree, sides: {} };
   const zones = Object.fromEntries(SIDES.map((id) => [id, { positions: [], uvs: [], indices: [], keys: new Map() }]));
   let orphans = 0;
+  // the steepest bottom face, and the flattest other face on the disc: the gap the cut sits in
+  const facing = { base: 0, rest: 180 };
   for (const { p, d } of tris) {
-    const sides = sidesOf([d[0][0], d[0][1], d[1][0], d[1][1], d[2][0], d[2][1]], regions);
+    const t = [d[0][0], d[0][1], d[1][0], d[1][1], d[2][0], d[2][1]];
+    const deg = degreesOffDown(p[0], p[1], p[2]);
+    const sides = sidesOf(t, regions, deg <= BASE_FACING_DEG);
+    if (sides.length === 1 && sides[0] === "base") facing.base = Math.max(facing.base, deg);
+    else if (sidesOf(t, regions, true).includes("base")) facing.rest = Math.min(facing.rest, deg);
     if (!sides.length) orphans++;
     for (const id of sides) {
       const z = zones[id];
@@ -365,6 +402,7 @@ export async function extractCanSurface(bytes, { dieId, model }) {
     }
   }
   report.orphans = orphans;
+  report.facing = { base: r2(facing.base), rest: r2(facing.rest) };
   for (const id of SIDES) {
     const { positions, uvs, indices } = zones[id];
     out.zones[id] = { positions, uvs, indices };
@@ -391,7 +429,8 @@ function sideReport(uvs, indices, region) {
  * The wrap as the model build's contract says it is (and so the v flip):
  * the rim's print on the +z side is the front panel's top edge (die y0), on
  * the -z side the back panel's (y3); the front's +x half is the die's right
- * half; the bottom is the band between the folds, the front fold toward +z.
+ * half; the bottom is the die's whole circle (v1.17.0; it was the band between
+ * the folds), the front toward +z.
  */
 function checkWrap(tris, die) {
   const verts = tris.flatMap(({ p, d }) => p.map((P, k) => ({ P, D: d[k] })));
@@ -400,6 +439,12 @@ function checkWrap(tris, die) {
   const mean = (vs, f) => vs.reduce((s, v) => s + f(v), 0) / vs.length;
   const rim = verts.filter((v) => v.P[1] > top - 5e-4);
   const floor = verts.filter((v) => v.P[1] < bottom + 1e-4);
+  // the bottom face itself, well inside its rim: the panels' bottom corners and
+  // the base piece's lip beside the side slits lie on the floor too, at the
+  // rim, and are not the circle
+  const reach = Math.max(...floor.map((v) => Math.hypot(v.P[0], v.P[2])));
+  const face = floor.filter((v) => Math.hypot(v.P[0], v.P[2]) < 0.85 * reach);
+  const spread = (k, c) => Math.max(...face.map((v) => Math.abs(v.D[k] - c)));
   const front = verts.filter((v) => v.P[2] > 0 && v.D[1] > die.y0 && v.D[1] < die.y1);
   const right = front.filter((v) => v.P[0] > 0.01);
   const left = front.filter((v) => v.P[0] < -0.01);
@@ -414,7 +459,10 @@ function checkWrap(tris, die) {
     floorFrontDieY: r2(mean(floor.filter((v) => v.P[2] > 0.01), (v) => v.D[1])),
     floorBackDieY: r2(mean(floor.filter((v) => v.P[2] < -0.01), (v) => v.D[1])),
     cy: r2(die.cy),
-    floorInBand: floor.every((v) => v.D[1] >= die.y1 - 2 && v.D[1] <= die.y2 + 2),
+    // v1.17.0: the bottom is the die's whole circle, its caps past the folds included
+    floorOnDisc: face.length > 0 && face.every((v) => Math.hypot(v.D[0] - die.cx, v.D[1] - die.cy) <= die.r + 2),
+    // and at its own shape: as deep in the die as it is wide (the band was 0.78)
+    floorDepthOverWidth: face.length ? r2(spread(1, die.cy) / spread(0, die.cx)) : 0,
   };
 }
 
@@ -427,7 +475,7 @@ function failuresOf(r) {
   if (!(Math.abs(w.frontRimDieY - w.y0) < 10)) f.push(`the +z rim is die y ${w.frontRimDieY}, not the front's top edge ${w.y0}`);
   if (!(Math.abs(w.backRimDieY - w.y3) < 10)) f.push(`the -z rim is die y ${w.backRimDieY}, not the back's top edge ${w.y3}`);
   if (!(w.frontRightDieX > w.cx && w.frontLeftDieX < w.cx)) f.push("the front panel is mirrored across the can");
-  if (!(w.floorFrontDieY < w.cy && w.floorBackDieY > w.cy && w.floorInBand)) f.push("the base is not the band between the folds, the front fold forward");
+  if (!(w.floorFrontDieY < w.cy && w.floorBackDieY > w.cy && w.floorOnDisc && Math.abs(w.floorDepthOverWidth - 1) < 0.03)) f.push("the base is not the die's whole circle, the front toward +z");
   for (const id of SIDES) if (!r.sides[id].triangles) f.push(`${id}: no triangles`);
   return f;
 }

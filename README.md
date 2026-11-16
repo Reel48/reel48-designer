@@ -104,7 +104,7 @@ import modelUrl from "@reel48/designer/models/hat-no-7.glb";                    
 import tileUrl from "@reel48/designer/patterns/gingham-red.v1.svg";               // v1.16.0: pattern tiles, served by the host
 ```
 
-### Consumers (v1.16.5)
+### Consumers (v1.17.0)
 
 - **account.reel48.com** (the portal) uses `viewer`, `models`, `patterns` and
   `core` (and `stage` for the flat die): its customizer island runs the hat and
@@ -925,18 +925,21 @@ back, base: { positions, uvs, indices } } }`, the frame the die's stage (1000 x
   between the folds, front fold forward) and fails if it ever changes.
 - **The sides** are core/confine.js `faceRegions`: `front` and `back` the
   panels' rects, `base` the disc. A sleeve print triangle (`print` and
-  `print_seam`) joins every side its die triangle touches within 2 die px, so
-  the disc's caps past each fold (on the model, the bottom of each panel's
-  wall) are both the base's and that panel's. Only print faces are written:
-  the triangles the model collapsed in the die (the folds round the bottom
-  edge) map nothing. About 5,560 triangles a panel and 2,400 for the base;
-  480 KB a file, 114 KB gzipped.
-- **What the model does not show.** The model's bottom disc is the ellipse
-  inscribed in the band between the fold lines (0.97 of it), so the parts of
-  the die's disc beside that ellipse, inside the band, are printed but not on
-  the 3D can; and the top 1 mm of each panel is the rim's cut edge. The editor
-  still confines art to the whole side (its area is the die's), and a fit
-  measures those points at the edge of what is printed (`areaScreenPoints`).
+  `print_seam`) joins the sides its die triangle touches within 2 die px, by
+  which way it faces (v1.17.0): one on the disc that faces down (within
+  `BASE_FACING_DEG`, 4) is the can's bottom, the base's alone; every other one
+  is the panels' it touches. Since v1.17.0 the model draws the disc's caps past
+  each fold both under the can and along the bottom of each wall's middle, so
+  a base piece is placed on the bottom and a panel piece on its wall. Only
+  print faces are written: the triangles the model collapsed in the die (the
+  folds round the bottom edge) map nothing. About 5,560 triangles a panel and
+  1,550 for the base; 465 KB a file, 113 KB gzipped.
+- **What the model does not show.** The bottom shows the die's whole circle to
+  0.97 of its radius (v1.17.0; until then only the band between the fold
+  lines, stretched); the last 3% is under the corner. The top 1 mm of each
+  panel is the rim's cut edge. The editor still confines art to the whole side
+  (its area is the die's), and a fit measures those points at the edge of what
+  is printed (`areaScreenPoints`).
 
 ### `viewer`: can-edit.js
 
@@ -1053,6 +1056,50 @@ die within a thousandth of a pixel, each pixel the die point a ray hits),
 `tests/can-edit.test.js` (the die, the limits, the rest art, the look's paint
 and live repaint, fits on a fake model-viewer, a whole edit session), and
 `tests/patterns.test.js`; `tests/models.test.js` knows the made surfaces.
+
+## v1.17.0: the can's bottom is the die's whole circle, at its own shape
+
+The can models drew only the band between the fold lines on the bottom, stretched
+about 1.29 times front to back, so a round logo on the base showed as an oval in
+3D, and the circle's caps past the folds (about 60 px, 0.32 in, each way) showed
+only on the front and back walls. Brayden, 2026-11-15: a real can cooler's bottom
+is the full circle. Of the two ways the panels could meet it, he chose to keep
+them straight (folding each along the circle's arc bent every row of a front
+design down in the middle).
+
+- **models/can-cooler-standard.glb, models/can-cooler-slim.glb.** Byte copies of
+  Reel48-Storefront `e8628e8` (branch `claude/can-full-circle-base`): its
+  model.py maps the die's whole circle onto the bottom, undistorted, and leaves
+  the walls as they were. The circle's caps now show in two places on the model:
+  under the can, and along the bottom of each wall's middle, as before.
+- **extract-can-surface.mjs splits the surfaces by facing** (`BASE_FACING_DEG`,
+  `facesDown`, `degreesOffDown`; `sidesOf` takes `down`). A face on the disc
+  that faces down is the base's alone; every other face is the panels'. So each
+  die point has one place per side: a base piece on the bottom, a panel piece on
+  its wall. The front and back surfaces are byte for byte v1.16.5's; the base's
+  is the bottom alone (1,564 faces on the standard, 1,532 on the slim). The
+  report's `facing` gives the gap the cut sits in (0 against 11.8 and 9.1
+  degrees). The wrap check now wants the bottom as deep in the die as it is
+  wide (`floorDepthOverWidth`), and fails on v1.16.5's models (0.78).
+- **The base's area is the disc again** (`canEditDie`), as in v1.16.1 to v1.16.4:
+  all of it is on the bottom now, so a piece pushed past the rim stops where the
+  base's camera sees it. v1.16.5's `CAN_BASE_INSET` ellipse (the band the model
+  drew) and its export are gone; `rect` and `maxImprint` are the disc's again,
+  2.875 in square (2.515 on the slim).
+
+Checked in the portal, locally in headless Chrome on the fakes: a round logo on
+the base is round from straight below (an oval on v1.16.5); the gingham front reads
+as before; a base logo dragged 450 px down stops at the bottom's back edge,
+visible, on its cap (die y 1252.6, where v1.16.4 lost it on the back wall); right,
+left and up stop at the rim; the front-panel drags land on v1.16.5's pixels.
+
+### Tests
+
+894. `tests/can-place.test.js`'s v1.16.5 test now asks that a piece pushed far past
+the base's rim, every 30 degrees on both dies, ends with its centre visible on the
+base from the base camera; on v1.16.4 it fails (the centre off the screen, on the
+back wall). The v1.16.1 test's diagonal tolerance is 12 die px again (the disc).
+`tests/can-surface.test.js` checks each face's sides with its facing.
 
 ## v1.16.5: a logo dragged on the can's base stays on the can's bottom
 

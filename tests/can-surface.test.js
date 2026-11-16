@@ -13,7 +13,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import * as THREE from "three";
-import { CAN_SURFACES, MARGIN_PX, extractCanSurface, formatSurface, sidesOf } from "../scripts/extract-can-surface.mjs";
+import { CAN_SURFACES, MARGIN_PX, extractCanSurface, facesDown, formatSurface, sidesOf } from "../scripts/extract-can-surface.mjs";
 import { dieGeometry, faceRegions, resolveDie } from "../src/core/index.js";
 import { createSurface, measureProjection, probePointsFor, project, solveProjection } from "../src/viewer/hat-surface.js";
 import { CAN_EDIT_VIEWS, createCanLook } from "../src/viewer/can-edit.js";
@@ -90,6 +90,8 @@ describe("the can coolers' surface files", () => {
   });
 
   it("hold, per side, exactly the print faces that touch its region within the margin, each a print face", () => {
+    // v1.17.0: by which way the face points too. A face on the disc that faces
+    // down is the bottom, the base's alone; every other face is the panels'.
     for (const can of CANS) {
       const regions = faceRegions(can.geom);
       // Every triangle of the sleeve's print, by its die corners, with the sides it is listed on.
@@ -97,16 +99,16 @@ describe("the can coolers' surface files", () => {
       for (const id of SIDES) {
         const z = can.json.zones[id];
         for (let t = 0; t < z.indices.length / 3; t++) {
-          const { d, area2 } = dieTri(z, t);
+          const { a, b, c, d, area2 } = dieTri(z, t);
           // A print face: hat-surface.js's PRINT_WINDING (negative, y down) and not a sliver.
           expect(area2).toBeLessThan(-1e-6);
           const key = d.join(",");
-          if (!listed.has(key)) listed.set(key, { d, on: [] });
+          if (!listed.has(key)) listed.set(key, { d, down: facesDown(vertex(z, a), vertex(z, b), vertex(z, c)), on: [] });
           listed.get(key).on.push(id);
         }
       }
-      for (const { d, on } of listed.values()) {
-        expect(on.sort()).toEqual([...sidesOf(d, regions)].sort());
+      for (const { d, down, on } of listed.values()) {
+        expect(on.sort()).toEqual([...sidesOf(d, regions, down)].sort());
         expect(on.length).toBeGreaterThan(0);
       }
       for (const id of SIDES) {
